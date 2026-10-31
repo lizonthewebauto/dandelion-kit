@@ -13,6 +13,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createForwarder } from './shim-forward.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
@@ -255,9 +256,15 @@ async function serveWithSetup(demo) {
       process.stdin.off('data', onData);
       if (initLine) inp.write(`${initLine}\n`);
       if (initLine && sawInitialized) inp.write(`${JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' })}\n`);
-      if (buf.trim()) inp.write(`${buf}\n`);
-      process.stdin.on('data', (c) => inp.write(c));
-      process.stdin.on('end', () => inp.end());
+      // Forward line by line (the unfinished line in buf included) so a setup_status call from a host that ignored
+      // list_changed gets an answer here, since the real server has no such tool.
+      const forward = createForwarder((l) => inp.write(l), send, buf);
+      buf = '';
+      process.stdin.on('data', (c) => forward.push(c));
+      process.stdin.on('end', () => {
+        forward.flush();
+        inp.end();
+      });
       send({ method: 'notifications/tools/list_changed' });
       err('Dandelion Kit: setup finished, tools are ready.');
     } catch (error) {
