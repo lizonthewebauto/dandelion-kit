@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "platforms": {
+    "instagram": {
+      "dandelion_id": "instagram",
+      "name": "Instagram",
+      "formats": [
+        {
+          "id": "reel",
+          "label": "Reel",
+          "accepts": [
+            "video"
+          ],
+          "aspect": "9:16",
+          "maxSeconds": 900,
+          "idealSeconds": 90
+        },
+        {
+          "id": "post",
+          "label": "Feed post",
+          "accepts": [
+            "image"
+          ],
+          "aspect": "4:5",
+          "maxImages": 10
+        },
+        {
+          "id": "story",
+          "label": "Story",
+          "accepts": [
+            "video",
+            "image"
+          ],
+          "aspect": "9:16",
+          "maxSeconds": 60
+        }
+      ],
+      "limits": {
+        "caption_max": 2000,
+        "caption_ideal": 300,
+        "hashtags_max": 5,
+        "hashtags_ideal": 3,
+        "first_line": 125
+      },
+      "style": "Make the first line a strong hook under 125 characters. Only that much shows before \"more\".\nUse short lines with a blank line between them. Friendly and personal.\nEnd with one clear ask to save the post or share it with a friend.\nHashtags go at the end, never in a sentence."
+    },
+    "tiktok": {
+      "dandelion_id": "tiktok",
+      "name": "TikTok",
+      "formats": [
+        {
+          "id": "video",
+          "label": "Video",
+          "accepts": [
+            "video"
+          ],
+          "aspect": "9:16",
+          "maxSeconds": 600,
+          "idealSeconds": 60
+        },
+        {
+          "id": "photos",
+          "label": "Photo post",
+          "accepts": [
+            "image"
+          ],
+          "aspect": "9:16",
+          "maxImages": 10
+        }
+      ],
+      "limits": {
+        "caption_max": 2200,
+        "caption_ideal": 150,
+        "hashtags_max": 5,
+        "hashtags_ideal": 4,
+        "first_line": 100
+      },
+      "style": "Put the words people would search for in the first 100 characters. Only that much shows at first.\nKeep it short, casual, and curious, like talking to a friend.\nUse hashtags about the topic itself, at the end."
+    },
+    "youtube": {
+      "dandelion_id": "youtube",
+      "name": "YouTube",
+      "formats": [
+        {
+          "id": "short",
+          "label": "Short",
+          "accepts": [
+            "video"
+          ],
+          "aspect": "9:16",
+          "maxSeconds": 180,
+          "idealSeconds": 60
+        },
+        {
+          "id": "video",
+          "label": "Video",
+          "accepts": [
+            "video"
+          ],
+          "aspect": "16:9"
+        }
+      ],
+      "limits": {
+        "caption_max": 5000,
+        "caption_ideal": 800,
+        "title_max": 100,
+        "description_max": 5000,
+        "hashtags_max": 3,
+        "hashtags_ideal": 3,
+        "first_line": 60
+      },
+      "style": "Title: under 60 characters with the main keyword first. Make people curious, but no clickbait.\nDescription: start with 2 short lines that sum up the video, with the words people would search for. Only these show before \"more\".\nThen add a few short lines of detail.\nTags: words people would type to find this video."
+    },
+    "linkedin": {
+      "dandelion_id": "linkedin",
+      "name": "LinkedIn",
+      "formats": [
+        {
+          "id": "post",
+          "label": "Post",
+          "accepts": [
+            "text",
+            "image",
+            "video"
+          ],
+          "aspect": "4:5",
+          "maxSeconds": 900,
+          "maxImages": 10
+        }
+      ],
+      "limits": {
+        "caption_max": 3000,
+        "caption_ideal": 1000,
+        "hashtags_max": 3,
+        "hashtags_ideal": 2,
+        "first_line": 140
+      },
+      "style": "Write in first person (I, we). Share one lesson, with a real example from the post.\nMake the first line strong. Only about 140 characters show before \"see more\".\nShort lines with white space between them. No walls of emojis, no slang, no filler.\nEnd with a question. 600 to 1,300 characters."
+    },
+    "x": {
+      "dandelion_id": "twitter",
+      "name": "X (Twitter)",
+      "formats": [
+        {
+          "id": "post",
+          "label": "Post",
+          "accepts": [
+            "text",
+            "image",
+            "video"
+          ],
+          "maxSeconds": 140,
+          "maxImages": 4
+        }
+      ],
+      "limits": {
+        "caption_max": 280,
+        "caption_ideal": 240,
+        "hashtags_max": 1,
+        "hashtags_ideal": 0
+      },
+      "style": "One idea only. Short and punchy, under 240 characters.\nLead with the most useful or boldest point.\nNo hashtag spam. No hashtags is best."
+    },
+    "threads": {
+      "dandelion_id": "threads",
+      "name": "Threads",
+      "formats": [
+        {
+          "id": "post",
+          "label": "Post",
+          "accepts": [
+            "text",
+            "image",
+            "video"
+          ],
+          "aspect": "4:5",
+          "maxSeconds": 300,
+          "maxImages": 10
+        }
+      ],
+      "limits": {
+        "caption_max": 500,
+        "caption_ideal": 300,
+        "hashtags_max": 1,
+        "hashtags_ideal": 1
+      },
+      "style": "Casual and chatty, like texting a friend. 150 to 400 characters.\nShare one thought or a short story. Do not paste the Instagram caption.\nEnd with one question that invites replies."
+    },
+    "facebook": {
+      "dandelion_id": "facebook",
+      "name": "Facebook",
+      "formats": [
+        {
+          "id": "reel",
+          "label": "Reel",
+          "accepts": [
+            "video"
+          ],
+          "aspect": "9:16",
+          "maxSeconds": 90,
+          "idealSeconds": 60
+        },
+        {
+          "id": "post",
+          "label": "Post",
+          "accepts": [
+            "image",
+            "video",
+            "text"
+          ],
+          "aspect": "4:5",
+          "maxImages": 10
+        },
+        {
+          "id": "story",
+          "label": "Story",
+          "accepts": [
+            "video",
+            "image"
+          ],
+          "aspect": "9:16",
+          "maxSeconds": 60
+        }
+      ],
+      "limits": {
+        "caption_max": 50000,
+        "caption_ideal": 250,
+        "hashtags_max": 5,
+        "hashtags_ideal": 2,
+        "first_line": 125
+      },
+      "style": "Friendly and chatty, like talking to a neighbor. 100 to 300 characters.\nFew capital letters. No shouting.\nAsk one simple question to get people talking."
+    },
+    "pinterest": {
+      "dandelion_id": "pinterest",
+      "name": "Pinterest",
+      "formats": [
+        {
+          "id": "pin",
+          "label": "Pin",
+          "accepts": [
+            "image",
+            "video"
+          ],
+          "aspect": "2:3",
+          "maxSeconds": 900
+        }
+      ],
+      "limits": {
+        "caption_max": 500,
+        "caption_ideal": 250,
+        "title_max": 100,
+        "description_max": 500,
+        "hashtags_max": 0,
+        "first_line": 40
+      },
+      "style": "Title: put the main keyword in the first 40 characters.\nDescription: 2 or 3 sentences in third person, full of words people search for. Not \"I\" or \"we\".\nSay what it is, who it is for, and when to use it."
+    }
+  }
+}

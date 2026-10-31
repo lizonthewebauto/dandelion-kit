@@ -1,17 +1,278 @@
-// Zero-dependency bootstrap. Installs dependencies on first run, then starts the server (serve) or runs a subcommand (doctor, edit, carousel, offer, connect).
-// Stub from the scaffold. Built in milestone M5.
-// M1 adds only the `edit <video> --transcribe-only` route below. M5 owns the rest of this file and should keep that route.
+#!/usr/bin/env node
+// Zero-dependency bootstrap. Installs the packages on first run, then starts the MCP server (serve)
+// or runs a command line step (doctor, edit, carousel, offer, connect).
+//
+//   kit serve [--demo]                  MCP server over stdio. Hosts run this. stdout carries MCP frames only.
+//   kit doctor                          check this computer
+//   kit edit <video> [options]          open, cut, plan, build and export a reel
+//   kit edit <video> --transcribe-only  just print the transcript
+//   kit carousel <spec.json> [--out]    render a carousel from a spec file
+//   kit offer <bundle.json>             build the per-app versions for a post
+//   kit connect                         sign in to Dandelion
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const [command, ...rest] = process.argv.slice(2);
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const IS_WIN = process.platform === 'win32';
 
-if (command === 'edit' && rest.includes('--transcribe-only')) {
-  const { runTranscribeOnly } = await import('../core/transcribe/cli.mjs');
+const USAGE = `Dandelion Kit: edit videos into Reels, make carousels and images, post with Dandelion.
+
+Usage:
+  kit serve [--demo]                    Start the MCP server (hosts run this).
+  kit doctor                            Check ffmpeg, Node, disk and models.
+  kit edit <video> [--look <id>] [--caption-theme <id>] [--accent #RRGGBB] [--preset gentle|standard|punchy]
+                   [--hook "text"] [--out <folder>] [--draft-only] [--variants <2-4>]
+  kit edit <video> --transcribe-only    Print the transcript only.
+  kit carousel <spec.json> [--out <folder>]
+  kit offer <bundle.json>               Per-app versions for a post: {kind, text, files, channels}
+  kit connect                           Sign in to Dandelion.
+  kit version
+`;
+
+/** @param {string} text */
+function err(text) {
+  process.stderr.write(`${text}\n`);
+}
+
+/** Wait without busy looping. @param {number} ms */
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/** True when the packages are installed. */
+function depsReady() {
+  return existsSync(join(ROOT, 'node_modules', '@modelcontextprotocol', 'sdk', 'package.json'));
+}
+
+/**
+ * Install the packages once (a plugin install does not run npm). Output goes to stderr, never stdout.
+ * @returns {boolean}
+ */
+function ensureDependencies() {
+  if (depsReady()) return true;
+  const npm = IS_WIN ? 'npm.cmd' : 'npm';
+  const check = spawnSync(npm, ['--version'], { shell: IS_WIN, stdio: 'ignore' });
+  if (check.status !== 0) {
+    err('Dandelion Kit needs npm to finish setup. Install Node.js from https://nodejs.org, then run: npm install --omit=dev');
+    err(`(in the folder ${ROOT})`);
+    return false;
+  }
+  const lock = join(ROOT, '.kit-install.lock');
+  const started = Date.now();
+  for (;;) {
+    try {
+      mkdirSync(lock);
+      break;
+    } catch {
+      // Another start is installing. Wait for it; a lock older than 5 minutes is stale.
+      let age = 0;
+      try {
+        age = Date.now() - statSync(lock).mtimeMs;
+      } catch {
+        continue;
+      }
+      if (age > 5 * 60 * 1000) {
+        rmSync(lock, { recursive: true, force: true });
+        continue;
+      }
+      if (depsReady()) return true;
+      if (Date.now() - started > 6 * 60 * 1000) {
+        err('Waited too long for another install to finish. Remove the folder .kit-install.lock and try again.');
+        return false;
+      }
+      sleep(1000);
+    }
+  }
   try {
-    process.exitCode = await runTranscribeOnly(rest.filter((arg) => arg !== '--transcribe-only'));
-  } catch (error) {
-    process.stderr.write(`${/** @type {any} */ (error)?.message ?? error}\n`);
-    process.exitCode = 1;
+    if (depsReady()) return true;
+    err('Dandelion Kit: installing its packages (once, about a minute)...');
+    const run = spawnSync(npm, ['install', '--omit=dev', '--no-audit', '--no-fund'], {
+      cwd: ROOT,
+      shell: IS_WIN,
+      stdio: ['ignore', 2, 2],
+    });
+    if (run.status !== 0 || !depsReady()) {
+      err(`Dandelion Kit: the install did not finish. Run "npm install --omit=dev" in ${ROOT} and look at the message.`);
+      return false;
+    }
+    err('Dandelion Kit: packages installed.');
+    return true;
+  } finally {
+    rmSync(lock, { recursive: true, force: true });
   }
 }
 
-export {};
+/**
+ * Read --flag and --key value pairs. Flags in `bools` take no value.
+ * @param {string[]} args
+ */
+function parseArgs(args) {
+  const bools = new Set(['demo', 'draft-only', 'json', 'allow-overflow', 'transcribe-only']);
+  /** @type {Record<string, string|boolean>} */
+  const flags = {};
+  /** @type {string[]} */
+  const positional = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a.startsWith('--')) {
+      const key = a.slice(2);
+      if (bools.has(key) || i + 1 >= args.length || args[i + 1].startsWith('--')) flags[key] = true;
+      else flags[key] = args[++i];
+    } else positional.push(a);
+  }
+  return { flags, positional };
+}
+
+/** Run one tool from the command line and print its text. @returns {Promise<{ok: boolean, data?: any}>} */
+async function runTool(/** @type {string} */ name, /** @type {any} */ args) {
+  const { toolByName } = await import('../server/lib/tools.mjs');
+  const { toMcpResult } = await import('../server/index.mjs');
+  const { friendlyError } = await import('../server/lib/kit.mjs');
+  const def = toolByName(name);
+  if (!def) throw new Error(`There is no tool called ${name}.`);
+  const parsed = (await import('zod')).z.object(def.input).safeParse(args);
+  if (!parsed.success) {
+    err(friendlyError(parsed.error).text);
+    return { ok: false };
+  }
+  let last = -1;
+  const ctx = {
+    demo: false,
+    progress(/** @type {number} */ fraction, /** @type {string|undefined} */ message) {
+      const pct = Math.round(fraction * 100);
+      if (message && pct !== last) {
+        err(`[kit] ${pct}% ${message}`);
+        last = pct;
+      }
+    },
+  };
+  let outcome;
+  try {
+    outcome = await def.run(parsed.data, ctx);
+  } catch (error) {
+    outcome = { isError: true, text: friendlyError(error).text };
+  }
+  const result = toMcpResult(name, outcome);
+  process.stdout.write(`${result.content[0].text}\n`);
+  return { ok: !result.isError, data: outcome.data };
+}
+
+/** @param {string[]} rest */
+async function cmdEdit(rest) {
+  const { flags, positional } = parseArgs(rest);
+  const video = positional[0];
+  if (!video) {
+    err('Usage: kit edit <video> [--look <id>] [--out <folder>]. Run "kit" for all options.');
+    return 2;
+  }
+  if (flags['transcribe-only']) {
+    const { runTranscribeOnly } = await import('../core/transcribe/cli.mjs');
+    return runTranscribeOnly(rest.filter((a) => a !== '--transcribe-only'));
+  }
+  // The render path may bring its own edit command. Use it when it exists.
+  if (flags.look) {
+    const file = join(ROOT, 'core', 'render', 'cli.mjs');
+    if (existsSync(file)) {
+      const mod = await import(pathToFileURL(file).href);
+      const fn = mod.runEdit ?? mod.run ?? mod.default;
+      if (typeof fn === 'function') return Number((await fn(rest)) ?? 0);
+    }
+  }
+
+  const opened = await runTool('open_video', { path: video });
+  if (!opened.ok) return 1;
+  const projectId = opened.data.project.id;
+  /** @type {[string, any][]} */
+  const steps = [
+    ['rough_cut', { project_id: projectId, ...(flags.preset ? { preset: flags.preset } : {}) }],
+    [
+      'pick_look',
+      {
+        project_id: projectId,
+        look: typeof flags.look === 'string' ? flags.look : 'karaoke-clean',
+        ...(flags['caption-theme'] ? { caption_theme: flags['caption-theme'] } : {}),
+        ...(flags.accent ? { accent: flags.accent } : {}),
+      },
+    ],
+    ['plan_shots', { project_id: projectId, ...(typeof flags.hook === 'string' ? { hook_text: flags.hook } : {}) }],
+    ['render_reel', { project_id: projectId, quality: 'draft' }],
+  ];
+  if (!flags['draft-only']) steps.push(['render_reel', { project_id: projectId, quality: 'final' }]);
+  if (flags.variants && !flags['draft-only']) steps.push(['make_variants', { project_id: projectId, count: Number(flags.variants) }]);
+  if (!flags['draft-only']) steps.push(['export', { project_id: projectId, ...(typeof flags.out === 'string' ? { to_dir: flags.out } : {}) }]);
+  for (const [name, args] of steps) {
+    process.stdout.write(`\n== ${name} ==\n`);
+    const r = await runTool(/** @type {string} */ (name), args);
+    if (!r.ok) return 1;
+  }
+  return 0;
+}
+
+/**
+ * @param {string[]} rest
+ * @param {string} tool
+ * @param {string} label
+ */
+async function cmdFromJson(rest, tool, label) {
+  const { flags, positional } = parseArgs(rest);
+  const file = positional[0];
+  if (!file) {
+    err(`Usage: kit ${label} <file.json>`);
+    return 2;
+  }
+  let spec;
+  try {
+    spec = JSON.parse(readFileSync(resolve(file), 'utf8'));
+  } catch {
+    err(`I could not read ${resolve(file)} as JSON.`);
+    return 2;
+  }
+  if (tool === 'make_carousel' && flags['allow-overflow']) spec.allow_overflow = true;
+  const r = await runTool(tool, spec);
+  return r.ok ? 0 : 1;
+}
+
+async function main() {
+  const [command, ...rest] = process.argv.slice(2);
+  if (!command || command === 'help' || command === '--help' || command === '-h') {
+    process.stdout.write(USAGE);
+    return 0;
+  }
+  if (command === 'version' || command === '--version') {
+    process.stdout.write(`${JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version}\n`);
+    return 0;
+  }
+  if (!ensureDependencies()) return 1;
+
+  switch (command) {
+    case 'serve': {
+      const { startStdio } = await import('../server/index.mjs');
+      await startStdio({ demo: rest.includes('--demo') });
+      return null; // keep running
+    }
+    case 'doctor':
+      return (await runTool('doctor', {})).ok ? 0 : 1;
+    case 'edit':
+      return cmdEdit(rest);
+    case 'carousel':
+      return cmdFromJson(rest, 'make_carousel', 'carousel');
+    case 'offer':
+      return cmdFromJson(rest, 'offer_post', 'offer');
+    case 'connect':
+      return (await runTool('connect_dandelion', {})).ok ? 0 : 1;
+    default:
+      err(`I do not know the command "${command}".\n`);
+      process.stdout.write(USAGE);
+      return 2;
+  }
+}
+
+try {
+  const code = await main();
+  if (code !== null) process.exitCode = code;
+} catch (error) {
+  err(`${/** @type {any} */ (error)?.message ?? error}`);
+  process.exitCode = 1;
+}
