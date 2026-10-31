@@ -19,6 +19,17 @@ export const SAFE_ZONE = Object.freeze({ x_min: 90, x_max: 940, y_min: 270, y_ma
 export const MAX_TEXT_WIDTH =
   2 * Math.min(PLAY.width / 2 - SAFE_ZONE.x_min, SAFE_ZONE.x_max - PLAY.width / 2);
 
+/** one-word-pop starts at 82%, swells to this share of its size, then settles at 100%. */
+export const POP_PEAK_SCALE = 1.12;
+/** The pop animation as written in the file, and the same style held at its widest moment (to measure the worst case). */
+export const POP_TAG = '\\fscx82\\fscy82\\t(0,110,\\fscx112\\fscy112)\\t(110,190,\\fscx100\\fscy100)';
+export const POP_PEAK_TAG = '\\fscx112\\fscy112';
+
+/** Room kept on each side of a line at its widest moment, so it never touches the safe zone edge. */
+const FIT_MARGIN = 6;
+/** Widest a line may be at its widest moment (pop scale, outline and shadow included). Centered, it clears SAFE_ZONE. */
+export const FIT_WIDTH = MAX_TEXT_WIDTH - 2 * FIT_MARGIN;
+
 /** Fonts the themes use. `file` is what ffmpeg is given to find the family by name. */
 export const FONT_FILES = Object.freeze({
   montserrat: { family: 'Montserrat ExtraBold', file: join(RENDER_FONTS, 'Montserrat-ExtraBold.ttf') },
@@ -38,6 +49,7 @@ export const FONT_FILES = Object.freeze({
  * @property {number} shadow
  * @property {'karaoke'|'pill'|'one'|'phrase'} mode
  * @property {number} lines           Most lines a cue may use.
+ * @property {number} [min_size]      Smallest em a cue is shrunk to (default 70% of `size`).
  * @property {boolean} [upper]
  * @property {boolean} [box]          Draw a solid box behind the line.
  * @property {number} [box_alpha]     0 opaque to 255 clear.
@@ -175,16 +187,32 @@ function lineWidth(style, text, size) {
 }
 
 /**
+ * Width of one line at its widest moment: the pop swell for one-word-pop, the outline and the shadow included.
+ * This is the width the safe zone has to hold, and the one the shrink step fits.
+ * @param {ThemeStyle} style
+ * @param {string} text
+ * @param {number} size
+ */
+export function fitWidth(style, text, size) {
+  const swell = style.mode === 'one' ? POP_PEAK_SCALE : 1;
+  return lineWidth(style, text, size) * swell + 2 * style.shadow;
+}
+
+/** The smallest em a cue of this theme is shrunk to. @param {ThemeStyle} style */
+export const minSizeOf = (style) => style.min_size ?? Math.floor(style.size * 0.7);
+
+/**
  * Split words into at most `maxLines` lines with the widest line as narrow as possible.
  * @param {string[]} words
  * @param {(line: string) => number} widthOf
  * @param {number} maxLines
+ * @param {number} [limit]   Width that counts as fitting (default MAX_TEXT_WIDTH).
  * @returns {string[]}
  */
-export function balanceLines(words, widthOf, maxLines) {
+export function balanceLines(words, widthOf, maxLines, limit = MAX_TEXT_WIDTH) {
   const whole = words.join(' ');
   if (maxLines <= 1 || words.length < 2) return [whole];
-  if (widthOf(whole) <= MAX_TEXT_WIDTH) return [whole];
+  if (widthOf(whole) <= limit) return [whole];
   let best = [whole];
   let bestWidth = Infinity;
   for (let cut = 1; cut < words.length; cut++) {
@@ -208,26 +236,77 @@ export function balanceLines(words, widthOf, maxLines) {
  * @param {ThemeStyle} style
  * @param {string[]} words    Words already tidied.
  * @param {number} anchorY    Where the block would like to start.
- * @returns {{size: number, fontsize: number, lines: string[], top: number, height: number, width: number}}
- *   `size` is the em in pixels; `fontsize` is the matching ASS Fontsize.
+ * @returns {{size: number, fontsize: number, lines: string[], top: number, height: number, width: number, fit_width: number, fits: boolean, below_min: boolean}}
+ *   `size` is the em in pixels; `fontsize` is the matching ASS Fontsize. `width` is the widest line as drawn at
+ *   100%; `fit_width` is the widest line at its widest moment (see fitWidth), which is what has to fit the safe zone.
+ *   `below_min` is true when a single word was too wide even at the theme's smallest size and was shrunk further.
  */
 export function layoutCue(style, words, anchorY) {
   const face = loadFontFace(FONT_FILES[style.font].file);
-  let size = style.size;
-  let lines = balanceLines(words, (l) => lineWidth(style, l, size), style.lines);
-  let width = Math.max(...lines.map((l) => lineWidth(style, l, size)));
-  if (width > MAX_TEXT_WIDTH) {
-    // Shrink to fit, but never below 70% of the theme size; past that the line is split instead.
-    const ratio = MAX_TEXT_WIDTH / width;
-    size = Math.max(Math.floor(style.size * 0.7), Math.floor(size * ratio));
-    lines = balanceLines(words, (l) => lineWidth(style, l, size), style.lines);
-    width = Math.max(...lines.map((l) => lineWidth(style, l, size)));
-  }
+  const fit = fitCue(style, words);
+  const { size, lines } = fit;
+  const width = Math.max(...lines.map((l) => lineWidth(style, l, size)));
   const lineH = face.line_height(size);
   const pad = style.box ? style.outline : style.mode === 'pill' ? PILL_PAD : 0;
-  const height = lines.length * lineH + 2 * pad;
+  // The pop swells the text downward from its top edge, so the block needs that room too.
+  const swell = style.mode === 'one' ? POP_PEAK_SCALE : 1;
+  const height = lines.length * lineH * swell + 2 * pad;
   const top = Math.round(Math.max(SAFE_ZONE.y_min + pad, Math.min(anchorY, SAFE_ZONE.y_max - height)));
-  return { size, fontsize: assFontsize(style.font, size), lines, top, height, width };
+  return {
+    size,
+    fontsize: assFontsize(style.font, size),
+    lines,
+    top,
+    height,
+    width,
+    fit_width: fit.width,
+    fits: fit.fits,
+    below_min: fit.below_min,
+  };
+}
+
+/**
+ * Pick the size and the lines for a cue so its widest moment fits FIT_WIDTH. In order: the theme size; the
+ * measured shrink down to the theme's smallest size; more lines at that smallest size; and only for a
+ * word that is wider than the zone even at the smallest size, smaller than the smallest size (never past 40%).
+ * A cue that fits at the theme size is returned untouched.
+ * @param {ThemeStyle} style
+ * @param {string[]} words
+ * @returns {{size: number, lines: string[], width: number, fits: boolean, below_min: boolean}}
+ */
+function fitCue(style, words) {
+  const min = minSizeOf(style);
+  /** @param {number} size @param {number} maxLines */
+  const wrap = (size, maxLines) => {
+    const widthOf = (/** @type {string} */ l) => fitWidth(style, l, size);
+    const lines =
+      maxLines <= 2
+        ? balanceLines(words, widthOf, maxLines, FIT_WIDTH)
+        : greedyLines(words, widthOf, FIT_WIDTH);
+    const width = Math.max(...lines.map(widthOf));
+    return { size, lines, width, fits: width <= FIT_WIDTH && lines.length <= maxLines, below_min: false };
+  };
+  let r = wrap(style.size, style.lines);
+  if (r.fits) return r;
+  // Shrink by the ratio first, then a pixel at a time, until the measured width fits.
+  let size = Math.max(min, Math.floor(style.size * (FIT_WIDTH / r.width)));
+  r = wrap(size, style.lines);
+  while (!r.fits && size > min) r = wrap(--size, style.lines);
+  if (r.fits) return r;
+  // Still too wide at the smallest size: keep that size and let the cue take more lines.
+  for (let maxLines = style.lines + 1; maxLines <= words.length; maxLines++) {
+    const t = wrap(min, maxLines);
+    if (t.fits) return t;
+  }
+  // One word wider than the zone at the smallest size: shrink it further, as little as it takes.
+  const hard = Math.max(8, Math.floor(style.size * 0.4));
+  const maxLines = Math.max(style.lines, words.length);
+  let last = r;
+  for (let s = min - 1; s >= hard; s--) {
+    last = { ...wrap(s, maxLines), below_min: true };
+    if (last.fits) return last;
+  }
+  return last;
 }
 
 // ---------------------------------------------------------------------------
@@ -270,7 +349,7 @@ function styleRow(name, family, size, s) {
  * Build the .ass text for a plan.
  * @param {import('../types.mjs').ShotPlan} plan
  * @param {AssOptions} [options]
- * @returns {{text: string, layout: {theme: string, anchor_y: number, top_min: number, bottom_max: number, widest: number, cues: number, hook?: HookLayout}}}
+ * @returns {{text: string, layout: {theme: string, anchor_y: number, top_min: number, bottom_max: number, widest: number, widest_peak: number, cues: number, hook?: HookLayout}}}
  */
 export function buildAss(plan, options = {}) {
   const theme = plan.caption_theme;
@@ -342,7 +421,7 @@ export function buildAss(plan, options = {}) {
   const ev = (layer, start, end, name, text) =>
     events.push(`Dialogue: ${layer},${formatAssTime(start)},${formatAssTime(end)},${name},,0,0,0,,${text}`);
 
-  const layout = { theme, anchor_y: anchorY, top_min: Infinity, bottom_max: 0, widest: 0, cues: 0 };
+  const layout = { theme, anchor_y: anchorY, top_min: Infinity, bottom_max: 0, widest: 0, widest_peak: 0, cues: 0 };
   /** @type {HookLayout | undefined} */
   let hookLayout;
 
@@ -364,6 +443,7 @@ export function buildAss(plan, options = {}) {
       layout.top_min = Math.min(layout.top_min, lay.top);
       layout.bottom_max = Math.max(layout.bottom_max, lay.top + lay.height);
       layout.widest = Math.max(layout.widest, lay.width);
+      layout.widest_peak = Math.max(layout.widest_peak, lay.fit_width);
 
       /** Build lines with per-word color. @param {(wordPos: number) => string} colorFor */
       const body = (colorFor) => {
@@ -415,13 +495,12 @@ export function buildAss(plan, options = {}) {
         }
       } else if (style.mode === 'one') {
         const wordColor = idx[0] >= 0 && emphasis.has(idx[0]) ? accent : textColor;
-        const pop = '\\fscx82\\fscy82\\t(0,110,\\fscx112\\fscy112)\\t(110,190,\\fscx100\\fscy100)';
         ev(
           0,
           cue.start_ms,
           cue.end_ms,
           themeStyleName,
-          `${pos}${pop}}{\\1c${tagColor(wordColor)}}${up(clean(lay.lines[0]))}`,
+          `${pos}${POP_TAG}}{\\1c${tagColor(wordColor)}}${lay.lines.map((l) => up(clean(l))).join('\\N')}`,
         );
       } else {
         // phrase: emphasized words in the accent color

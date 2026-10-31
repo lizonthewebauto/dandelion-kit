@@ -12,15 +12,19 @@ import { zoomAt } from '../core/edit/camera.mjs';
 import { ensureSfx, synthSfx, SFX_SAMPLE_RATE } from '../core/render/sfx.mjs';
 import { loadFontFace } from '../core/render/fontmetrics.mjs';
 import {
+  FIT_WIDTH,
   FONT_FILES,
   MAX_TEXT_WIDTH,
+  POP_PEAK_SCALE,
   SAFE_ZONE,
   THEME_STYLES,
   assColor,
   balanceLines,
   buildAss,
+  fitWidth,
   formatAssTime,
   layoutCue,
+  minSizeOf,
   readableOn,
 } from '../core/render/ass.mjs';
 import {
@@ -42,6 +46,10 @@ import {
 } from '../core/render/facezone.mjs';
 import { axesDiffer, axesOf, buildVariantPlan, planVariantAxes } from '../core/render/variants.mjs';
 import { loadFixture } from './helpers-edit.mjs';
+
+const BIG_FIXTURE = JSON.parse(
+  readFileSync(new URL('./fixtures/transcript-113s.json', import.meta.url), 'utf8'),
+);
 
 const EM = String.fromCharCode(0x2014);
 const EN = String.fromCharCode(0x2013);
@@ -585,4 +593,72 @@ test('the hook card slides up and shrinks to stay 40 px above a high head, and s
   assert.ok(high && high.clearance_px !== null && high.clearance_px < 40, 'a head this high cannot be cleared');
   const unknown = buildAss({ ...plan, caption_anchor: null }).layout.hook;
   assert.equal(unknown?.clearance_px, null);
+});
+
+// ---------------------------------------------------------------------------
+// Caption width guard: a line fits the safe zone at its widest moment, in every theme
+// ---------------------------------------------------------------------------
+
+/** The left and right edge a laid out cue reaches at its widest moment (centered on the frame, pop swell included). */
+function reach(style, lay) {
+  const widest = Math.max(...lay.lines.map((l) => fitWidth(style, l, lay.size)));
+  return { left: 1080 / 2 - widest / 2, right: 1080 / 2 + widest / 2 };
+}
+
+test('one-word-pop fits a long word inside x 90 to 940 at its swell, and a short word keeps the full size', () => {
+  const style = THEME_STYLES['one-word-pop'];
+  for (const word of ['Instagram', 'unquestionably', 'Communication', 'straightforward']) {
+    const lay = layoutCue(style, [word], 1163);
+    const { left, right } = reach(style, lay);
+    assert.ok(left >= SAFE_ZONE.x_min && right <= SAFE_ZONE.x_max, `${word} ${left}-${right} at ${lay.size}`);
+    assert.ok(lay.fit_width <= FIT_WIDTH, `${word} fit width ${lay.fit_width}`);
+    assert.ok(lay.size >= minSizeOf(style) && !lay.below_min, `${word} size ${lay.size}`);
+    assert.equal(lay.lines.length, 1);
+  }
+  // The 14 letter word does not fit at 110 with the swell, so it is shrunk; a short word is not.
+  assert.ok(layoutCue(style, ['unquestionably'], 1163).size < style.size);
+  for (const word of ['hi', 'Instagram', 'Reels']) assert.equal(layoutCue(style, [word], 1163).size, style.size, word);
+  // Two words on one pop (the cue that overflowed in QA) are fitted by the swelled width, not the plain width.
+  const two = layoutCue(style, ['on', 'Watermark'], 1163);
+  assert.ok(two.width <= MAX_TEXT_WIDTH, 'it fit when drawn at 100%');
+  assert.ok(two.fit_width <= FIT_WIDTH, `and it fits at the swell: ${two.fit_width}`);
+  assert.ok(two.width * POP_PEAK_SCALE <= FIT_WIDTH);
+  // The pop block leaves room for the swell below it.
+  const lineH = loadFontFace(FONT_FILES.montserrat.file).line_height(two.size);
+  assert.ok(two.height >= lineH * POP_PEAK_SCALE - 0.01);
+});
+
+test('every theme fits the longest words of the fixture transcripts and "straightforward"', () => {
+  const tidy = (w) => w.replace(/[.,;:!?]+$/u, '');
+  const all = [...T.words, ...BIG_FIXTURE.transcript.words].map((w) => tidy(w.text));
+  const longest = [...new Set(all)].sort((a, b) => b.length - a.length).slice(0, 6);
+  const words = [...new Set([...longest, 'straightforward', 'Instagram', 'unquestionably'])];
+  for (const [theme, style] of Object.entries(THEME_STYLES)) {
+    for (const word of words) {
+      const lay = layoutCue(style, [word], 1100);
+      const { left, right } = reach(style, lay);
+      assert.ok(left >= SAFE_ZONE.x_min && right <= SAFE_ZONE.x_max, `${theme} ${word} ${left}-${right}`);
+      assert.ok(lay.fits && !lay.below_min, `${theme} ${word}`);
+      assert.ok(lay.size >= minSizeOf(style), `${theme} ${word} size ${lay.size}`);
+    }
+    // Several wide words together: still inside, by wrapping when shrinking alone is not enough.
+    const crowd = layoutCue(style, ['straightforward', 'unquestionably', 'misunderstood', 'extraordinarily'], 1100);
+    const { left, right } = reach(style, crowd);
+    assert.ok(left >= SAFE_ZONE.x_min && right <= SAFE_ZONE.x_max, `${theme} crowd ${left}-${right}`);
+    assert.ok(crowd.top + crowd.height <= SAFE_ZONE.y_max + 0.5, `${theme} crowd bottom`);
+  }
+});
+
+test('a word wider than the zone at the smallest size shrinks past it as a last resort, and says so', () => {
+  const style = THEME_STYLES['one-word-pop'];
+  const lay = layoutCue(style, ['internationalization'], 1163);
+  assert.ok(lay.below_min && lay.size < minSizeOf(style));
+  assert.ok(lay.fit_width <= FIT_WIDTH);
+});
+
+test('the swelled width reaches the file: the plan layout reports the widest line at the swell', () => {
+  const popPlan = planShots(T, cut, 'karaoke-clean', { seed: 3, caption_theme: 'one-word-pop' });
+  const { layout } = buildAss(popPlan);
+  assert.ok(layout.widest_peak <= FIT_WIDTH, `widest at the swell ${layout.widest_peak}`);
+  assert.ok(layout.widest_peak >= layout.widest, 'the swell is wider than the plain line');
 });

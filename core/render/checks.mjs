@@ -6,7 +6,17 @@ import { HOOK_CARD_MS } from '../edit/shotplan.mjs';
 import { visualEvents } from '../edit/pacing.mjs';
 import { captureFfmpeg, runFfprobe } from '../media/ffmpeg.mjs';
 import { makeTempDir } from '../util/fs.mjs';
-import { buildAss, fontFilesFor, HOOK_STYLE, readableOn, SAFE_ZONE, THEME_STYLES, PLAY } from './ass.mjs';
+import {
+  buildAss,
+  fontFilesFor,
+  HOOK_STYLE,
+  POP_PEAK_TAG,
+  POP_TAG,
+  readableOn,
+  SAFE_ZONE,
+  THEME_STYLES,
+  PLAY,
+} from './ass.mjs';
 import { chinAtZoom, maxZoomOf } from './facezone.mjs';
 import { QUALITY } from './filtergraph.mjs';
 import { ffmpegLog, streamRawFrames } from './run.mjs';
@@ -135,7 +145,7 @@ export async function measureMotion(file, times_ms = CHECK_LIMITS.motion_times_m
 
 /**
  * Draw the plan's captions on black with libass and find the box they cover. This is measured, not guessed
- * from font sizes, so the numbers include outlines, boxes and shadows.
+ * from font sizes, so the numbers include outlines, boxes and shadows. A pop caption is measured at its widest swell.
  * @param {import('../types.mjs').ShotPlan} plan
  * @returns {Promise<{x_min: number, x_max: number, y_min: number, y_max: number, frames: number} | null>}
  */
@@ -154,7 +164,12 @@ export async function measureCaptionBounds(plan) {
         treatment: b.treatment === 'hook-card' ? 'face' : b.treatment,
       })),
     };
-    writeFileSync(join(dir, 'c.ass'), buildAss(noHook, { captions: true }).text);
+    // The pop swells for about 80 ms, and frames are sampled 5 times a second, so the swell could slip between
+    // samples. Hold every pop at its widest so the box is the worst case the viewer can see.
+    writeFileSync(
+      join(dir, 'c.ass'),
+      buildAss(noHook, { captions: true }).text.split(POP_TAG).join(POP_PEAK_TAG),
+    );
     const w = 540;
     const h = 960;
     const fps = 5;

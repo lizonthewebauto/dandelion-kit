@@ -314,3 +314,24 @@ test('libass draws karaoke captions at the em size the theme asks for, not small
   assert.ok(height >= 60 && height <= 110, `line height ${height}`);
   assert.ok(b.x_max - b.x_min >= 520, `widest line ${b.x_max - b.x_min}`);
 });
+
+test('long words and wide pairs stay inside the safe zone as drawn by libass, at the pop swell', async () => {
+  const text =
+    'Instagram straightforward unquestionably on Watermark communication extraordinarily misunderstood, so try Instagram Reels today';
+  const words = [];
+  let t = 300;
+  for (const w of text.split(' ')) {
+    words.push({ text: w, start_ms: t, end_ms: t + 420 });
+    t += 450;
+  }
+  const transcript = makeTranscript(words, { engine: 'transformers' });
+  const cut = edit.roughCut(transcript, { duration_ms: 11000 });
+  for (const theme of ['one-word-pop', 'karaoke-highlight', 'bold-stroke', 'clean-minimal']) {
+    const plan = edit.planShots(transcript, cut, 'karaoke-clean', { seed: 7, caption_theme: theme });
+    const b = await measureCaptionBounds({ ...plan, caption_anchor: { x: 540, y: 1163 } });
+    assert.ok(b, theme);
+    // The same test the captions-safe-zone check applies.
+    assert.ok(b.x_min >= SAFE_ZONE.x_min && b.x_max <= SAFE_ZONE.x_max, `${theme} x ${b.x_min}-${b.x_max}`);
+    assert.ok(b.y_min >= SAFE_ZONE.y_min && b.y_max <= SAFE_ZONE.y_max, `${theme} y ${b.y_min}-${b.y_max}`);
+  }
+});
