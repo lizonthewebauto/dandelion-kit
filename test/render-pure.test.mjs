@@ -524,7 +524,17 @@ test('a punchier pace changes the picture more often than a gentle one', () => {
 
 test('the edit command line reads flags and keeps the video path', async () => {
   const { parseEditArgs } = await import('../core/render/cli.mjs');
-  const { flags, positional } = parseEditArgs(['clip.mp4', '--look', 'bold-value', '--out', 'out dir', '--variants', '3', '--hook', 'Stop doing this']);
+  const { flags, positional } = parseEditArgs([
+    'clip.mp4',
+    '--look',
+    'bold-value',
+    '--out',
+    'out dir',
+    '--variants',
+    '3',
+    '--hook',
+    'Stop doing this',
+  ]);
   assert.deepEqual(positional, ['clip.mp4']);
   assert.equal(flags.look, 'bold-value');
   assert.equal(flags.out, 'out dir');
