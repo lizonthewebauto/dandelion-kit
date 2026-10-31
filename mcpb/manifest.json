@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "dandelion-kit",
   "display_name": "Dandelion Kit",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion. Runs on your computer.",
   "long_description": "A free kit that runs on your computer. Edit a talking-head video into a finished Reel (transcript, breath-safe cuts, captions, punch-ins, loudness, quality checks), make carousels and single images as JPEG, and see a ready version of any post for Instagram, TikTok, YouTube, LinkedIn, X, Threads, Facebook and Pinterest. Posting goes through Dandelion only when you connect it, and nothing is posted without your yes. Video editing needs ffmpeg, which the kit checks for and never ships.",
   "author": {
