@@ -140,7 +140,11 @@ test('the command line: help, version and an unknown command', () => {
   const doctor = run('doctor');
   assert.equal(doctor.status, 0);
   assert.match(doctor.stdout, /ffmpeg:/);
-  const connect = run('connect');
+  // connect with nothing to talk to: a plain failure, no browser, no waiting.
+  const connect = spawnSync(process.execPath, [BIN, 'connect'], {
+    encoding: 'utf8',
+    env: { ...process.env, DANDELION_KIT_HOME: home, DANDELION_URL: 'http://127.0.0.1:9', DANDELION_KIT_NO_BROWSER: '1' },
+  });
   assert.equal(connect.status, 1);
-  assert.match(connect.stdout, /not built into this version/);
+  assert.match(connect.stdout, /could not reach Dandelion/);
 });

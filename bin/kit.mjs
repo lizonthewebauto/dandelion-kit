@@ -260,8 +260,19 @@ async function main() {
       return cmdFromJson(rest, 'make_carousel', 'carousel');
     case 'offer':
       return cmdFromJson(rest, 'offer_post', 'offer');
-    case 'connect':
-      return (await runTool('connect_dandelion', {})).ok ? 0 : 1;
+    case 'connect': {
+      // From the command line there is no card to poll, so wait the full 3 minutes for the browser.
+      process.env.DANDELION_KIT_CONNECT_WAIT_MS ??= String(3 * 60 * 1000);
+      err('Opening Dandelion in your browser. Sign in there and allow the Dandelion Kit. This waits up to 3 minutes.');
+      const connected = await runTool('connect_dandelion', {});
+      try {
+        const { closeSession } = await import('../server/dandelion/client.mjs');
+        await closeSession();
+      } catch {
+        // Nothing to close.
+      }
+      return connected.ok ? 0 : 1;
+    }
     default:
       err(`I do not know the command "${command}".\n`);
       process.stdout.write(USAGE);

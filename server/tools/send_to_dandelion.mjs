@@ -1,5 +1,10 @@
 import { CHANNEL_IDS } from '../../core/types.mjs';
-import { defineTool, notBuilt, z } from '../lib/kit.mjs';
+import { getState, invalidateState } from '../dandelion/client.mjs';
+import { sendBundle } from '../dandelion/send.mjs';
+import { defineTool, ok, z } from '../lib/kit.mjs';
+import { asFail } from '../dandelion/outcome.mjs';
+import { loadBundle, saveBundle } from '../lib/offer.mjs';
+import { renderText } from '../text.mjs';
 
 export const tool = defineTool({
   name: 'send_to_dandelion',
@@ -13,7 +18,31 @@ export const tool = defineTool({
     channels: z.array(z.enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (CHANNEL_IDS)))).optional().describe('For review: which apps to make a post for.'),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
-  async run() {
-    return notBuilt('Sending to Dandelion');
+  async run(args, ctx) {
+    const bundle = await loadBundle(args.bundle_id);
+    try {
+      const { sent, notes } = await sendBundle({
+        bundle,
+        brandId: args.brand_id,
+        mode: args.mode,
+        channels: args.channels,
+        progress: ctx.progress,
+        // Keep the library record at once, so a failed second step never makes the files go up twice.
+        onSent: async (s) => {
+          bundle.sent = s;
+          await saveBundle(bundle);
+        },
+      });
+      bundle.sent = sent;
+      await saveBundle(bundle);
+      invalidateState();
+      const dandelion = await getState({ fresh: true });
+      const text = [renderText('send_to_dandelion', { sent }), ...notes.map((n) => `Note: ${n}`)].join('\n');
+      return ok({ sent, dandelion }, text);
+    } catch (error) {
+      const failure = asFail(error);
+      if (failure) return failure;
+      throw error;
+    }
   },
 });

@@ -140,20 +140,27 @@ test('errors are plain words, never stack traces', async () => {
   assert.match(textOf(badId), /is not a project id/);
 });
 
-test('the Dandelion tools have real schemas and say they are not built yet', async () => {
+test('the Dandelion tools have real schemas and answer in plain words when Dandelion is not signed in', async () => {
+  const listed = await kit.client.listTools();
+  const byName = Object.fromEntries(listed.tools.map((t) => [t.name, /** @type {any} */ (t.inputSchema)]));
+  assert.deepEqual(byName.send_to_dandelion.required.sort(), ['brand_id', 'bundle_id']);
+  assert.deepEqual(byName.approve_post.required, ['job_id']);
+  assert.deepEqual(byName.skip_post.required, ['job_id']);
+  const status = await kit.call('dandelion_status');
+  assert.equal(status.isError, undefined, textOf(status));
+  assert.equal(status.structuredContent.dandelion.connected, false);
   for (const [name, args] of /** @type {[string, any][]} */ ([
-    ['connect_dandelion', {}],
-    ['dandelion_status', {}],
-    ['send_to_dandelion', { bundle_id: 'b_aaaa1111', brand_id: 'brand-1', mode: 'review', channels: ['instagram'] }],
     ['approve_post', { job_id: 'j1', post_at: '2026-12-02T14:00:00.000Z' }],
     ['skip_post', { job_id: 'j1' }],
   ])) {
     const r = await kit.call(name, args);
     assert.equal(r.isError, true, name);
-    assert.equal(r.structuredContent.error, 'not_built');
-    assert.match(textOf(r), /not built into this version of the kit yet/);
+    assert.match(textOf(r), /connect Dandelion/);
     assert.ok(!DASH_RE.test(textOf(r)));
   }
+  const missing = await kit.call('send_to_dandelion', { bundle_id: 'b_aaaa1111', brand_id: 'brand-1', mode: 'review', channels: ['instagram'] });
+  assert.equal(missing.isError, true);
+  assert.match(textOf(missing), /could not find the post/);
 });
 
 test('make_carousel renders six JPEG slides with thumbnails and readable text', async () => {
