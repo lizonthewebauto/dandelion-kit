@@ -172,7 +172,9 @@ const CHECKS_FINAL = [
 const DRAFT_RENDER = {
   id: 'draft', label: 'Draft', quality: 'draft', file: 'C:\\Users\\you\\.dandelion-kit\\projects\\p_demo\\out\\draft.mp4', duration_ms: 33000, bytes: 1_240_000, plan_hash: 'h_a1',
   video_asset_id: 'a_video_draft', frame_asset_ids: Array.from({ length: 8 }, (_, i) => `a_frame_${i + 1}`),
-  checks: CHECKS_FINAL.slice(0, 5).map((c) => ({ ...c })),
+  checks: CHECKS_FINAL.slice(0, 5).map((c) =>
+    c.id === 'encode' ? { ...c, measured: 'h264, 540 by 960, 15 fps, 48 kHz audio', limit: 'h264, 540 by 960, 15 fps' } : { ...c },
+  ),
 };
 const FINAL_RENDER = {
   id: 'final', label: 'Final', quality: 'final', file: 'C:\\Users\\you\\.dandelion-kit\\projects\\p_demo\\out\\reel-final.mp4', duration_ms: 33040, bytes: 14_800_000, plan_hash: 'h_a1',

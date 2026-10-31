@@ -443,3 +443,9 @@ select.field { appearance: auto; }
   .actions .btn.quiet { flex: 0 0 auto; }
   .bigtime .b { font-size: 30px; }
 }
+
+/* looks: two columns once the card is wide enough, so five cards do not make a very tall card */
+@media (min-width: 600px) {
+  .lookgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
+  .lookgrid > .pick { margin: 0; height: 100%; }
+}

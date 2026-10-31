@@ -2,7 +2,7 @@
 import { rm, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { IMAGE_SIZES, LAYOUT_IDS } from '../../core/types.mjs';
-import { describeLayout, renderCarousel } from '../../core/carousel/render.mjs';
+import { describeLayout, renderCarousel, resolveSize } from '../../core/carousel/render.mjs';
 import { ensureDir } from '../../core/util/fs.mjs';
 import { projectDir, registerAsset, requireProject, updateProject } from '../store/project.mjs';
 import { z } from './kit.mjs';
@@ -36,10 +36,23 @@ export const brandInput = z
   .optional()
   .describe('A brand.json path or a brand object. Defaults to ./brand.json, then ~/.dandelion-kit/brand.json, then the built-in look.');
 
+/** Size names or WxH strings. Checked by resolveSize, which says in plain words what is allowed. */
 export const sizeInput = z
-  .enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (Object.keys(IMAGE_SIZES))))
+  .string()
   .optional()
-  .describe('portrait 1080x1350 (default), square 1080x1080, or story 1080x1920.');
+  .describe('portrait or 1080x1350 (default), square or 1080x1080, story or 1080x1920.')
+  .refine(
+    (v) => {
+      if (v === undefined) return true;
+      try {
+        resolveSize(v);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: 'size must be portrait (1080x1350), square (1080x1080) or story (1080x1920)' },
+  );
 
 /** One line per layout with its fields and limits, for tool descriptions. */
 export function layoutHelp() {
@@ -96,7 +109,7 @@ export function carouselData(project, warnings = []) {
   const spec = /** @type {import('../../core/types.mjs').CarouselSpec} */ (project.carousel);
   const rendered = spec.rendered ?? [];
   const byPath = new Map(Object.values(project.assets).map((a) => [a.path, a.id]));
-  const size = spec.size ?? 'portrait';
+  const size = resolveSize(spec.size);
   return {
     project_id: project.id,
     title: spec.title || project.title,

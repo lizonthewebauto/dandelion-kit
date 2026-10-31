@@ -194,7 +194,7 @@ test('other mistakes get plain messages too', () => {
   assert.throws(() => validateSlide({ layout: 'list', fields: { title: 'T', items: ['a'], heading: 'x' } }), /"heading" is not a field of the list layout. Use: title, items/);
   assert.throws(() => validateSlide({ layout: /** @type {any} */ ('poster'), fields: {} }, { index: 0 }), /Slide 1 \(poster\): "poster" is not a layout. Use one of: cover/);
   assert.throws(() => validateSlide({ layout: 'steps', fields: { title: 'T', steps: [{ text: '' }] } }), /"steps, entry 1, text" is missing/);
-  assert.throws(() => resolveSize('huge'), /not a size/);
+  assert.throws(() => resolveSize('huge'), /size must be portrait \(1080x1350\), square \(1080x1080\) or story \(1080x1920\)/);
   assert.equal(resolveSize('1080x1080'), 'square');
   assert.equal(resolveSize(undefined), 'portrait');
 });
@@ -289,4 +289,13 @@ test('a logo in the brand shows in the header', async () => {
   const a = (await regionStats(withLogo.buffer, strip)).channels[1].mean;
   const b = (await regionStats(without.buffer, strip)).channels[1].mean;
   assert.ok(Math.abs(a - b) > 3, `logo not visible (${a} vs ${b})`);
+});
+
+test('the tool size input accepts names and WxH strings and refuses others in plain words', async () => {
+  const { sizeInput } = await import('../server/lib/carousel.mjs');
+  for (const ok of [undefined, 'portrait', 'square', 'story', '1080x1350', '1080x1080', '1080x1920'])
+    assert.equal(sizeInput.safeParse(ok).success, true, String(ok));
+  const bad = sizeInput.safeParse('huge');
+  assert.equal(bad.success, false);
+  assert.match(String(bad.error?.issues[0].message), /size must be portrait \(1080x1350\), square \(1080x1080\) or story \(1080x1920\)/);
 });

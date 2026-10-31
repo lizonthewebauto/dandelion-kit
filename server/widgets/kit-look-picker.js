@@ -98,7 +98,7 @@
     function render() {
       body.textContent = "";
       var l = chosen();
-      var group = h("div", { role: "radiogroup", "aria-label": "Looks" });
+      var group = h("div", { class: "lookgrid", role: "radiogroup", "aria-label": "Looks" });
       looks.forEach(function (x) { group.appendChild(lookCard(x)); });
       body.appendChild(group);
 

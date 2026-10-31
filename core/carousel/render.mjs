@@ -38,7 +38,7 @@ export function resolveSize(size) {
   if (s in IMAGE_SIZES) return /** @type {keyof typeof IMAGE_SIZES} */ (s);
   const hit = Object.values(IMAGE_SIZES).find((v) => s === `${v.width}x${v.height}`);
   if (hit) return /** @type {keyof typeof IMAGE_SIZES} */ (hit.id);
-  throw new CarouselError(`"${size}" is not a size. Use portrait (1080x1350), square (1080x1080) or story (1080x1920).`);
+  throw new CarouselError(`size must be portrait (1080x1350), square (1080x1080) or story (1080x1920). "${size}" is none of those.`);
 }
 
 /**
