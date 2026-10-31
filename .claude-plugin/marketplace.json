@@ -1,0 +1,17 @@
+{
+  "name": "dandelion-kit",
+  "description": "The free Dandelion Kit: video editing, carousels and images, and posting through Dandelion.",
+  "owner": {
+    "name": "Dandelion",
+    "url": "https://dandelionapp.io"
+  },
+  "plugins": [
+    {
+      "name": "dandelion-kit",
+      "source": "./",
+      "description": "Edit talking-head videos into Reels, make carousels and images as JPEG, and post anything through Dandelion. Runs on your computer.",
+      "homepage": "https://dandelionapp.io/kit",
+      "license": "MIT"
+    }
+  ]
+}

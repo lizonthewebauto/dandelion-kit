@@ -1,0 +1,25 @@
+{
+  "name": "dandelion-kit",
+  "version": "0.1.0",
+  "description": "Free kit: edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.",
+  "author": {
+    "name": "Dandelion",
+    "url": "https://dandelionapp.io"
+  },
+  "homepage": "https://dandelionapp.io/kit",
+  "repository": "https://github.com/lizonthewebauto/dandelion-kit",
+  "license": "MIT",
+  "keywords": ["video", "reels", "captions", "carousel", "social", "dandelion"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Dandelion Kit",
+    "shortDescription": "Edit Reels, make carousels, post with Dandelion",
+    "longDescription": "A free kit that runs on your computer. Edit a talking-head video into a finished Reel, make carousels and single images as JPEG, and see a ready version of any post for Instagram, TikTok, YouTube, LinkedIn, X, Threads, Facebook and Pinterest.",
+    "developerName": "Dandelion",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://dandelionapp.io/kit",
+    "defaultPrompt": ["Edit this video into a Reel", "Make a carousel about my topic"]
+  }
+}

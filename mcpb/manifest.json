@@ -1,0 +1,34 @@
+{
+  "manifest_version": "0.3",
+  "name": "dandelion-kit",
+  "display_name": "Dandelion Kit",
+  "version": "0.1.0",
+  "description": "Edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion. Runs on your computer.",
+  "long_description": "A free kit that runs on your computer. Edit a talking-head video into a finished Reel (transcript, breath-safe cuts, captions, punch-ins, loudness, quality checks), make carousels and single images as JPEG, and see a ready version of any post for Instagram, TikTok, YouTube, LinkedIn, X, Threads, Facebook and Pinterest. Posting goes through Dandelion only when you connect it, and nothing is posted without your yes. Video editing needs ffmpeg, which the kit checks for and never ships.",
+  "author": {
+    "name": "Dandelion",
+    "url": "https://dandelionapp.io"
+  },
+  "homepage": "https://dandelionapp.io/kit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lizonthewebauto/dandelion-kit.git"
+  },
+  "documentation": "https://dandelionapp.io/kit",
+  "support": "https://github.com/lizonthewebauto/dandelion-kit/issues",
+  "license": "MIT",
+  "keywords": ["video", "reels", "captions", "carousel", "social", "dandelion"],
+  "server": {
+    "type": "node",
+    "entry_point": "bin/kit.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/bin/kit.mjs", "serve"]
+    }
+  },
+  "tools_generated": true,
+  "compatibility": {
+    "platforms": ["win32"],
+    "runtimes": { "node": ">=20.0.0" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "dandelion-kit",
+  "interface": { "displayName": "Dandelion Kit" },
+  "plugins": [
+    {
+      "name": "dandelion-kit",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}
