@@ -4,12 +4,16 @@
 //
 //   node scripts/widget-preview.mjs --out <folder>
 //
+// Without --out the pages go to a temp folder that is removed when the script ends, unless
+// DANDELION_KIT_KEEP_WIDGET_PAGES is set (then they stay in <temp>/dandelion-kit-widgets). Importing this file
+// writes nothing: the work starts only when it is run as a script.
+//
 // Each page is a small fake MCP Apps host: it embeds the real card in an iframe, answers ui/initialize,
 // sends the sample tool result, and answers tools/call from the sample kit in server/widgets/fixtures.mjs
 // (including read_asset, so pictures and video load through the same chunk path as the real thing).
 // Open <name>.html?theme=dark for dark, &w=360 for a phone width, &log=1 to see what the card told the model,
 // &h=1800 to force a tall frame for screenshot tools that capture early.
-import { mkdirSync, readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -27,7 +31,6 @@ function arg(name) {
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
 
-const outDir = resolve(arg('out') || join(tmpdir(), 'dandelion-kit-widgets'));
 
 /** @param {string} s */
 const xml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -268,13 +271,32 @@ function hostPage(fx, assets) {
 }
 
 async function main() {
+  const keep = Boolean(arg('out') || process.env.DANDELION_KIT_KEEP_WIDGET_PAGES);
+  const outDir = arg('out')
+    ? resolve(/** @type {string} */ (arg('out')))
+    : process.env.DANDELION_KIT_KEEP_WIDGET_PAGES
+      ? join(tmpdir(), 'dandelion-kit-widgets')
+      : mkdtempSync(join(tmpdir(), 'kit-widgets-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'kit-video-'));
+  try {
+    await writePages(outDir, tmp);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+    if (!keep) {
+      rmSync(outDir, { recursive: true, force: true });
+      console.log('Removed the card pages again. Pass --out <folder> or set DANDELION_KIT_KEEP_WIDGET_PAGES to keep them.');
+    }
+  }
+}
+
+/** @param {string} outDir @param {string} tmp */
+async function writePages(outDir, tmp) {
   mkdirSync(outDir, { recursive: true });
   const assets = /** @type {Record<string, { mime: string, b64: string }>} */ ({});
   for (const a of DEMO_ASSETS) {
     const made = await makeAsset(a.id);
     if (made) assets[a.id] = made;
   }
-  const tmp = mkdtempSync(join(tmpdir(), 'kit-video-'));
   const video = makeVideo(tmp);
   if (video) {
     assets.a_video_draft = video;
@@ -288,7 +310,9 @@ async function main() {
   console.log(`Wrote ${CARD_FIXTURES.length} card pages to ${outDir}`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

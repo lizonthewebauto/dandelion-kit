@@ -238,7 +238,8 @@ test('rules: under the test runner without DANDELION_URL the kit stays offline (
   const previousUrl = process.env.DANDELION_URL;
   const previousHome = process.env.DANDELION_KIT_HOME;
   delete process.env.DANDELION_URL;
-  process.env.DANDELION_KIT_HOME = (await import('../core/util/fs.mjs')).makeTempDir('kit-rules-offline-');
+  const offlineHome = (await import('../core/util/fs.mjs')).makeTempDir('kit-rules-offline-');
+  process.env.DANDELION_KIT_HOME = offlineHome;
   try {
     const r = await loadPlatformRules();
     assert.equal(r.fetched_at, undefined);
@@ -246,5 +247,8 @@ test('rules: under the test runner without DANDELION_URL the kit stays offline (
     if (previousUrl !== undefined) process.env.DANDELION_URL = previousUrl;
     if (previousHome === undefined) delete process.env.DANDELION_KIT_HOME;
     else process.env.DANDELION_KIT_HOME = previousHome;
+    try {
+      (await import('node:fs')).rmSync(offlineHome, { recursive: true, force: true });
+    } catch {}
   }
 });
