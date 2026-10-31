@@ -1,0 +1,26 @@
+{
+ "cover": {
+  "mean": [
+   234.4,
+   228.2,
+   216.5
+  ],
+  "grid": "7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7/Dx8vLx8e/v7+/v7+/v7+/v7+/v7+/v7+/v8Ofe2tnZ2u/v7+/v7+/v7+/v7+/v7+/v7+/v8Oji3d3b3e/v7+/v7+/v7+/v7+/v7+/v7+/v7/Dw8fHx8e/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7/Dv7+/w8O/v7+/v7+/v7+/v7+/v7+/v7+/v7uzs7e3s7O/v7+/v7+/v7+/v7+/v7+/v8ObV4dTW29jT2e/v7+/v7+/v7+/v7+/v7+/v7/Dz8/Dw8PDw8e/v7/Dv8PHx8PDv7+/v7+/v8dy2teju7/Ds4+7v7vDu6cri7+7v7+/v7+/v8tWFhp+ThY7Qjp2zqn+mjoqJmb7z7+/v7+/v8dyzsLC8srDkrq7L0Ka+wLitp9Lx7+/v7+/v7/H09vX28fHy9PT19Pb19tjd9vDv7+/v7+/v8tWfo6qfoKCv0aGiqKumpYyUsOzv7+/v7+/v88aHl6aenKWiw4qUoaCXiJuSqu7v7+/v7+/v8dnN9+/x8vD1xKjy7vLgyPXw7/Hv7+/v7+/v8OS5xrarwMK8l4au18rDvLbHuNrx7+/v7+/v8tB/h6WWh46GjZiVx7aMhZahiM/y7+/v7+/v7+vh5OXm5eTh4+K76Ozl4ens5O3w8O/v7+/v8Onr7e/t7ezt7Ozs7O3t7u7t7u3s7O/v7+/v8dvc2dvZ1dvV09jY19zR1dnV2dnV4vDv7+/v8dvd2Nfd3t7U4O/v7u/u7u7v7e3u7+/v7+/v8Obn5OTo5+fk6O/v7+/v7+/v7+/v7+/v7+/v7/Dw8PHw8PDw8O/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/w7u7u7u7u7u7u7u7u7u7u7u7u7+/v8Ojf4eHj7u7u7u7u7u7u7u7u7u7u7u7v5unw8Ojf4+Ll7+/v7+/v7+/v7+/v7+/v7+/w5+nw7/Dx8PDw7+/v7+/v7+/v7+/v7+/v7+/v8O/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v"
+ },
+ "list": {
+  "mean": [
+   232.7,
+   225.1,
+   213.2
+  ],
+  "grid": "7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7/Dx8vLx8e/v7+/v7+/v7+/v7+/v7+/v7+/v8Ofe2tnZ2u/v7+/v7+/v7+/v7+/v7+/v7+/v8Onj3t3c3u/w8PDv7+/w8O/v7+/v7+/v7+/v7+3o7Pbs7fTq7e7z8vLu5fDv7+/v7+/v7+/v88qZp8XGoM2hqaS40NKrsvTv7+/v7+/v7+/v8dykoZ/Jm5mUnpehsbOcx/Pw7+/v7+/v7+/v7+7q5+vt6sft7e3u7+vp7e/u7+/v7+/v7+/v8tCYnKienIe1yZqdnJqfo5qd5fDv7+/v7+/v8d+7u7u2tra8xaa/wry7usvC5/Dv7+/v7+/v7/Hz8/X19e/s6u318/Tz9PPy7u3t7e3t7e/v8tei28zP1N7X3dDZ3Nfe2NXv7+/v7+/v7+/v8tGW1sfFwMzAzbnCwcDJvcbv7+/v7+/v7+/v7+7f7fT08/P08/Xz8vTy8/Px8fHu7e3t7e/v886R0L2+x7nJw77AxcDGyMq8trfr8O/v7+/v8d+34tzV29vczNba29ja2dza2Njs7+/v7+/v8OjO6Ojw7+7s8PHw8O7u8PDw7u7t7u7u7u/v88qLzLyvxLe0vL+wtMKrvbyzvrur4fHv7+/v8OnS6vDo6+rq6+no6ezp6+ro6+vj6u7u7u/v8d2z3tff4OHl4uHl5uHf4eDh493o8O/v7+/v8s+V0rqrucXIu7vBx763ur7CvLrN8u/v7+/v7+7f7vTx8fHx8/Hy8fLy8vLy8vDu7e3t7e/v8tKZ0r/Iy9LHwdDBysXL0MbGwtzx7+/v7+/v8dqs3NDLztXSytjL0MzL0tDQyePw7+/v7+/v7+vX7O708/Hy8+/z8fPy8vLz8+/u7u7u7u/v88yPzbmvxLW1v7e+u7K/xLi7uezw7+/v7+/v8OTF5+Xd4ePj5eXk5OHj5OLj4u7v7+/v7+/v7/Dz8PHx8PDw7+/w8PDv7/Dw8O7u7u7u7+/v8Ojf4eHj7u7u7u7u7u7u7u7u7u7u7u7v5unw8Ojf4+Ll7+/v7+/v7+/v7+/v7+/v7+/w5+nw7/Dx8PDw7+/v7+/v7+/v7+/v7+/v7+/v8O/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v"
+ },
+ "stat": {
+  "mean": [
+   237.2,
+   220.8,
+   207.2
+  ],
+  "grid": "7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7/Dx8vLx8e/v7+/v7+/v7+/v7+/v7+/v7+/v8Ofe2tnZ2u/v7+/v7+/v7+/v7+/v7+/v7+/v8Oji3d3b3e/v7+/v7+/v7+/v7+/v7+/v7+/v7/Dx8vHx8e/v7+/v7+/v7+/v7+/v7+/v7+/v7+/s6urq6urq6urq6urq6urq6urq6urq7O/v8Orc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Orv8Ojb3uDg4N7f3+De3tve3d3c3Nzc3Nzc3Ojw8OjdtZOVlrmflpaqwa+w3LjK3tzc3Nzc3Ojw8OjcoqWokr6htJfFlsKVu6nZ3Nzc3Nzc3Ojw8OjbzePBwdrYucTjnribr9Dg3dzc3Nzc3Ojw8Ojb4Myp3d/dt5a31b6+ubGz2tzc3Nzc3Ojw8Ojc3pyr4cut4quG3Nqzk8KTx97c3Nzc3Ojw8Ojc24qK3cGBzqGf363DoLeWzd7c3Nzc3Ojw8Ojb3cG83NzDvL3Y3MPc0rzH3dzc3Nzc3Ojw8Ojb3N/f3Nzf3t/d3N7c3t/f3Nzc3Nzc3Ojw7+vf3t7e3t7e3t7e3t7e3t7e3t7e3t7e3+vv7+/w7+7u7u7w7u7u7u7u7u7u7+7v7+7u7u/v7+7g1urr6urT6evr6err6ero5evX3evo7+/v8tGWtZeXpZSHrrCcoai5lZ2hmbqclJDA8u/v8Onk4s/U38rk5+nU3eja0dLd4ujh4t3o7+/v8s6irKObtK+go8ahm6mlv5WYnp7L9fHw7+/v8ObS087X29fU0eDW09LU5NXR1K/S8u/v7+/v8Ofg5Obj5+Tk5ubi4eTg4+Pl5Obh6vDv7+/v8OfV2NrZ3OHj5OTi3OTg4uLk3ubl6+/v7+/v8OXY4d7c3vDw8PDx8fDx8PDx8fDw7+/v7+/v7/Dx8fHx8O/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/w7u7u7u7u7u7u7u7u7u7u7u7u7+/v8Ojf4eHj7u7u7u7u7u7u7u7u7u7u7u7v5unw8Ojf4+Ll7+/v7+/v7+/v7+/v7+/v7+/w5+nw7/Dx8PDw7+/v7+/v7+/v7+/v7+/v7+/v8O/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v"
+ }
+}
