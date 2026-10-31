@@ -1,0 +1,41 @@
+{
+  "name": "dandelion-kit",
+  "version": "0.1.0",
+  "description": "Free kit for Claude and Codex: edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.",
+  "type": "module",
+  "license": "MIT",
+  "author": "lizonthewebauto",
+  "homepage": "https://dandelionapp.io/kit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lizonthewebauto/dandelion-kit.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "kit": "bin/kit.mjs"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.mjs\" && tsc -p jsconfig.json --noEmit && node scripts/check-copy.mjs",
+    "check-copy": "node scripts/check-copy.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "make-sfx": "node scripts/make-sfx.mjs"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "4.3.2",
+    "@modelcontextprotocol/ext-apps": "2.0.4",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "onnxruntime-node": "1.31.1",
+    "open": "11.0.4",
+    "satori": "0.63.2",
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "prettier": "3.9.10",
+    "typescript": "7.0.2"
+  }
+}

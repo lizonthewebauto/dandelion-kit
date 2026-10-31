@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+.dandelion-kit/
+tmp/
+dist/
+*.mcpb
+.claude/settings.local.json
