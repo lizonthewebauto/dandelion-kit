@@ -419,6 +419,15 @@
     return h("div", { role: "status", "aria-live": "polite" }, h("p", { class: "small strong", text: text }), h("div", { class: "busybar" }, h("i")));
   };
 
+  /** A progress bar with the percent beside it, for a build that is still running. fraction is 0 to 1. */
+  DK.progress = function (fraction, label) {
+    var pct = Math.max(0, Math.min(100, Math.round((Number(fraction) || 0) * 100)));
+    var fill = h("i");
+    fill.style.width = pct + "%";
+    var bar = h("div", { class: "meter", role: "progressbar", "aria-label": label || "Progress", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(pct) }, fill);
+    return h("div", { class: "meter-line" }, bar, h("span", { class: "count", text: pct + "%" }));
+  };
+
   /** The card header: a small kit label, the title, and a Back button when we moved here from another step. */
   DK.head = function (title, o) {
     o = o || {};

@@ -53,6 +53,14 @@ export const PROJECT_FAR = {
   next: 'export',
 };
 
+/** A draft is done and the final reel is still being built (what get_project says while a build runs). */
+export const PROJECT_BUILDING = {
+  mode: 'project',
+  project: { ...PROJECT_BASE, cut_applied: true, cut_before_ms: 113000, cut_after_ms: 91000, look_id: 'karaoke-clean', look_name: 'Karaoke Clean', has_shot_plan: true, has_draft: true, has_final: false },
+  next: 'render_reel',
+  rendering: { quality: 'final', progress: 0.45, tool: 'render_reel' },
+};
+
 export const DOCTOR = {
   mode: 'status',
   doctor: {
@@ -186,6 +194,9 @@ const VARIANT_B = { ...FINAL_RENDER, id: 'v2', label: 'Variant B', variant_id: '
 export const PREVIEW_DRAFT = { project_id: 'p_demo', active: 'draft', renders: [DRAFT_RENDER] };
 export const PREVIEW_FINAL = { project_id: 'p_demo', active: 'final', renders: [DRAFT_RENDER, FINAL_RENDER] };
 export const PREVIEW_VARIANTS = { project_id: 'p_demo', active: 'v1', renders: [DRAFT_RENDER, FINAL_RENDER, VARIANT_A, VARIANT_B] };
+/** What render_reel and make_variants answer while the build is still running (see PreviewPending in contracts.mjs). */
+export const PREVIEW_PENDING = { project_id: 'p_demo', quality: 'final', tool: 'render_reel', pending: true, progress: 0.45, message: 'Building the video' };
+export const PREVIEW_PENDING_VARIANTS = { project_id: 'p_demo', quality: 'final', tool: 'make_variants', count: 2, pending: true, progress: 0.3, message: 'Variant 1 of 2: Building the video' };
 
 // ---------------------------------------------------------------------------
 // kit-carousel
@@ -350,6 +361,8 @@ export function newDemoState(seed) {
     sentJobs: copy(JOBS),
     connected: !!(seed && seed.dandelion && seed.dandelion.connected),
     delayMs: 350,
+    finalAsks: 0,
+    variantAsks: 0,
   };
 }
 
@@ -361,8 +374,14 @@ export function newDemoState(seed) {
  */
 export function demoTool(tool, args, state) {
   switch (tool) {
-    case 'get_project':
+    case 'get_project': {
+      if (state.finalAsks > 0) {
+        const building = copy(PROJECT_BUILDING);
+        building.rendering.progress = state.finalAsks === 1 ? 0.45 : 0.85;
+        return ok('Project p_demo: the final reel is still being built.', building);
+      }
       return ok('Project p_demo: transcript ready.', copy(PROJECT));
+    }
     case 'rough_cut': {
       state.cut = copy(CUT);
       state.cut.preset = args.preset || 'standard';
@@ -399,12 +418,28 @@ export function demoTool(tool, args, state) {
       if (args.hook_text) state.shot.hook.text = args.hook_text;
       return ok('Shot plan saved.', copy(state.shot));
     }
-    case 'render_reel':
+    case 'render_reel': {
+      if (args.quality === 'final') {
+        // The demo shows a slow build: the first two asks say "still building", the third has the reel.
+        state.finalAsks = (state.finalAsks || 0) + 1;
+        if (state.finalAsks <= 2) {
+          const pending = copy(PREVIEW_PENDING);
+          pending.progress = state.finalAsks === 1 ? 0.45 : 0.85;
+          pending.message = state.finalAsks === 1 ? 'Building the video' : 'Checking the result';
+          return ok('The final reel is still being built.', pending);
+        }
+        state.finalAsks = 0;
+      }
       return ok(`${args.quality} render done.`, copy(args.quality === 'final' ? PREVIEW_FINAL : PREVIEW_DRAFT));
+    }
     case 'check_reel':
       return ok('Checks run.', copy(PREVIEW_FINAL));
-    case 'make_variants':
+    case 'make_variants': {
+      state.variantAsks = (state.variantAsks || 0) + 1;
+      if (state.variantAsks === 1) return ok('The variants are still being built.', copy(PREVIEW_PENDING_VARIANTS));
+      state.variantAsks = 0;
       return ok('Two variants ready.', copy(PREVIEW_VARIANTS));
+    }
     case 'update_slides': {
       state.carousel.slides = (args.slides || []).map((/** @type {any} */ s, /** @type {number} */ i) => ({
         ...s, file: `C:\\Users\\you\\.dandelion-kit\\projects\\p_car\\out\\slide-${i + 1}.jpg`,
@@ -458,6 +493,7 @@ export const CARD_FIXTURES = [
   { file: 'kit-project', widget: 'kit-project', title: 'Project, after open_video', data: PROJECT },
   { file: 'kit-project-working', widget: 'kit-project', title: 'Project, still listening', data: PROJECT_WAITING },
   { file: 'kit-project-done', widget: 'kit-project', title: 'Project, finished', data: PROJECT_FAR },
+  { file: 'kit-project-building', widget: 'kit-project', title: 'Project, final reel still building', data: PROJECT_BUILDING },
   { file: 'kit-project-doctor', widget: 'kit-project', title: 'Kit check', data: DOCTOR },
   { file: 'kit-project-doctor-missing', widget: 'kit-project', title: 'Kit check, ffmpeg missing', data: DOCTOR_MISSING },
   { file: 'kit-cut-review', widget: 'kit-cut-review', title: 'Rough cut', data: CUT },
@@ -466,6 +502,8 @@ export const CARD_FIXTURES = [
   { file: 'kit-preview', widget: 'kit-preview', title: 'Draft preview', data: PREVIEW_DRAFT },
   { file: 'kit-preview-final', widget: 'kit-preview', title: 'Final with a warning', data: PREVIEW_FINAL },
   { file: 'kit-preview-variants', widget: 'kit-preview', title: 'Variants', data: PREVIEW_VARIANTS },
+  { file: 'kit-preview-pending', widget: 'kit-preview', title: 'Final reel, still building', data: PREVIEW_PENDING },
+  { file: 'kit-preview-pending-variants', widget: 'kit-preview', title: 'Variants, still building', data: PREVIEW_PENDING_VARIANTS },
   { file: 'kit-carousel', widget: 'kit-carousel', title: 'Carousel', data: CAROUSEL },
   { file: 'kit-export', widget: 'kit-export', title: 'Export', data: EXPORT },
   { file: 'kit-post', widget: 'kit-post', title: 'Post, state 1: not connected', data: POST_DRAFT },

@@ -331,6 +331,8 @@ async function cmdEdit(rest) {
     err('Usage: kit edit <video> [--look <id>] [--out <folder>]. Run "kit" for all options.');
     return 2;
   }
+  // On the command line there is no host timeout, so wait for each build to finish instead of answering "still building".
+  process.env.DANDELION_KIT_RENDER_WAIT_MS = '2000000000';
   if (flags['transcribe-only']) {
     const { runTranscribeOnly } = await import('../core/transcribe/cli.mjs');
     return runTranscribeOnly(rest.filter((a) => a !== '--transcribe-only'));

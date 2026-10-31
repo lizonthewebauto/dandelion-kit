@@ -115,6 +115,11 @@ function textProject(d) {
     `${mark(p.has_draft)} Draft preview`,
     `${mark(p.has_final)} Final reel`,
   );
+  if (d.rendering) {
+    const what = d.rendering.tool === 'make_variants' ? 'the variants' : d.rendering.quality === 'final' ? 'the final reel' : 'the draft';
+    const again = d.rendering.tool === 'make_variants' ? 'make_variants' : 'render_reel';
+    lines.push('', `Building now: ${what}, ${Math.round((d.rendering.progress || 0) * 100)}% done. Call ${again} again with the same arguments to wait for it, or call get_project later.`);
+  }
   if (d.next) lines.push('', `Next: ${d.next}${d.next === 'render_reel' ? (p.has_draft ? ' with quality final' : ' with quality draft') : ''}.`);
   return lines.join('\n');
 }
@@ -230,8 +235,21 @@ function checkCounts(checks) {
   return `${n('pass')} pass, ${n('warn')} warn, ${n('stop')} stop`;
 }
 
+/** The answer while a reel or its variants are still being built. @param {Data} d */
+function textPending(d) {
+  const variants = d.tool === 'make_variants';
+  const tool = variants ? 'make_variants' : 'render_reel';
+  const what = variants ? `The ${d.count ? `${d.count} ` : ''}variants` : d.quality === 'final' ? 'The final reel' : 'The draft';
+  const args = variants ? `project_id ${d.project_id} and count ${d.count ?? 2}` : `project_id ${d.project_id} and quality ${d.quality}`;
+  return [
+    `${what} ${variants ? 'are' : 'is'} still being built. It is ${Math.round((Number(d.progress) || 0) * 100)}% done${d.message ? ` (${d.message})` : ''}.`,
+    `Nothing is lost if you wait. Call ${tool} again with the same arguments (${args}) to wait for it, or call get_project to see when it is done. A second call does not start a second build.`,
+  ].join('\n');
+}
+
 /** @param {Data} d */
 function textPreview(d) {
+  if (d.pending) return textPending(d);
   const renders = Array.isArray(d.renders) ? d.renders : [];
   const active = renders.find((r) => r.id === d.active) ?? renders[renders.length - 1];
   if (!active) return 'There is no render yet.';

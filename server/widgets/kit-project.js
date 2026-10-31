@@ -88,15 +88,16 @@
       cut: { label: "Rough cut", icon: "scissors", run: function () { return DK.call("rough_cut", { project_id: pid }).then(function (r) { return { tool: "rough_cut", data: r }; }); }, busy: "Finding the cuts...", tell: "In the Dandelion Kit card the person tapped Rough cut. The cut review is on screen." },
       look: { label: "Pick a look", icon: "palette", run: function () { return DK.call("pick_look", { project_id: pid }).then(function (r) { return { tool: "pick_look", data: r }; }); }, busy: "Getting the looks...", tell: "In the Dandelion Kit card the person tapped Pick a look. The look picker is on screen." },
       plan: { label: "Plan shots", icon: "film", run: function () { return DK.call("plan_shots", { project_id: pid }).then(function (r) { return { tool: "plan_shots", data: r }; }); }, busy: "Planning the shots...", tell: "In the Dandelion Kit card the person tapped Plan shots. The shot plan is on screen." },
-      draft: { label: "Build draft", icon: "play", run: function () { return DK.call("render_reel", { project_id: pid, quality: "draft" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Building the draft. This can take a minute...", tell: "In the Dandelion Kit card the person tapped Build draft. The draft preview is on screen." },
-      final: { label: "Render final", icon: "film", run: function () { return DK.call("render_reel", { project_id: pid, quality: "final" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Rendering the final reel. This can take a few minutes...", tell: "In the Dandelion Kit card the person tapped Render final. The finished reel and its checks are on screen." }
+      draft: { label: "Build draft", icon: "play", run: function () { return DK.call("render_reel", { project_id: pid, quality: "draft" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Building the draft. This can take a minute...", tell: "In the Dandelion Kit card the person tapped Build draft. The draft preview is on screen.", tellPending: "In the Dandelion Kit card the person tapped Build draft. It is still being built, and a progress bar is on screen." },
+      final: { label: "Render final", icon: "film", run: function () { return DK.call("render_reel", { project_id: pid, quality: "final" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Rendering the final reel. This can take a few minutes...", tell: "In the Dandelion Kit card the person tapped Render final. The finished reel and its checks are on screen.", tellPending: "In the Dandelion Kit card the person tapped Render final. It is still being built, and a progress bar is on screen." }
     };
 
     function go(id) {
       var a = ACTIONS[id];
       st.busy = a.busy; st.error = ""; render();
       a.run().then(function (res) {
-        DK.tellModel(a.tell);
+        // A long build answers "still building": the preview card draws the progress bar and its Check again button.
+        DK.tellModel(res.data && res.data.pending && a.tellPending ? a.tellPending : a.tell);
         DK.go(res.tool, res.data);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
@@ -125,6 +126,19 @@
         list.appendChild(stepRow({ n: i + 1, title: s.title, detail: s.detail, state: state, action: action }));
       });
       body.appendChild(list);
+      if (d.rendering) {
+        var what = d.rendering.tool === "make_variants" ? "the variants" : d.rendering.quality === "final" ? "the final reel" : "the draft";
+        body.appendChild(h("div", { class: "mt" },
+          h("p", { class: "small strong", text: "Building " + what + " now" }),
+          DK.progress(d.rendering.progress, "Build progress"),
+          h("div", { class: "actions" }, DK.btn("Check again", { small: true, kind: "gold", icon: "film", disabled: !!st.busy, onclick: function () {
+            st.busy = "Checking..."; st.error = ""; render();
+            DK.call("get_project", { project_id: pid }).then(function (r) {
+              DK.tellModel("In the Dandelion Kit card the person tapped Check again while " + what + " was being built.");
+              DK.go("get_project", r);
+            }, function (e) { st.busy = ""; st.error = e.message; render(); });
+          } }))));
+      }
       if (st.busy) body.appendChild(DK.busy(st.busy));
       if (st.error) body.appendChild(DK.err(st.error));
       if (p.has_final) {

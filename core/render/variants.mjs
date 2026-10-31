@@ -9,6 +9,7 @@ import { getLook } from '../edit/looks.mjs';
 import { hashShotPlan, planShots } from '../edit/shotplan.mjs';
 import { requireProject, updateProject, ProjectError } from '../../server/store/project.mjs';
 import { anchorForPlan } from './facezone.mjs';
+import { overallProgress } from './progress.mjs';
 import { renderPlan } from './render.mjs';
 
 export const VARIANT_AXES = Object.freeze(['hook_text', 'opening', 'caption_theme', 'pace']);
@@ -166,9 +167,13 @@ export async function makeVariants({ projectId, count = 2, onProgress, signal })
   const project = await requireProject(projectId);
   if (!project.shot_plan || !project.cut || !project.transcript)
     throw new ProjectError('Variants need a rough cut and a shot plan first.');
+  // Progress goes out as one number for the whole run (0 to 1), so a bar only goes up.
+  /** @param {number} i @param {string} stage @param {number} f @param {string} [msg] */
+  const report = (i, stage, f, msg) =>
+    onProgress?.(stage, (i + (overallProgress(stage, f) ?? 0)) / n, msg);
   let base = project.shot_plan;
   if (!base.caption_anchor) {
-    const anchor = await anchorForPlan(projectId, base, onProgress);
+    const anchor = await anchorForPlan(projectId, base, (stage, f, msg) => report(0, stage, f, msg));
     base = { ...base, caption_anchor: /** @type {any} */ (anchor) };
     base.hash = hashShotPlan(base);
   }
@@ -189,8 +194,7 @@ export async function makeVariants({ projectId, count = 2, onProgress, signal })
       plan,
       quality: 'final',
       variant_id: id,
-      onProgress: (stage, f, msg) =>
-        onProgress?.(stage, (i + f) / sets.length, `Variant ${i + 1} of ${sets.length}: ${msg ?? stage}`),
+      onProgress: (stage, f, msg) => report(i, stage, f, `Variant ${i + 1} of ${sets.length}: ${msg ?? stage}`),
       signal,
     });
     const withDiff = {

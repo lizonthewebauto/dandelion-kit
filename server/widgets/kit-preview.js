@@ -9,7 +9,47 @@
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
 
+  // The build is still running: a progress bar and a button that asks again with the same arguments.
+  function buildPending(d) {
+    var pid = d.project_id;
+    var variants = d.tool === "make_variants";
+    var tool = variants ? "make_variants" : "render_reel";
+    var what = variants ? "variants" : d.quality === "draft" ? "draft" : "final reel";
+    var st = { busy: false, error: "" };
+    var body = h("div");
+
+    function again() {
+      st.busy = true; st.error = ""; render();
+      var asked = variants
+        ? DK.call("make_variants", { project_id: pid, count: d.count || 2 })
+        : DK.call("render_reel", { project_id: pid, quality: d.quality === "draft" ? "draft" : "final" });
+      asked.then(function (r) {
+        DK.tellModel("In the Dandelion Kit card the person tapped Check again for the " + what + ". " + (r && r.pending ? "It is still being built, and a progress bar is on screen." : "It is finished and on screen."));
+        DK.go(tool, r);
+      }, function (e) { st.busy = false; st.error = e.message; render(); });
+    }
+
+    function render() {
+      body.textContent = "";
+      body.appendChild(h("p", { class: "strong", text: variants ? "Making your variants" : d.quality === "draft" ? "Building your draft" : "Building your final reel" }));
+      body.appendChild(DK.progress(d.progress, "Build progress"));
+      if (d.message) body.appendChild(h("p", { class: "small muted mt-s", text: d.message }));
+      body.appendChild(h("p", { class: "small mt-s", text: "This is still working. It keeps going if you leave this open, and nothing is lost." }));
+      if (st.busy) body.appendChild(DK.busy("Checking..."));
+      if (st.error) body.appendChild(DK.err(st.error));
+      body.appendChild(h("div", { class: "actions" },
+        DK.btn("Check again", { kind: "gold", icon: "film", disabled: st.busy, onclick: again })));
+    }
+
+    render();
+    return [
+      DK.head(variants ? "Making variants" : "Building your reel", { pill: DK.pill("Building", "gold", "film"), sub: "Still working. It can take a few minutes." }),
+      h("section", { class: "card" }, body)
+    ];
+  }
+
   function build(d) {
+    if (d.pending) return buildPending(d);
     var pid = d.project_id;
     var renders = Array.isArray(d.renders) ? d.renders : [];
     var st = { active: d.active || (renders[renders.length - 1] && renders[renders.length - 1].id) || "", busy: "", error: "" };
@@ -20,14 +60,14 @@
     function doFinal() {
       st.busy = "Rendering the final reel. This can take a few minutes..."; st.error = ""; render();
       DK.call("render_reel", { project_id: pid, quality: "final" }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Render final. The finished reel and its checks are on screen.");
+        DK.tellModel("In the Dandelion Kit card the person tapped Render final. " + (r && r.pending ? "It is still being built, and a progress bar is on screen." : "The finished reel and its checks are on screen."));
         DK.go("render_reel", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
     function doVariants() {
       st.busy = "Making 2 variants. The speech stays the same..."; st.error = ""; render();
       DK.call("make_variants", { project_id: pid, count: 2 }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Make variants. Two versions with the same speech are on screen as tabs.");
+        DK.tellModel("In the Dandelion Kit card the person tapped Make variants. " + (r && r.pending ? "They are still being built, and a progress bar is on screen." : "Two versions with the same speech are on screen as tabs."));
         DK.go("make_variants", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }

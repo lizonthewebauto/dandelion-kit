@@ -119,6 +119,8 @@ export async function demoOutcome(name, args, state) {
       return ok(JSON.parse(JSON.stringify(state.carousel)));
     }
     default: {
+      // render_reel with quality final and make_variants answer "still building" first (PREVIEW_PENDING in fixtures.mjs),
+      // so the progress bar and the Check again button can be seen. Ask again and the finished reel comes back.
       const result = demoTool(name, args, state);
       if (result.isError) return fail(result.content[0].text);
       return ok(/** @type {any} */ (result).structuredContent);

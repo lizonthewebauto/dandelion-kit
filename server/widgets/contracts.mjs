@@ -18,6 +18,7 @@
  *   poster_asset_id?: string
  * }} [project]
  * @property {import('../../core/types.mjs').DoctorReport} [doctor]   With mode "status".
+ * @property {{quality: 'draft'|'final', progress: number, tool?: 'render_reel'|'make_variants'}} [rendering]   Only from get_project, while a build is running.
  */
 
 /**
@@ -75,6 +76,20 @@
  * @property {string} project_id
  * @property {string} [active]
  * @property {PreviewRender[]} renders
+ */
+/**
+ * kit-preview, while the build is still running. render_reel and make_variants answer with this instead of a PreviewCard
+ * when the build takes longer than the wait (40 seconds by default). The card shows a progress bar and a "Check again"
+ * button that calls tool again with the same arguments: render_reel with {project_id, quality}, or make_variants with
+ * {project_id, count}. The repeat call joins the same build.
+ * @typedef {object} PreviewPending
+ * @property {string} project_id
+ * @property {'draft'|'final'} quality
+ * @property {true} pending
+ * @property {number} progress                    0 to 1, only goes up.
+ * @property {string} message                     Plain words for what it is doing.
+ * @property {'render_reel'|'make_variants'} [tool]   Which tool to call again. Default render_reel.
+ * @property {number} [count]                     With make_variants: the count to pass again.
  */
 
 /**
