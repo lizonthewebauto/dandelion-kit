@@ -50,6 +50,15 @@ test('the MCP server entry starts bin/kit.mjs serve', () => {
   assert.deepEqual(mcpb.server.mcp_config.args.slice(1), ['serve']);
 });
 
+test('the Codex plugin starts the kit without a plugin root variable', () => {
+  const codex = readJson('.codex-plugin/plugin.json');
+  assert.equal(codex.mcpServers, './mcp.json');
+  const server = readJson('mcp.json').mcpServers['dandelion-kit'];
+  assert.equal(server.command, 'npx');
+  assert.deepEqual(server.args, ['-y', 'github:lizonthewebauto/dandelion-kit', 'serve']);
+  assert.ok(!JSON.stringify(server).includes('PLUGIN_ROOT'));
+});
+
 test('each skill has front matter that matches its folder', () => {
   for (const name of SKILLS) {
     const text = readText(`skills/${name}/SKILL.md`);

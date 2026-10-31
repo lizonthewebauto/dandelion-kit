@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "dandelion-kit": {
+      "command": "npx",
+      "args": ["-y", "github:lizonthewebauto/dandelion-kit", "serve"],
+      "startup_timeout_sec": 180
+    }
+  }
+}
