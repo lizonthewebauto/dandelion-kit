@@ -385,6 +385,7 @@ export const ASSET_KINDS = Object.freeze([
  * @property {string} text                 On-screen hook text, at most 9 words, no dashes.
  * @property {string} formula              Id of the hook formula used.
  * @property {number} score                0 to 100, pass at 70 or more.
+ * @property {'given'|'auto'} source        "given" when the agent or person wrote the hook; "auto" when the kit built it from the words in the video (a fallback, never to be shown as a verdict).
  * @property {{text:string,formula:string,score:number}[]} candidates
  */
 

@@ -542,3 +542,47 @@ test('the edit command line reads flags and keeps the video path', async () => {
   assert.equal(flags.hook, 'Stop doing this');
   assert.equal(parseEditArgs(['a.mp4', '--variants']).flags.variants, true);
 });
+
+// ---------------------------------------------------------------------------
+// Caption size (Fable QA 1, P0-1): theme sizes are em pixels, converted to the ASS Fontsize libass wants
+// ---------------------------------------------------------------------------
+
+test('libass Fontsize is the whole line box, so an em of text needs a larger Fontsize', () => {
+  const m = loadFontFace(FONT_FILES.montserrat.file);
+  // Montserrat: OS/2 win ascent 1109 + descent 453 over 1000 units, so 100 px of em is a Fontsize of about 156.
+  assert.ok(Math.abs(m.ass_scale - 1.562) < 0.01, `scale ${m.ass_scale}`);
+  assert.ok(Math.abs(m.ass_fontsize(68) - 106.2) < 0.5);
+  assert.equal(m.line_height(50), m.ass_fontsize(50));
+  const ass = buildAss(plan).text;
+  const row = /^Style: Cap,Montserrat ExtraBold,([\d.]+),/m.exec(ass);
+  assert.ok(row, 'style row');
+  assert.ok(Math.abs(Number(row[1]) - 68 * m.ass_scale) < 0.2, `Fontsize ${row[1]}`);
+});
+
+test('body caption themes are 48 to 80 px of em, single words and shouting styles larger', () => {
+  const body = ['karaoke-highlight', 'karaoke-pill', 'clean-minimal', 'editorial-serif', 'box-caption', 'mono-terminal'];
+  for (const t of body) assert.ok(THEME_STYLES[t].size >= 48 && THEME_STYLES[t].size <= 75, `${t} ${THEME_STYLES[t].size}`);
+  assert.ok(THEME_STYLES['bold-stroke'].size >= 75 && THEME_STYLES['bold-stroke'].size <= 90);
+  assert.ok(THEME_STYLES['one-word-pop'].size >= 100);
+});
+
+test('a four word karaoke line spans 55 to 70 percent of the frame width', () => {
+  const lay = layoutCue(THEME_STYLES['karaoke-highlight'], ['figured', 'out', 'how', 'to'], 1100);
+  const share = lay.width / 1080;
+  assert.ok(share >= 0.5 && share <= 0.72, `share ${share}`);
+  assert.equal(lay.size, 68, 'it did not need shrinking');
+  assert.ok(Math.abs(lay.fontsize - 68 * loadFontFace(FONT_FILES.montserrat.file).ass_scale) < 0.2);
+});
+
+test('the hook card slides up and shrinks to stay 40 px above a high head, and says so when it cannot', () => {
+  const withHead = (y) => ({ ...plan, caption_anchor: /** @type {any} */ ({ x: 540, y: 1163, head_top_y: y }) });
+  const low = buildAss(withHead(900)).layout.hook;
+  assert.ok(low && low.clearance_px !== null && low.clearance_px >= 40, `low head ${low?.clearance_px}`);
+  const mid = buildAss(withHead(700)).layout.hook;
+  assert.ok(mid && mid.clearance_px !== null && mid.clearance_px >= 40, `mid head ${mid?.clearance_px}`);
+  assert.ok(mid.top >= SAFE_ZONE.y_min, 'never above the safe zone');
+  const high = buildAss(withHead(330)).layout.hook;
+  assert.ok(high && high.clearance_px !== null && high.clearance_px < 40, 'a head this high cannot be cleared');
+  const unknown = buildAss({ ...plan, caption_anchor: null }).layout.hook;
+  assert.equal(unknown?.clearance_px, null);
+});

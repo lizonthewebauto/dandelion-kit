@@ -12,10 +12,10 @@ export const tool = defineTool({
   name: 'plan_shots',
   title: 'Plan the shots',
   description:
-    'Build the shot plan from the words, the rough cut and the look: the hook (scored choices), each beat with how it is shown (face, punch-in, hold-wide, text-emphasis, hook-card, cta-end), caption cues, camera moves and sound cues. Nothing is rendered. Show the plan to the person and get a yes before building. Pass hook_text to use your own on-screen hook (9 words at most, no dashes); a weak one is refused with the reasons.',
+    'Build the shot plan from the words, the rough cut and the look: the hook (scored choices), each beat with how it is shown (face, punch-in, hold-wide, text-emphasis, hook-card, cta-end), caption cues, camera moves and sound cues. Nothing is rendered. Show the plan to the person and get a yes before building. Write the on-screen hook yourself from the transcript and pass it as hook_text on the first call (9 words at most, no dashes; a rule-breaking one is refused with the reasons). Without hook_text the kit builds a fallback from repeated words in the video and marks it auto; that fallback can be grounded but beside the point, so do not present it as the chosen hook.',
   input: {
     project_id: z.string(),
-    hook_text: z.string().optional().describe('Your own on-screen hook for the first 2 seconds.'),
+    hook_text: z.string().optional().describe('The on-screen hook for the first 2 seconds, written by you from what the video says. Always pass it; the kit only makes a fallback when it is missing.'),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   async run(args, ctx) {

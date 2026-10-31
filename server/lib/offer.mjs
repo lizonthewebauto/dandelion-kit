@@ -10,6 +10,9 @@ import { shortId } from '../../core/util/hash.mjs';
 import { createProject, projectDir, registerAsset, requireProject, updateProject } from '../store/project.mjs';
 import { assetByLabel, renderIsFresh } from './data.mjs';
 import { ToolFailure } from './kit.mjs';
+import { countedLength } from './counted.mjs';
+
+export { countedLength, INLINE_HASHTAG_PLATFORMS, X_LINK_LENGTH } from './counted.mjs';
 
 /** @typedef {import('../../core/types.mjs').PostBundle} PostBundle */
 /** @typedef {import('../../core/types.mjs').ChannelCopy} ChannelCopy */
@@ -55,7 +58,8 @@ const NOUN = { video: 'a video', image: 'pictures', text: 'a text post' };
  * Never changes the copy: the person decides what to cut.
  * @param {PlatformRule} rule
  * @param {ChannelCopy} copy
- * @param {{kind?: string, duration_ms?: number, image_count?: number}} [media]
+ * @param {{kind?: string, duration_ms?: number, image_count?: number, platform?: string}} [media]
+ *   `platform` is the channel id; with it the caption is counted the way that app counts (see countedLength).
  * @returns {string[]}
  */
 export function checkCopy(rule, copy, media = {}) {
@@ -68,7 +72,14 @@ export function checkCopy(rule, copy, media = {}) {
     const n = charCount(text);
     if (n > max) warnings.push(`The ${field} is ${n - max} characters too long for ${name} (${n} of ${max}). Shorten it before you send.`);
   };
-  over(copy.caption, limits.caption_max, 'caption');
+  if (limits.caption_max) {
+    const { total, with_hashtags } = countedLength(media.platform, copy);
+    if (total > limits.caption_max) {
+      warnings.push(
+        `The caption is ${total - limits.caption_max} characters too long for ${name} (${total} of ${limits.caption_max}${with_hashtags ? ' with hashtags' : ''}). Shorten it before you send.`,
+      );
+    }
+  }
   over(copy.title, limits.title_max, 'title');
   over(copy.description, limits.description_max, 'description');
   const tags = copy.hashtags ?? [];
@@ -159,7 +170,7 @@ export function buildChannels({ rules, kind, text, copies, channels, duration_ms
     const rule = rules.platforms?.[id];
     if (!rule) continue;
     const copy = copies?.[id] ?? (text ? draftCopy(rule, text) : {});
-    const warnings = checkCopy(rule, copy, { kind, duration_ms, image_count });
+    const warnings = checkCopy(rule, copy, { kind, duration_ms, image_count, platform: id });
     if (!text && !copies?.[id]) warnings.push(`Write the words for ${rule.name}, or tell me what the post is about.`);
     const format = pickFormat(rule, kind, image_count);
     out[id] = { copy, limits: rule.limits ?? {}, warnings, ...(format ? { format: format.label } : {}) };

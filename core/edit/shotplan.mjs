@@ -164,7 +164,7 @@ export function planShots(transcript, cut, look, options = {}) {
     captions: cues,
     camera: motion.camera,
     sfx: motion.sfx,
-    hook: { text: hook.text, formula: hook.formula, score: hook.score, candidates: hook.candidates },
+    hook: { text: hook.text, formula: hook.formula, score: hook.score, source: hook.source, candidates: hook.candidates },
     caption_anchor: null,
     hash: '',
   };
@@ -211,7 +211,7 @@ export function editShotPlan(transcript, cut, plan, edits) {
   if (edits.hook_text !== undefined) {
     const spokenText = words.map((w) => w.text).join(' ');
     const chosen = chooseHook(spokenText, { hook_text: edits.hook_text, seed: plan.seed });
-    hook = { text: chosen.text, formula: chosen.formula, score: chosen.score, candidates: chosen.candidates };
+    hook = { text: chosen.text, formula: chosen.formula, score: chosen.score, source: chosen.source, candidates: chosen.candidates };
     if (beats.length > 0) {
       beats[0].treatment = 'hook-card';
       beats[0].screen_text = hook.text;

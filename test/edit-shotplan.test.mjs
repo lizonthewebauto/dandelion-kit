@@ -66,7 +66,7 @@ test('the first beat is the hook card and carries the hook text, the last prompt
   const plan = planShots(T, cut, 'karaoke-clean');
   assert.equal(plan.beats[0].treatment, 'hook-card');
   assert.equal(plan.beats[0].screen_text, plan.hook.text);
-  assert.ok(plan.hook.score >= 70);
+  assert.equal(plan.hook.source, 'auto');
   assert.ok(plan.hook.text.split(' ').length <= 9);
   assert.equal(plan.beats[plan.beats.length - 1].kind, 'cta');
   assert.equal(plan.beats[plan.beats.length - 1].treatment, 'cta-end');

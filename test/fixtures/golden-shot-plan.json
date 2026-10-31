@@ -15,7 +15,7 @@
       "text": "so if you edit videos you probably",
       "treatment": "hook-card",
       "emphasis_words": [],
-      "screen_text": "Most people get captions wrong"
+      "screen_text": "so if you edit videos you probably waste three"
     },
     {
       "id": "b2",
@@ -946,27 +946,18 @@
     }
   ],
   "hook": {
-    "text": "Most people get captions wrong",
-    "formula": "most-people-wrong",
-    "score": 76,
+    "text": "so if you edit videos you probably waste three",
+    "formula": "custom",
+    "score": 36,
+    "source": "auto",
     "candidates": [
       {
-        "text": "Most people get captions wrong",
-        "formula": "most-people-wrong",
-        "score": 76
-      },
-      {
-        "text": "Nobody tells you this about captions",
-        "formula": "forbidden-knowledge",
-        "score": 75
-      },
-      {
-        "text": "The mistake everyone makes with captions",
-        "formula": "mistake-autopsy",
-        "score": 70
+        "text": "so if you edit videos you probably waste three",
+        "formula": "custom",
+        "score": 36
       }
     ]
   },
   "caption_anchor": null,
-  "hash": "d58d93b0f534e175"
+  "hash": "f932ad50a97f6276"
 }

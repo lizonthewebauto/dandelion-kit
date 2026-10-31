@@ -147,6 +147,7 @@ export function shotPlanData(project) {
       text: plan.hook.text,
       formula: plan.hook.formula,
       score: plan.hook.score,
+      source: plan.hook.source ?? 'auto',
       candidates: plan.hook.candidates.slice(0, 6),
     },
     beats: plan.beats.map((b) => {

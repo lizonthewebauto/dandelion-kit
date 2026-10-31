@@ -95,7 +95,11 @@ test('look text names all five looks and marks the current one', () => {
 
 test('shot plan text numbers the beats and shows hook scores', () => {
   const t = renderText('plan_shots', SHOT_PLAN);
-  assert.match(t, /Hook \(84 out of 100, good\)/);
+  assert.match(t, /Hook \(auto-made, scored 84 out of 100\)/);
+  assert.match(t, /Made from the words in the video\. Write your own with hook_text/);
+  assert.doesNotMatch(t, /out of 100, good/);
+  const given = renderText('plan_shots', { ...SHOT_PLAN, hook: { ...SHOT_PLAN.hook, source: 'given' } });
+  assert.match(given, /Hook \(84 out of 100, good\)/);
   assert.equal(t.split('\n').filter((l) => /^\d+\. \[b\d+\]/.test(l)).length, SHOT_PLAN.beats.length);
   assert.match(t, /wanted stat-card, drawn as face/);
   assert.match(t, /Next: render_reel with quality draft/);
@@ -140,7 +144,8 @@ test('post text shows all eight apps with counts, warnings and the sign-in state
   const t = renderText('offer_post', POST_DRAFT);
   for (const name of ['Instagram', 'TikTok', 'YouTube', 'LinkedIn', 'X', 'Threads', 'Facebook', 'Pinterest']) assert.match(t, new RegExp(`${name} \\(`));
   assert.match(t, /X \(Post with video\): caption \d+ of 280/);
-  assert.match(t, /! This is too long for X/);
+  assert.match(t, /! The caption is 3 characters too long for X \(283 of 280 with hashtags\)/);
+  assert.match(t, /X \(Post with video\): caption 283 of 280 with hashtags/);
   assert.match(t, /Title: The 30 day morning routine/);
   assert.match(t, /Dandelion is not signed in/);
   assert.match(t, /connect_dandelion/);
@@ -186,4 +191,14 @@ test('projects list text', () => {
 test('unknown tool or empty data does not throw', () => {
   assert.equal(renderText('nope', {}), 'Done.');
   assert.ok(renderText('get_project', /** @type {any} */ (undefined)).length > 0);
+});
+
+test('the counted length puts hashtags in the body on X and counts a link as 23', async () => {
+  const { countedLength, checkCopy } = await import('../server/lib/offer.mjs');
+  assert.deepEqual(countedLength('x', { caption: 'hello', hashtags: ['#a'] }), { total: 5 + 1 + 2, with_hashtags: true });
+  assert.deepEqual(countedLength('pinterest', { caption: 'hello', hashtags: ['#a'] }), { total: 5, with_hashtags: false });
+  assert.equal(countedLength('x', { caption: 'see https://example.com/a/very/long/path/indeed' }).total, 'see '.length + 23);
+  const rule = /** @type {any} */ ({ name: 'X', formats: [], limits: { caption_max: 10 } });
+  const warn = checkCopy(rule, { caption: 'twelve char', hashtags: ['#ab'] }, { platform: 'x' });
+  assert.match(warn[0], /\(\d+ of 10 with hashtags\)/);
 });

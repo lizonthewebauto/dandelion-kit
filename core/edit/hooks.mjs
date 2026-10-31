@@ -203,7 +203,10 @@ function hasNamedThing(text) {
 /**
  * Score one on-screen hook.
  * @param {string} text
- * @param {{spoken_opening?: string}} [options]  The first spoken line, to catch a hook that only repeats it.
+ * @param {{spoken_opening?: string, formula_bonus?: boolean}} [options]
+ *   `spoken_opening` is the first spoken line, to catch a hook that only repeats it. `formula_bonus: false` withholds
+ *   every point a hook earns just for fitting one of the eighteen shapes. The suggester uses it when a template was
+ *   filled with a single generic word, which should not earn credit for the template alone.
  * @returns {HookScore}
  */
 export function scoreHook(text, options = {}) {
@@ -231,7 +234,7 @@ export function scoreHook(text, options = {}) {
   const hasDigit = /\d/.test(raw);
   const spelled = words.some((w) => NUMBER_WORDS.has(normalizeWord(w)));
   const named = hasNamedThing(raw);
-  const formulaMatched = formula !== 'custom';
+  const formulaMatched = formula !== 'custom' && options.formula_bonus !== false;
 
   // Brevity: short reads at a glance. Under three words says too little.
   parts.brevity = n <= 2 ? 4 : n === 3 ? 9 : n <= 6 ? 12 : n === 7 ? 10 : n === 8 ? 8 : 6;
@@ -276,7 +279,7 @@ export function scoreHook(text, options = {}) {
   if (words.length > 0 && KNOWN_TOOLS.has(words[0].toLowerCase().replace(/[^a-z]/g, ''))) interrupt += 3;
   if (/\b[A-Z]{3,}\b/.test(raw)) interrupt += 2;
   if (/\b(delete|fired|quit|erase|kill|ban|cut|removed)\w*\b/iu.test(lower)) interrupt += 3;
-  if (INTERRUPT_FORMULAS.has(formula)) interrupt += 5;
+  if (formulaMatched && INTERRUPT_FORMULAS.has(formula)) interrupt += 5;
   if (formulaMatched) interrupt += 2;
   parts.interrupt = Math.min(HOOK_WEIGHTS.interrupt, interrupt);
 
@@ -285,7 +288,7 @@ export function scoreHook(text, options = {}) {
   let stakes = Math.min(3, stakesHits.size) * 4;
   if (/\$\d|\d+%/.test(raw)) stakes += 4;
   if (/\b(every|always|daily|a day|a week|per|faster|cleaner|better)\b/iu.test(lower)) stakes += 3;
-  if (STAKES_FORMULAS.has(formula)) stakes += 3;
+  if (formulaMatched && STAKES_FORMULAS.has(formula)) stakes += 3;
   parts.stakes = Math.min(HOOK_WEIGHTS.stakes, stakes);
 
   // Reading level: short, common words.
@@ -350,7 +353,22 @@ const GENERIC_TOPIC_WORDS = new Set([
   'hello', 'okay', 'yeah', 'much', 'many', 'even', 'only', 'back', 'take', 'time', 'times', 'give', 'show', 'look',
   'down', 'over', 'with', 'what', 'when', 'your', 'from', 'have', 'been', 'were', 'them', 'then', 'than', 'that', 'this',
   'just', 'like', 'most', 'also', 'into', 'about', 'which', 'said', 'does', 'done', 'doing', 'seconds', 'minutes', 'hours', 'mistake', 'mistakes', 'biggest', 'faster', 'better', 'best', 'worst', 'edit', 'cut', 'pick', 'drop', 'takes', 'wants', 'makes', 'follow', 'tips',
+  'between', 'difference', 'differences', 'huge', 'through', 'without', 'within', 'across', 'around', 'others', 'other', 'whole', 'those', 'these', 'having', 'getting', 'being', 'thats', 'theres', 'maybe', 'quite', 'pretty', 'super', 'kind', 'sort', 'such',
 ]);
+
+/** Words that never carry a hook on their own ("info", "flag"), though they can sit inside a longer phrase. */
+const NOT_ALONE = new Set(['info', 'flag', 'stuff', 'label', 'labels', 'content', 'image', 'images', 'tool', 'tools', 'free', 'work', 'works', 'ways', 'part', 'parts', 'kind', 'lots', 'bunch', 'whole', 'data', 'post', 'posts', 'story', 'idea', 'ideas', 'point', 'case', 'result', 'results']);
+
+/** How a named tool is written on screen. */
+const TOOL_DISPLAY = new Map([
+  ['ai', 'AI'], ['chatgpt', 'ChatGPT'], ['claude', 'Claude'], ['gemini', 'Gemini'], ['notion', 'Notion'], ['canva', 'Canva'],
+  ['instagram', 'Instagram'], ['tiktok', 'TikTok'], ['youtube', 'YouTube'], ['google', 'Google'], ['openai', 'OpenAI'],
+  ['reels', 'Reels'], ['shorts', 'Shorts'], ['linkedin', 'LinkedIn'], ['pinterest', 'Pinterest'], ['threads', 'Threads'],
+  ['facebook', 'Facebook'], ['codex', 'Codex'], ['capcut', 'CapCut'], ['excel', 'Excel'], ['zoom', 'Zoom'],
+]);
+
+/** A topic earns the template bonus when it names a tool or is a phrase of two or more words. @param {string} topic */
+export const isStrongTopic = (topic) => /\s/.test(topic.trim()) || KNOWN_TOOLS.has(topic.trim().toLowerCase());
 
 const COMMAND_START = /^(stop|don't|dont|never|delete|check|type|read|watch|copy|save|add|paste|turn|open|try|fix|skip|cut|trim|keep|write|post|send|start|use|avoid|remove)\b/iu;
 
@@ -360,26 +378,80 @@ const COMMAND_START = /^(stop|don't|dont|never|delete|check|type|read|watch|copy
  */
 export function extractMaterial(text) {
   const clean = String(text ?? '').replace(/\s+/g, ' ').trim();
+  const rawWords = wordsOf(clean);
+
+  // Topics, best first: repeated phrases, then named tools, then single words that carry meaning on their own.
+  const phrases = repeatedPhrases(clean);
+  const tools = [];
+  const seenTool = new Set();
+  for (const w of rawWords) {
+    const key = w.replace(/[^A-Za-z]/g, '').toLowerCase();
+    if (KNOWN_TOOLS.has(key) && !seenTool.has(key)) {
+      seenTool.add(key);
+      tools.push(TOOL_DISPLAY.get(key) ?? key);
+    }
+  }
   const counts = new Map();
   const order = new Map();
-  wordsOf(clean).forEach((raw, i) => {
+  rawWords.forEach((raw, i) => {
     const w = normalizeWord(raw);
-    if (w.length < 4 || !/^[a-z']+$/.test(w) || /ly$/.test(w) || isStopword(w) || GENERIC_TOPIC_WORDS.has(w)) return;
+    if (w.length < 5 || !/^[a-z]+$/.test(w) || NUMBER_WORDS.has(w) || /ly$/.test(w) || isStopword(w) || GENERIC_TOPIC_WORDS.has(w) || NOT_ALONE.has(w)) return;
     counts.set(w, (counts.get(w) ?? 0) + 1);
     if (!order.has(w)) order.set(w, i);
   });
   // Nouns make better topics than verbs: plural words first, then longer words, then the earlier one.
   const nounish = (/** @type {string} */ w) => (/(s|ing)$/.test(w) && !/ss$/.test(w) ? 1 : 0);
-  const topics = [...counts.keys()].sort(
+  const singles = [...counts.keys()].filter((w) => (counts.get(w) ?? 0) >= 2).sort(
     (a, b) => counts.get(b) - counts.get(a) || nounish(b) - nounish(a) || b.length - a.length || order.get(a) - order.get(b),
   );
+  const lowerTools = new Set(tools.map((t) => t.toLowerCase()));
+  const topics = [...new Set([...phrases, ...tools.filter((t) => t !== 'AI' || phrases.length === 0), ...singles.filter((w) => !lowerTools.has(w) && !phrases.some((p) => p.toLowerCase().split(' ').includes(w)))])];
+
   const numbers = [];
   const numRe = /\b(\d{1,4})\s+(seconds?|minutes?|hours?|days?|weeks?|years?|tools?|ways?|steps?|tips?|mistakes?|things?|words?|clips?|posts?|reasons?)\b/giu;
   for (const m of clean.matchAll(numRe)) numbers.push({ value: Number(m[1]), unit: m[2].toLowerCase() });
   const sentences = clean.split(/(?<=[.?!])\s+/u);
   const command = sentences.map((s) => wordsOf(s.replace(/[.?!]+$/u, ''))).find((w) => w.length >= 3 && w.length <= HOOK_LIMITS.max_words && COMMAND_START.test(w.join(' ')));
-  const tools = [...new Set(wordsOf(clean).map((w) => w.replace(/[^A-Za-z]/g, '')).filter((w) => KNOWN_TOOLS.has(w.toLowerCase())))];
-  return { topics, numbers, command: command ? command.join(' ') : null, tools };
+  return { topics, phrases, numbers, command: command ? command.join(' ') : null, tools };
+}
+
+/**
+ * Phrases of two or three content words that are said at least twice, best first, in the speaker's own casing.
+ * A phrase inside a longer repeated phrase is dropped ("AI info" gives way to "AI info flag"). Each phrase has at
+ * least one word that means something on its own: a named tool, or a plain word of five letters or more.
+ * @param {string} clean
+ * @returns {string[]}
+ */
+function repeatedPhrases(clean) {
+  /** @type {Map<string, {count: number, shown: string, len: number, tool: boolean}>} */
+  const found = new Map();
+  for (const clause of clean.split(/[.?!,;:]+\s*/u)) {
+    const toks = wordsOf(clause).map((raw) => {
+      const norm = normalizeWord(raw);
+      const letters = raw.replace(/[^A-Za-z]/g, '');
+      const ok = /^[a-z]+$/.test(norm) && norm.length >= 2 && !isStopword(norm) && !GENERIC_TOPIC_WORDS.has(norm) && !NUMBER_WORDS.has(norm) && !/ly$/.test(norm);
+      const tool = KNOWN_TOOLS.has(letters.toLowerCase());
+      const shown = tool ? (TOOL_DISPLAY.get(letters.toLowerCase()) ?? letters) : letters;
+      return { norm, ok, tool, shown, strong: tool || (norm.length >= 5 && !NOT_ALONE.has(norm)) };
+    });
+    for (let n = 2; n <= 3; n++) {
+      for (let i = 0; i + n <= toks.length; i++) {
+        const slice = toks.slice(i, i + n);
+        if (!slice.every((t) => t.ok) || !slice.some((t) => t.strong)) continue;
+        const key = slice.map((t) => t.norm).join(' ');
+        const hit = found.get(key);
+        if (hit) hit.count += 1;
+        else found.set(key, { count: 1, shown: slice.map((t) => t.shown).join(' '), len: n, tool: slice.some((t) => t.tool) });
+      }
+    }
+  }
+  const repeated = [...found.entries()].filter(([, v]) => v.count >= 2);
+  const keys = repeated.map(([k]) => k);
+  const kept = repeated.filter(([k]) => !keys.some((other) => other !== k && other.length > k.length && (other.startsWith(k + ' ') || other.endsWith(' ' + k))));
+  const value = (/** @type {{count: number, len: number, tool: boolean}} */ v) => v.count + 1.5 * (v.len - 1) + (v.tool ? 2 : 0);
+  return kept
+    .sort((a, b) => value(b[1]) - value(a[1]) || b[1].len - a[1].len)
+    .map(([, v]) => v.shown);
 }
 
 /**
@@ -400,45 +472,54 @@ export function extractMaterial(text) {
 export function suggestHooks(spokenText, options = {}) {
   const m = extractMaterial(spokenText);
   const opening = wordsOf(spokenText).slice(0, 12).join(' ');
-  const topic = m.topics[0];
-  /** @type {{formula:string,text:string|null}[]} */
+  /** The topic as it reads in a sentence: "the AI info flag", "Instagram", "captions". @param {string} t */
+  const np = (t) => (KNOWN_TOOLS.has(t.toLowerCase()) || /s$/i.test(t) ? t : `the ${t}`);
+  const topics = [...new Set(m.topics)].slice(0, 3);
+  const topic = topics[0];
+  /** @type {{formula:string,text:string|null,strong:boolean,copies?:boolean}[]} */
   const raw = [];
-  for (const [id, slots] of Object.entries(options.slots ?? {})) raw.push({ formula: id, text: fillFormula(id, slots) });
-  if (topic) {
-    raw.push({ formula: 'most-people-wrong', text: `Most people get ${topic} wrong` });
-    raw.push({ formula: 'forbidden-knowledge', text: fillFormula('forbidden-knowledge', { topic }) });
-    raw.push({ formula: 'mistake-autopsy', text: fillFormula('mistake-autopsy', { topic }) });
-  }
+  // Words the agent supplied for a shape are its own choice, so the shape keeps its credit.
+  for (const [id, slots] of Object.entries(options.slots ?? {})) raw.push({ formula: id, text: fillFormula(id, slots), strong: true });
+  topics.forEach((t, i) => {
+    const strong = isStrongTopic(t);
+    raw.push({ formula: 'most-people-wrong', text: `Most people get ${np(t)} wrong`, strong });
+    raw.push({ formula: 'forbidden-knowledge', text: fillFormula('forbidden-knowledge', { topic: np(t) }), strong });
+    if (i === 0) raw.push({ formula: 'mistake-autopsy', text: fillFormula('mistake-autopsy', { topic: np(t) }), strong });
+  });
   for (const num of m.numbers) {
     if (/^(second|minute|hour|day|week|year)/.test(num.unit)) {
-      if (topic) raw.push({ formula: 'time-boxed-promise', text: `Get ${topic} right in ${num.value} ${num.unit}` });
+      if (topic) raw.push({ formula: 'time-boxed-promise', text: `Get ${np(topic)} right in ${num.value} ${num.unit}`, strong: isStrongTopic(topic) });
     } else {
-      raw.push({ formula: 'receipts-first', text: `${num.value} ${num.unit}. That is all it took.` });
-      if (topic) raw.push({ formula: 'numbered-promise', text: `${num.value} ${num.unit} to get ${topic} right` });
+      raw.push({ formula: 'receipts-first', text: `${num.value} ${num.unit}. That is all it took.`, strong: true });
+      if (topic) raw.push({ formula: 'numbered-promise', text: `${num.value} ${num.unit} to get ${np(topic)} right`, strong: isStrongTopic(topic) });
     }
   }
-  if (m.command) raw.push({ formula: 'direct-command', text: m.command });
-  if (m.tools[0] && topic) raw.push({ formula: 'what-happens-when', text: `What happens when ${m.tools[0]} handles ${topic}?` });
+  if (m.command) raw.push({ formula: 'direct-command', text: m.command, strong: true, copies: true });
+  const tool = m.tools.find((t) => topic && !topic.toLowerCase().split(' ').includes(t.toLowerCase()));
+  if (tool && topic) raw.push({ formula: 'what-happens-when', text: `What happens when ${tool} handles ${np(topic)}?`, strong: isStrongTopic(topic) });
 
-  /** @type {Map<string, HookCandidate>} */
+  /** @type {Map<string, HookCandidate & {order: number}>} */
   const seen = new Map();
-  for (const r of raw) {
-    if (!r.text) continue;
-    const s = scoreHook(r.text, { spoken_opening: opening });
-    if (s.rejected) continue;
+  raw.forEach((r, order) => {
+    if (!r.text) return;
+    // A filled template cannot restate the opening line; only a hook lifted from the speech can.
+    const s = scoreHook(r.text, { spoken_opening: r.copies ? opening : undefined, formula_bonus: r.strong });
+    if (s.rejected) return;
     const key = s.text.toLowerCase();
     const prev = seen.get(key);
-    if (!prev || s.score > prev.score) seen.set(key, { text: s.text, formula: r.formula, score: s.score });
-  }
+    if (!prev || s.score > prev.score) seen.set(key, { text: s.text, formula: r.formula, score: s.score, order });
+  });
   const rng = makeRng(`hooks:${options.seed ?? 1}`);
   const ranked = [...seen.values()].map((c) => ({ c, tie: rng() }));
-  ranked.sort((a, b) => b.c.score - a.c.score || a.tie - b.tie);
-  return ranked.slice(0, options.limit ?? 8).map((r) => r.c);
+  ranked.sort((a, b) => b.c.score - a.c.score || a.c.order - b.c.order || a.tie - b.tie);
+  return ranked.slice(0, options.limit ?? 8).map((r) => ({ text: r.c.text, formula: r.c.formula, score: r.c.score }));
 }
 
 /**
- * Choose the hook for a reel. A given hook_text is checked and used as written; if it breaks a hard rule the
- * error says why, so the caller can ask for a different one. With no hook_text, the best suggestion wins.
+ * Choose the hook for a reel. A given hook_text is checked and used as written (source "given"); if it breaks a hard
+ * rule the error says why, so the caller can ask for a different one. With no hook_text the best suggestion is used
+ * (source "auto"). Suggestions are built from words in the video and are a backstop: the agent writing the hook
+ * itself, from what the video says, almost always does better.
  * @param {string} spokenText
  * @param {{hook_text?: string, seed?: number|string, slots?: Record<string, Record<string, string|number>>}} [options]
  * @returns {import('../types.mjs').Hook}
@@ -455,15 +536,15 @@ export function chooseHook(spokenText, options = {}) {
       throw err;
     }
     const merged = [{ text: s.text, formula: s.formula, score: s.score }, ...candidates.filter((c) => c.text.toLowerCase() !== s.text.toLowerCase())];
-    return { text: s.text, formula: s.formula, score: s.score, candidates: merged };
+    return { text: s.text, formula: s.formula, score: s.score, source: 'given', candidates: merged };
   }
   const passing = candidates.find((c) => c.score >= HOOK_LIMITS.pass_score);
-  if (passing) return { ...passing, candidates };
-  // Nothing passes: fall back to the opening words trimmed to the limit, so the plan still has a hook to edit.
+  if (passing) return { ...passing, source: 'auto', candidates };
+  // Nothing passes: use the best suggestion anyway, or the opening words trimmed to the limit, so the plan still has a hook to edit.
   const lead = wordsOf(opening).slice(0, HOOK_LIMITS.max_words).join(' ').replace(/[,;:.!?]+$/u, '');
   const best = candidates[0];
-  if (best) return { ...best, candidates };
-  if (!lead) return { text: '', formula: 'none', score: 0, candidates: [] };
+  if (best) return { ...best, source: 'auto', candidates };
+  if (!lead) return { text: '', formula: 'none', score: 0, source: 'auto', candidates: [] };
   const s = scoreHook(lead);
-  return { text: s.rejected ? '' : lead, formula: s.formula, score: s.score, candidates: s.rejected ? [] : [{ text: lead, formula: s.formula, score: s.score }] };
+  return { text: s.rejected ? '' : lead, formula: s.formula, score: s.score, source: 'auto', candidates: s.rejected ? [] : [{ text: lead, formula: s.formula, score: s.score }] };
 }

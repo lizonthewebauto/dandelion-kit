@@ -36,6 +36,17 @@
 
     /* ---------------- helpers ---------------- */
     function copyOf(p) { return st.edits[p] || (bundle.channels[p] && bundle.channels[p].copy) || {}; }
+    /* The length an app counts: hashtags live in the post text on these apps, and X counts every link as 23. */
+    var INLINE_TAGS = { x: 1, threads: 1, tiktok: 1, instagram: 1 };
+    function counted(p, text, tags) {
+      var t = String(text || "");
+      if (p === "x") t = t.replace(/https?:\/\/\S+/g,new Array(24).join("x"));
+      var n = Array.from(t).length;
+      var tg = (tags || []).map(function (x) { var s = String(x).trim(); return s && s.charAt(0) !== "#" ? "#" + s : s; }).filter(Boolean).join(" ");
+      var inline = !!(INLINE_TAGS[p] && tg);
+      if (inline) n += 1 + Array.from(tg).length;
+      return { n: n, inline: inline };
+    }
     function limitsOf(p) { return (bundle.channels[p] && bundle.channels[p].limits) || {}; }
     function isDirty(p) { return !!st.edits[p]; }
     function absorb(r) {
@@ -90,6 +101,7 @@
     }
 
     /* ---------------- tabs and one app's words ---------------- */
+    function hasWarning(p) { var c = bundle.channels[p]; return !!(c && c.warnings && c.warnings.length); }
     function paintTabs() {
       tabsHost.textContent = "";
       var tabs = h("div", { class: "tabs", role: "tablist", "aria-label": "Apps" });
@@ -98,6 +110,7 @@
         var b = h("button", { type: "button", class: "tab", role: "tab", "aria-selected": p === st.tab ? "true" : "false" },
           DK.platDot(p), DK.plat(p).n,
           isDirty(p) ? h("span", { class: "dotmark", role: "img", "aria-label": "Unsaved changes" }) : null,
+          hasWarning(p) ? h("span", { class: "warnmark", role: "img", "aria-label": "Needs a look" }) : null,
           dl.connected && c && c.can_post ? h("span", { class: "tick", role: "img", "aria-label": "Connected" }, DK.glyph("check", "sm")) : null);
         b.addEventListener("click", function () { st.tab = p; paintTabs(); paintPanel(); });
         tabs.appendChild(b);
@@ -132,11 +145,17 @@
       var wantDesc = lim.description_max || copy.description;
       var wantCaption = lim.caption_max || copy.caption || (!wantTitle && !wantDesc);
       var fields = h("div", { class: "stack-s mt" });
+      var captionField = null;
+      function tagsNow() { return (st.edits[p] || copyOf(p)).hashtags || []; }
       function textField(key, label, max, area) {
+        var isCaption = key === "caption";
         var f = DK.textField({
           label: label, value: copy[key] || "", max: max || 0, area: area, rows: area ? 5 : 2,
+          count: isCaption ? function (v) { return counted(p, v, tagsNow()).n; } : null,
+          note: isCaption ? function () { return counted(p, (st.edits[p] || copyOf(p)).caption, tagsNow()).inline ? "with hashtags" : ""; } : null,
           onInput: function (v) { ensure()[key] = v; paintSave(); }
         });
+        if (isCaption) captionField = f;
         fieldRegistry.push(f);
         fields.appendChild(f.el);
       }
@@ -149,7 +168,7 @@
         var tf = DK.textField({
           label: "Hashtags", value: tagText, area: false, placeholder: "#one #two",
           hint: lim.hashtags_ideal ? "Around " + lim.hashtags_ideal + " works best" + (lim.hashtags_max ? ", " + lim.hashtags_max + " at most." : ".") : lim.hashtags_max ? lim.hashtags_max + " at most." : "",
-          onInput: function (v) { ensure().hashtags = textToTags(v, hadHash); tagCount(); paintSave(); }
+          onInput: function (v) { ensure().hashtags = textToTags(v, hadHash); tagCount(); if (captionField) captionField.refresh(); paintSave(); }
         });
         var tagLine = h("p", { class: "tiny num muted mt-s" });
         var tagCount = function () {

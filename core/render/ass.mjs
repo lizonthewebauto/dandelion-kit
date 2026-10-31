@@ -31,7 +31,9 @@ export const FONT_FILES = Object.freeze({
 /**
  * @typedef {object} ThemeStyle
  * @property {keyof typeof FONT_FILES} font
- * @property {number} size            Font size in frame pixels (48 to 75 for body text, larger for single words).
+ * @property {number} size            Size of the em in frame pixels (48 to 75 for body text, larger for single words and
+ *                                    shouting styles). libass reads ASS Fontsize as the whole line box, so the file gets
+ *                                    size * the font's (win ascent + win descent); see fontmetrics.mjs.
  * @property {number} outline         Stroke width, or box padding when `box` is set.
  * @property {number} shadow
  * @property {'karaoke'|'pill'|'one'|'phrase'} mode
@@ -46,12 +48,12 @@ export const FONT_FILES = Object.freeze({
 
 /** @type {Readonly<Record<string, ThemeStyle>>} */
 export const THEME_STYLES = Object.freeze({
-  'karaoke-highlight': { font: 'montserrat', size: 66, outline: 5, shadow: 2, mode: 'karaoke', lines: 1 },
-  'karaoke-pill': { font: 'montserrat', size: 62, outline: 4, shadow: 0, mode: 'pill', lines: 1 },
-  'one-word-pop': { font: 'montserrat', size: 112, outline: 7, shadow: 3, mode: 'one', lines: 1 },
+  'karaoke-highlight': { font: 'montserrat', size: 68, outline: 5, shadow: 2, mode: 'karaoke', lines: 1 },
+  'karaoke-pill': { font: 'montserrat', size: 64, outline: 4, shadow: 0, mode: 'pill', lines: 1 },
+  'one-word-pop': { font: 'montserrat', size: 110, outline: 7, shadow: 3, mode: 'one', lines: 1 },
   'bold-stroke': {
     font: 'anton',
-    size: 86,
+    size: 80,
     outline: 7,
     shadow: 0,
     mode: 'karaoke',
@@ -60,10 +62,10 @@ export const THEME_STYLES = Object.freeze({
     spacing: 1,
   },
   'clean-minimal': { font: 'inter', size: 56, outline: 3, shadow: 2, mode: 'phrase', lines: 2 },
-  'editorial-serif': { font: 'serif', size: 68, outline: 2, shadow: 3, mode: 'phrase', lines: 2 },
+  'editorial-serif': { font: 'serif', size: 64, outline: 2, shadow: 3, mode: 'phrase', lines: 2 },
   'box-caption': {
     font: 'inter',
-    size: 54,
+    size: 56,
     outline: 16,
     shadow: 0,
     mode: 'phrase',
@@ -74,7 +76,7 @@ export const THEME_STYLES = Object.freeze({
   },
   'mono-terminal': {
     font: 'mono',
-    size: 50,
+    size: 52,
     outline: 16,
     shadow: 0,
     mode: 'phrase',
@@ -86,13 +88,30 @@ export const THEME_STYLES = Object.freeze({
   },
 });
 
+/** Hook card sizes are em pixels too (the Fontsize written to the file is larger; see fontmetrics.mjs). */
+/** How far the accent box around the active word reaches past the text (karaoke-pill). */
+const PILL_PAD = 14;
+
 export const HOOK_STYLE = Object.freeze({
   font: /** @type {const} */ ('anton'),
-  max_size: 108,
-  min_size: 64,
+  max_size: 88,
+  min_size: 52,
   max_lines: 3,
   padding: 20,
+  /** The card's bottom edge stays at least this far above the top of the head. */
+  face_clearance: 40,
+  /** When the head is high, the card may slide up this far before it shrinks. */
+  slide_min_top: 360,
 });
+
+/**
+ * The ASS Fontsize that draws text with an em of `em` pixels in a theme's font.
+ * @param {keyof typeof FONT_FILES} font
+ * @param {number} em
+ */
+export function assFontsize(font, em) {
+  return Math.round(loadFontFace(FONT_FILES[font].file).ass_fontsize(em) * 10) / 10;
+}
 
 // ---------------------------------------------------------------------------
 // Small helpers
@@ -189,7 +208,8 @@ export function balanceLines(words, widthOf, maxLines) {
  * @param {ThemeStyle} style
  * @param {string[]} words    Words already tidied.
  * @param {number} anchorY    Where the block would like to start.
- * @returns {{size: number, lines: string[], top: number, height: number, width: number}}
+ * @returns {{size: number, fontsize: number, lines: string[], top: number, height: number, width: number}}
+ *   `size` is the em in pixels; `fontsize` is the matching ASS Fontsize.
  */
 export function layoutCue(style, words, anchorY) {
   const face = loadFontFace(FONT_FILES[style.font].file);
@@ -204,10 +224,10 @@ export function layoutCue(style, words, anchorY) {
     width = Math.max(...lines.map((l) => lineWidth(style, l, size)));
   }
   const lineH = face.line_height(size);
-  const pad = style.box ? style.outline : 0;
+  const pad = style.box ? style.outline : style.mode === 'pill' ? PILL_PAD : 0;
   const height = lines.length * lineH + 2 * pad;
   const top = Math.round(Math.max(SAFE_ZONE.y_min + pad, Math.min(anchorY, SAFE_ZONE.y_max - height)));
-  return { size, lines, top, height, width };
+  return { size, fontsize: assFontsize(style.font, size), lines, top, height, width };
 }
 
 // ---------------------------------------------------------------------------
@@ -235,10 +255,22 @@ function styleRow(name, family, size, s) {
 }
 
 /**
+ * Where the hook card landed.
+ * @typedef {object} HookLayout
+ * @property {string} text
+ * @property {number} size            Em in pixels.
+ * @property {number} top
+ * @property {number} bottom          Bottom edge of the card's box.
+ * @property {string[]} lines
+ * @property {number|null} head_top_y   Top of the head in the frame while the card is up, null when no face was found.
+ * @property {number|null} clearance_px Space between the card's bottom and the head top (the rule asks for 40 or more).
+ */
+
+/**
  * Build the .ass text for a plan.
  * @param {import('../types.mjs').ShotPlan} plan
  * @param {AssOptions} [options]
- * @returns {{text: string, layout: {theme: string, anchor_y: number, top_min: number, bottom_max: number, widest: number, cues: number, hook?: {text: string, size: number, top: number, bottom: number, lines: string[]}}}}
+ * @returns {{text: string, layout: {theme: string, anchor_y: number, top_min: number, bottom_max: number, widest: number, cues: number, hook?: HookLayout}}}
  */
 export function buildAss(plan, options = {}) {
   const theme = plan.caption_theme;
@@ -256,7 +288,7 @@ export function buildAss(plan, options = {}) {
   const styles = [];
   const themeStyleName = 'Cap';
   styles.push(
-    styleRow(themeStyleName, font.family, style.size, {
+    styleRow(themeStyleName, font.family, assFontsize(style.font, style.size), {
       primary: textColor,
       outline: strokeColor,
       back: '#000000',
@@ -270,12 +302,12 @@ export function buildAss(plan, options = {}) {
   );
   if (style.mode === 'pill') {
     styles.push(
-      styleRow('Pill', font.family, style.size, {
+      styleRow('Pill', font.family, assFontsize(style.font, style.size), {
         primary: readableOn(accent),
         outline: accent,
         back: '#000000',
         border: 3,
-        bord: 14,
+        bord: PILL_PAD,
         shadow: 0,
         spacing: style.spacing,
       }),
@@ -284,7 +316,7 @@ export function buildAss(plan, options = {}) {
   const hookFont = FONT_FILES[HOOK_STYLE.font];
   const hookInk = readableOn(accent);
   styles.push(
-    styleRow('Hook', hookFont.family, HOOK_STYLE.max_size, {
+    styleRow('Hook', hookFont.family, assFontsize(HOOK_STYLE.font, HOOK_STYLE.max_size), {
       primary: hookInk,
       outline: accent,
       back: '#000000',
@@ -311,7 +343,7 @@ export function buildAss(plan, options = {}) {
     events.push(`Dialogue: ${layer},${formatAssTime(start)},${formatAssTime(end)},${name},,0,0,0,,${text}`);
 
   const layout = { theme, anchor_y: anchorY, top_min: Infinity, bottom_max: 0, widest: 0, cues: 0 };
-  /** @type {{text: string, size: number, top: number, bottom: number, lines: string[]} | undefined} */
+  /** @type {HookLayout | undefined} */
   let hookLayout;
 
   // Captions
@@ -326,7 +358,7 @@ export function buildAss(plan, options = {}) {
         words.map((w) => w || ' '),
         anchorY,
       );
-      const pos = `{\\an8\\pos(${PLAY.width / 2},${lay.top})\\q2${lay.size !== style.size ? `\\fs${lay.size}` : ''}`;
+      const pos = `{\\an8\\pos(${PLAY.width / 2},${lay.top})\\q2${lay.size !== style.size ? `\\fs${lay.fontsize}` : ''}`;
       const up = (t) => (style.upper ? t.toUpperCase() : t);
       layout.cues += 1;
       layout.top_min = Math.min(layout.top_min, lay.top);
@@ -416,28 +448,66 @@ export function buildAss(plan, options = {}) {
   const first = plan.beats[0];
   const hookText =
     first?.treatment === 'hook-card' ? (first.screen_text ?? plan.hook?.text ?? '').trim() : '';
+  // The top of the head while the card is up (frame pixels), when the face finder knew it.
+  const headTop = /** @type {any} */ (plan.caption_anchor)?.head_top_y;
+  const clearBottom = typeof headTop === 'number' ? headTop - HOOK_STYLE.face_clearance : null;
   const placeScreenText = (text, start, end) => {
     const face = loadFontFace(hookFont.file);
     const words = clean(text).toUpperCase().split(/\s+/).filter(Boolean);
+    const step = 4;
+    const wrap = (/** @type {number} */ em) => {
+      const widthOf = (/** @type {string} */ l) => face.width(l, em, 1) + 2 * HOOK_STYLE.padding;
+      return greedyLines(words, widthOf, MAX_TEXT_WIDTH);
+    };
+    const boxHeight = (/** @type {number} */ lineCount, /** @type {number} */ em) =>
+      lineCount * face.line_height(em) + 2 * HOOK_STYLE.padding;
+    /** @type {number} */
     let size = HOOK_STYLE.max_size;
-    /** @type {string[]} */
-    let lines = [];
-    for (; size >= HOOK_STYLE.min_size; size -= 4) {
-      const widthOf = (l) => face.width(l, size, 1) + 2 * HOOK_STYLE.padding;
-      lines = greedyLines(words, widthOf, MAX_TEXT_WIDTH);
+    let lines = wrap(size);
+    for (; size >= HOOK_STYLE.min_size; size -= step) {
+      lines = wrap(size);
       const height = lines.length * face.line_height(size) + 2 * HOOK_STYLE.padding;
       if (lines.length <= HOOK_STYLE.max_lines && height <= HOOK_ZONE.y_max - HOOK_ZONE.y_min) break;
     }
-    const top = HOOK_ZONE.y_min + HOOK_STYLE.padding;
-    const height = lines.length * face.line_height(size) + 2 * HOOK_STYLE.padding;
+    size = Math.max(size, HOOK_STYLE.min_size);
+    // The box libass draws around the text starts at the top of the zone. When the head is high in the frame, keep
+    // the card clear of it: first slide the card up (not past the slide limit), then step the size down, and at the
+    // smallest size slide as far as the safe zone allows. If it still does not clear, the checks warn.
+    /** @type {number} */
+    let boxTop = HOOK_ZONE.y_min;
+    while (clearBottom !== null && boxTop + boxHeight(lines.length, size) > clearBottom) {
+      const needTop = clearBottom - boxHeight(lines.length, size);
+      if (needTop >= HOOK_STYLE.slide_min_top) {
+        boxTop = needTop;
+        break;
+      }
+      if (size - step >= HOOK_STYLE.min_size) {
+        size -= step;
+        lines = wrap(size);
+        continue;
+      }
+      boxTop = Math.max(SAFE_ZONE.y_min, needTop);
+      break;
+    }
+    const top = boxTop + HOOK_STYLE.padding;
+    const bottom = boxTop + boxHeight(lines.length, size);
+    const clearance = clearBottom === null ? null : Math.round(headTop - bottom);
     ev(
       2,
       start,
       end,
       'Hook',
-      `{\\an8\\pos(${PLAY.width / 2},${top})\\q2\\fs${size}\\fsp1\\fad(120,160)}${lines.join('\\N')}`,
+      `{\\an8\\pos(${PLAY.width / 2},${top})\\q2\\fs${assFontsize(HOOK_STYLE.font, size)}\\fsp1\\fad(120,160)}${lines.join('\\N')}`,
     );
-    return { text, size, top, bottom: top + height, lines };
+    return {
+      text,
+      size,
+      top,
+      bottom,
+      lines,
+      head_top_y: typeof headTop === 'number' ? headTop : null,
+      clearance_px: clearance,
+    };
   };
   if (hookText) hookLayout = placeScreenText(hookText, 0, Math.min(HOOK_CARD_MS, plan.duration_ms));
   for (const [i, beat] of plan.beats.entries()) {

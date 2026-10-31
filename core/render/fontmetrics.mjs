@@ -11,7 +11,12 @@ import { readFileSync } from 'node:fs';
  * @property {number} units_per_em
  * @property {number} ascent         Share of the font size above the baseline (from the hhea table).
  * @property {number} descent        Share of the font size below the baseline, as a positive number.
- * @property {(size: number) => number} line_height  Height of one line of text at a size, as libass lays it out.
+ * @property {number} win_ascent     Windows ascent (OS/2) as a share of the em. libass sizes text from this, not from hhea.
+ * @property {number} win_descent    Windows descent (OS/2) as a share of the em.
+ * @property {number} ass_scale      ASS Fontsize per pixel of em: (win ascent + win descent) / em. libass treats
+ *                                   Fontsize as the whole line box, so 1 em of text needs a Fontsize of em * ass_scale.
+ * @property {(em: number) => number} ass_fontsize   The ASS Fontsize that draws text with an em of `em` pixels.
+ * @property {(em: number) => number} line_height    Height in pixels of one line of text with an em of `em`, as libass lays it out.
  * @property {(text: string, size: number, spacing?: number) => number} width   Width in pixels of one line.
  */
 
@@ -60,6 +65,18 @@ export function loadFontFace(path) {
   const hhea = need('hhea').offset;
   const ascent = buf.readInt16BE(hhea + 4) / unitsPerEm;
   const descent = -buf.readInt16BE(hhea + 6) / unitsPerEm;
+  // libass follows GDI: the line box is the OS/2 Windows ascent plus descent (hhea only when OS/2 has none).
+  let winAscent = ascent;
+  let winDescent = descent;
+  if (tables['OS/2'] && tables['OS/2'].length >= 78) {
+    const os2 = tables['OS/2'].offset;
+    const wa = buf.readUInt16BE(os2 + 74) / unitsPerEm;
+    const wd = buf.readUInt16BE(os2 + 76) / unitsPerEm;
+    if (wa + wd > 0) {
+      winAscent = wa;
+      winDescent = wd;
+    }
+  }
   const numHMetrics = buf.readUInt16BE(hhea + 34);
   const hmtx = need('hmtx').offset;
   const advance = (gid) => buf.readUInt16BE(hmtx + Math.min(gid, numHMetrics - 1) * 4);
@@ -165,7 +182,11 @@ export function loadFontFace(path) {
     units_per_em: unitsPerEm,
     ascent,
     descent,
-    line_height: (size) => (ascent + descent) * size,
+    win_ascent: winAscent,
+    win_descent: winDescent,
+    ass_scale: winAscent + winDescent,
+    ass_fontsize: (em) => em * (winAscent + winDescent),
+    line_height: (em) => em * (winAscent + winDescent),
     width(text, size, spacing = 0) {
       let units = 0;
       let count = 0;

@@ -25,7 +25,7 @@ export const tool = defineTool({
     if (!entry) return fail(`This post has no version for ${args.channel}.`);
     const { rules } = await loadRules();
     const rule = rules.platforms?.[args.channel];
-    const media = { kind: bundle.kind, duration_ms: bundle.media?.duration_ms, image_count: bundle.media?.image_count };
+    const media = { kind: bundle.kind, duration_ms: bundle.media?.duration_ms, image_count: bundle.media?.image_count, platform: args.channel };
     const warnings = rule ? checkCopy(rule, args.copy, media) : [];
     bundle.channels[args.channel] = { ...entry, copy: args.copy, warnings };
     await saveBundle(bundle);

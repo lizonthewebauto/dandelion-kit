@@ -482,7 +482,7 @@
       bar.firstChild.style.width = pct + "%";
       bar.className = "meter" + (max > 0 && n > max ? " over" : max > 0 && n > max * 0.9 ? " near" : "");
       line.className = "meter-line" + (max > 0 && n > max ? " over" : "");
-      count.textContent = max > 0 ? DK.num(n) + " / " + DK.num(max) + (n > max ? " (too long)" : "") : DK.num(n);
+      count.textContent = max > 0 ? DK.num(n) + " / " + DK.num(max) + (line.note ? " " + line.note : "") + (n > max ? " (too long)" : "") : DK.num(n);
     };
     line.update(len);
     return line;
@@ -503,12 +503,14 @@
     if (o.label) wrap.appendChild(h("label", { class: o.hideLabel ? "label sr" : "label", for: id, text: o.label }));
     wrap.appendChild(input);
     var meter = null;
-    if (o.max) { meter = DK.meter(input.value.length, o.max); wrap.appendChild(meter); }
+    /* o.count(value) gives the length the app counts (hashtags, links); o.note() is a short tag shown beside it. */
+    function lenOf(v) { return o.count ? o.count(v) : v.length; }
+    if (o.max) { meter = DK.meter(lenOf(input.value), o.max); wrap.appendChild(meter); }
     if (o.hint) wrap.appendChild(h("p", { class: "tiny muted mt-s", text: o.hint }));
     function check() {
-      var over = !!(o.max && input.value.length > o.max);
+      var over = !!(o.max && lenOf(input.value) > o.max);
       if (over) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid");
-      if (meter) meter.update(input.value.length);
+      if (meter) { meter.note = o.note ? o.note() : ""; meter.update(lenOf(input.value)); }
     }
     input.addEventListener("input", function () { check(); if (o.onInput) o.onInput(input.value); });
     check();
@@ -516,7 +518,8 @@
       el: wrap, input: input,
       value: function () { return input.value; },
       set: function (v) { input.value = v; check(); },
-      over: function () { return !!(o.max && input.value.length > o.max); }
+      refresh: check,
+      over: function () { return !!(o.max && lenOf(input.value) > o.max); }
     };
   };
 

@@ -426,7 +426,7 @@ export async function renderLookSample({ projectId, look, captionTheme }) {
     ],
     camera: [],
     sfx: [],
-    hook: { text: '', formula: '', score: 0, candidates: [] },
+    hook: { text: '', formula: '', score: 0, source: 'auto', candidates: [] },
     caption_anchor: anchor,
     hash: '',
   };

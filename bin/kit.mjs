@@ -9,7 +9,7 @@
 //   kit carousel <spec.json> [--out]    render a carousel from a spec file
 //   kit offer <bundle.json>             build the per-app versions for a post
 //   kit connect                         sign in to Dandelion
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -102,6 +102,170 @@ function ensureDependencies() {
   } finally {
     rmSync(lock, { recursive: true, force: true });
   }
+}
+
+// ---------------------------------------------------------------------------
+// First run: answer the host right away while the packages install
+// ---------------------------------------------------------------------------
+
+/**
+ * A plugin install has no node_modules, and npm takes a minute. A host waits only about 30 seconds for an MCP server to
+ * answer "initialize", so on a first run this answers the handshake itself with one small tool, installs the packages in a
+ * child process, then loads the real server onto the same stdin and stdout and tells the host the tool list changed.
+ * Zero dependencies. stdout carries MCP messages only.
+ * @param {boolean} demo
+ */
+async function serveWithSetup(demo) {
+  const version = (() => {
+    try {
+      return JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
+    } catch {
+      return '0.0.0';
+    }
+  })();
+  const send = (/** @type {any} */ obj) => process.stdout.write(`${JSON.stringify({ jsonrpc: '2.0', ...obj })}\n`);
+  let status = 'Dandelion Kit is setting up for the first time. This takes about a minute. Ask again shortly.';
+  let failed = false;
+  let handedOff = false;
+  /** @type {string | null} */
+  let initLine = null;
+  let initId = null;
+  let sawInitialized = false;
+  let buf = '';
+
+  const reply = (/** @type {any} */ msg) => {
+    switch (msg.method) {
+      case 'initialize':
+        send({
+          id: msg.id,
+          result: {
+            protocolVersion: msg.params?.protocolVersion ?? '2025-06-18',
+            capabilities: { tools: { listChanged: true } },
+            serverInfo: { name: 'dandelion-kit', version },
+            instructions: 'Dandelion Kit is finishing its first-time setup (about a minute). The real tools appear when it is done.',
+          },
+        });
+        break;
+      case 'tools/list':
+        send({
+          id: msg.id,
+          result: {
+            tools: [
+              {
+                name: 'setup_status',
+                description: 'Dandelion Kit is finishing its first-time setup. Call this to see how it is going. The editing tools appear when it is done.',
+                inputSchema: { type: 'object', properties: {} },
+              },
+            ],
+          },
+        });
+        break;
+      case 'tools/call':
+        send({ id: msg.id, result: { content: [{ type: 'text', text: status }], isError: failed } });
+        break;
+      case 'resources/list':
+        send({ id: msg.id, result: { resources: [] } });
+        break;
+      case 'resources/templates/list':
+        send({ id: msg.id, result: { resourceTemplates: [] } });
+        break;
+      case 'prompts/list':
+        send({ id: msg.id, result: { prompts: [] } });
+        break;
+      case 'ping':
+        send({ id: msg.id, result: {} });
+        break;
+      default:
+        if (msg.id !== undefined) send({ id: msg.id, error: { code: -32601, message: 'Dandelion Kit is still setting up.' } });
+    }
+  };
+
+  /** @param {string} line */
+  const onLine = (line) => {
+    /** @type {any} */
+    let msg;
+    try {
+      msg = JSON.parse(line);
+    } catch {
+      return;
+    }
+    if (msg.method === 'initialize') {
+      initLine = line;
+      initId = msg.id;
+    }
+    if (msg.method === 'notifications/initialized') sawInitialized = true;
+    reply(msg);
+  };
+  /** @param {string|Buffer} chunk */
+  const onData = (chunk) => {
+    buf += chunk.toString();
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (line) onLine(line);
+    }
+  };
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', onData);
+  process.stdin.on('end', () => {
+    if (!handedOff) process.exit(0);
+  });
+
+  // Install in a child so the handshake keeps being answered. It reuses the lock logic in ensureDependencies.
+  err('Dandelion Kit: first run, installing packages in the background...');
+  const child = spawn(process.execPath, [fileURLToPath(import.meta.url), 'install-deps'], { stdio: ['ignore', 2, 2] });
+  child.on('exit', async (code) => {
+    if (code !== 0 || !depsReady()) {
+      failed = true;
+      status = `Dandelion Kit could not finish its setup. Run "npm install --omit=dev" in ${ROOT} and look at the message, then start a new session.`;
+      return;
+    }
+    try {
+      const { PassThrough } = await import('node:stream');
+      const inp = new PassThrough();
+      const out = new PassThrough();
+      const { startStdio } = await import('../server/index.mjs');
+      await startStdio({ demo, stdin: inp, stdout: out });
+      // The real server's answer to the replayed initialize is dropped: the host already got one.
+      out.setEncoding('utf8');
+      let outBuf = '';
+      let dropped = initLine === null;
+      out.on('data', (/** @type {string} */ chunk) => {
+        outBuf += chunk;
+        let i;
+        while ((i = outBuf.indexOf('\n')) >= 0) {
+          const line = outBuf.slice(0, i);
+          outBuf = outBuf.slice(i + 1);
+          if (!line.trim()) continue;
+          if (!dropped) {
+            try {
+              if (JSON.parse(line).id === initId) {
+                dropped = true;
+                continue;
+              }
+            } catch {
+              // Not JSON; pass it on.
+            }
+          }
+          process.stdout.write(`${line}\n`);
+        }
+      });
+      handedOff = true;
+      process.stdin.off('data', onData);
+      if (initLine) inp.write(`${initLine}\n`);
+      if (initLine && sawInitialized) inp.write(`${JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' })}\n`);
+      if (buf.trim()) inp.write(`${buf}\n`);
+      process.stdin.on('data', (c) => inp.write(c));
+      process.stdin.on('end', () => inp.end());
+      send({ method: 'notifications/tools/list_changed' });
+      err('Dandelion Kit: setup finished, tools are ready.');
+    } catch (error) {
+      failed = true;
+      status = `Dandelion Kit installed but could not start: ${/** @type {any} */ (error)?.message ?? error}`;
+      err(status);
+    }
+  });
 }
 
 /**
@@ -243,6 +407,11 @@ async function main() {
   if (command === 'version' || command === '--version') {
     process.stdout.write(`${JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version}\n`);
     return 0;
+  }
+  if (command === 'install-deps') return ensureDependencies() ? 0 : 1;
+  if (command === 'serve' && !depsReady()) {
+    await serveWithSetup(rest.includes('--demo'));
+    return null; // keep running
   }
   if (!ensureDependencies()) return 1;
 

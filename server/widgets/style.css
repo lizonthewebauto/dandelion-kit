@@ -277,7 +277,7 @@ select.field { appearance: auto; }
 .cb input { width: 20px; height: 20px; accent-color: var(--dk-gold-3); flex: none; margin: 0; }
 
 /* tabs */
-.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 -2px; scrollbar-width: thin; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 -2px; scrollbar-width: thin; }
 .tab {
   -webkit-appearance: none; appearance: none; flex: none; cursor: pointer;
   display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 4px 11px;
@@ -287,6 +287,8 @@ select.field { appearance: auto; }
 .tab:hover { background: var(--dk-raise); }
 .tab[aria-selected="true"] { background: var(--dk-gold-2); color: var(--dk-ink); border-color: var(--dk-edge); }
 .tab .dotmark { width: 8px; height: 8px; border-radius: 50%; background: var(--dk-danger); }
+.tab .warnmark { width: 8px; height: 8px; border-radius: 50%; background: var(--dk-warn); box-shadow: 0 0 0 2px var(--dk-paper); }
+.tab[aria-selected="true"] .warnmark { box-shadow: 0 0 0 2px var(--dk-gold-2); }
 .tab .tick { color: var(--dk-success); }
 .tab[aria-selected="true"] .tick { color: var(--dk-ink); }
 

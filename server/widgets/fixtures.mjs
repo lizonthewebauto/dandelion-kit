@@ -142,6 +142,7 @@ export const SHOT_PLAN = {
     text: 'Your morning is quietly costing you focus',
     formula: 'cost-reveal',
     score: 84,
+    source: 'auto',
     candidates: [
       { text: 'Your morning is quietly costing you focus', formula: 'cost-reveal', score: 84 },
       { text: 'I skipped my phone for thirty days', formula: 'personal-experiment', score: 78 },
@@ -258,7 +259,7 @@ const CHANNELS = {
   tiktok: { copy: { caption: 'No phone for the first hour. Thirty days later my focus was up forty percent.', hashtags: ['#morningroutine', '#focus'] }, limits: LIMITS.tiktok, warnings: [], format: 'Video' },
   youtube: { copy: { title: 'The 30 day morning routine that boosted my focus', description: `${CORE_TEXT}\n\nStep one: no phone. Step two: water before coffee.`, hashtags: ['#shorts', '#morningroutine'] }, limits: LIMITS.youtube, warnings: [], format: 'Short' },
   linkedin: { copy: { caption: `${CORE_TEXT}\n\nWhat is the first thing you do after you wake up?`, hashtags: ['#productivity', '#habits'] }, limits: LIMITS.linkedin, warnings: [], format: 'Video post' },
-  x: { copy: { caption: `${CORE_TEXT} It really does change the whole day, and the best part is that it costs you nothing at all to try tomorrow morning.`, hashtags: ['#focus'] }, limits: LIMITS.x, warnings: ['This is too long for X. Shorten it before you send.'], format: 'Post with video' },
+  x: { copy: { caption: `${CORE_TEXT} It really does change the whole day, and the best part is that it costs you nothing at all to try tomorrow morning.`, hashtags: ['#focus'] }, limits: LIMITS.x, warnings: ['The caption is 3 characters too long for X (283 of 280 with hashtags). Shorten it before you send.'], format: 'Post with video' },
   threads: { copy: { caption: 'No phone for the first hour. Thirty days later my focus was up forty percent.', hashtags: [] }, limits: LIMITS.threads, warnings: [], format: 'Post' },
   facebook: { copy: { caption: `${CORE_TEXT}`, hashtags: ['#morningroutine'] }, limits: LIMITS.facebook, warnings: [], format: 'Reel' },
   pinterest: { copy: { title: 'A 30 day morning routine for better focus', description: 'No phone for the first hour, water before coffee, and one thing written down. Save it for tomorrow.', hashtags: ['#morningroutine'] }, limits: LIMITS.pinterest, warnings: [], format: 'Video pin' },

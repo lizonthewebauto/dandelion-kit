@@ -6,7 +6,7 @@ import { HOOK_CARD_MS } from '../edit/shotplan.mjs';
 import { visualEvents } from '../edit/pacing.mjs';
 import { captureFfmpeg, runFfprobe } from '../media/ffmpeg.mjs';
 import { makeTempDir } from '../util/fs.mjs';
-import { buildAss, fontFilesFor, readableOn, SAFE_ZONE, THEME_STYLES, PLAY } from './ass.mjs';
+import { buildAss, fontFilesFor, HOOK_STYLE, readableOn, SAFE_ZONE, THEME_STYLES, PLAY } from './ass.mjs';
 import { chinAtZoom, maxZoomOf } from './facezone.mjs';
 import { QUALITY } from './filtergraph.mjs';
 import { ffmpegLog, streamRawFrames } from './run.mjs';
@@ -492,6 +492,21 @@ export async function checkReel({ file, plan, quality, cut_points_ms = [] }) {
         'Add hook text in the shot plan.',
       ),
     );
+  }
+  if (hookCard && hookText) {
+    const hookBox = buildAss(plan, { captions: false }).layout.hook;
+    if (hookBox && hookBox.clearance_px !== null) {
+      checks.push(
+        check(
+          hookBox.clearance_px >= HOOK_STYLE.face_clearance ? 'pass' : 'warn',
+          'hook-clear-of-face',
+          'Hook card stays clear of your head',
+          `${hookBox.clearance_px} px above your head`,
+          `at least ${HOOK_STYLE.face_clearance} px`,
+          'Your head is high in the frame. Use a shorter hook, or frame the shot a little lower.',
+        ),
+      );
+    }
   }
   if (durationMs > 2000) {
     const motion = await measureMotion(file);

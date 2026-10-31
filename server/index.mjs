@@ -25,7 +25,7 @@ export function serverVersion() {
 export const INSTRUCTIONS = [
   'Dandelion Kit: free tools to edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.',
   '',
-  'Editing a video, in order: doctor (first time in a session), open_video, rough_cut, pick_look, plan_shots, render_reel with quality draft, then render_reel with quality final only after the person says yes to the draft. After that: make_variants if they want options, export, then offer_post. Read the whole transcript before you plan. Plan, then build once: do not render to find out what you want. Captions come only from the transcript. Never put two text surfaces on screen at once. Every result has full text with exact file paths, so nothing depends on a card being drawn.',
+  'Editing a video, in order: doctor (first time in a session), open_video, rough_cut, pick_look, plan_shots, render_reel with quality draft, then render_reel with quality final only after the person says yes to the draft. After that: make_variants if they want options, export, then offer_post. Read the whole transcript before you plan. Plan, then build once: do not render to find out what you want. Captions come only from the transcript. Never two competing text blocks in the same zone: captions stay on the whole time under the chin (for accessibility), the hook card and per-beat on-screen text sit in the top zone, and the hook card keeps clear of the face. Write the on-screen hook yourself from the transcript and pass it as hook_text in plan_shots on the first call; the kit hook is only a fallback made from repeated words and is marked auto. Every result has full text with exact file paths, so nothing depends on a card being drawn.',
   '',
   'Carousels and images: make_carousel or make_image. JPEG only. Plain words at about a third-grade reading level, no hype. Text over a layout limit is refused with the field name and the limit, so shorten it.',
   '',
@@ -132,7 +132,8 @@ export function createKitServer(options = {}) {
 
 /**
  * Run the server over stdio until the host closes it.
- * @param {{demo?: boolean}} [options]
+ * @param {{demo?: boolean, stdin?: import('node:stream').Readable, stdout?: import('node:stream').Writable}} [options]
+ *   `stdin` and `stdout` are only given by the first-run bootstrap in bin/kit.mjs.
  */
 export async function startStdio(options = {}) {
   // A library that prints with console.log would corrupt the MCP stream. Send it to stderr instead.
@@ -142,7 +143,7 @@ export async function startStdio(options = {}) {
   console.debug = toStderr;
   process.on('unhandledRejection', (reason) => log.error('Unhandled error in the background:', /** @type {any} */ (reason)?.stack ?? reason));
   const server = createKitServer(options);
-  const transport = new StdioServerTransport();
+  const transport = new StdioServerTransport(options.stdin, options.stdout);
   server.server.onclose = () => process.exit(0);
   await server.connect(transport);
   log.info(`Dandelion Kit ${serverVersion()} is running${options.demo || process.env.DANDELION_KIT_DEMO ? ' in demo mode (sample data)' : ''}.`);

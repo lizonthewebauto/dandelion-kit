@@ -298,3 +298,19 @@ test('a render without a cut or a plan gives plain words', async () => {
   await assert.rejects(renderReel({ projectId, quality: 'final' }), /no shot plan/);
   await assert.rejects(renderReel({ projectId, quality: /** @type {any} */ ('ultra') }), /Quality must be/);
 });
+
+test('libass draws karaoke captions at the em size the theme asks for, not smaller', async () => {
+  const p = await requireProject(projectId);
+  const plan = edit.planShots(
+    /** @type {any} */ (p.transcript),
+    /** @type {any} */ (p.cut),
+    'karaoke-clean',
+    { seed: 7 },
+  );
+  const b = await measureCaptionBounds({ ...plan, caption_anchor: { x: 540, y: 1100 } });
+  assert.ok(b);
+  const height = b.y_max - b.y_min;
+  // One line of 68 px text with a 5 px outline: cap height alone is about 48 px, so a line with descenders is over 60.
+  assert.ok(height >= 60 && height <= 110, `line height ${height}`);
+  assert.ok(b.x_max - b.x_min >= 520, `widest line ${b.x_max - b.x_min}`);
+});

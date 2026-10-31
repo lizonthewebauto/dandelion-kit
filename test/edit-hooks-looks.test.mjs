@@ -149,11 +149,12 @@ test('chooseHook uses a good hook_text as written and refuses a bad one with a r
   );
 });
 
-test('chooseHook picks the best passing suggestion when no text is given', () => {
+test('chooseHook picks the best suggestion when no text is given, and says it was made by the kit', () => {
   const h = hooks.chooseHook(SPOKEN, {});
-  assert.ok(h.score >= 70);
+  assert.equal(h.source, 'auto');
   assert.ok(h.candidates.length >= 1);
   assert.equal(h.candidates[0].text, h.text);
+  assert.equal(hooks.chooseHook(SPOKEN, { hook_text: 'Nobody tells you this about captions' }).source, 'given');
 });
 
 // ---- looks ----

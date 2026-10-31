@@ -19,6 +19,10 @@ export const YUNET_SHA256 = '8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f428060
 
 export const FRAME = Object.freeze({ width: 1080, height: 1920 });
 export const SAMPLE_INTERVAL_MS = 500;
+/** Share of the face box height that hair and head add above the box. */
+const HAIR_ALLOWANCE = 0.12;
+/** The hook card is up for the first 2 s; head position is read over a little longer than that. */
+const HOOK_WINDOW_MS = 2500;
 /** The model takes a fixed 640x640 square; a 9:16 frame is shrunk to 360x640 and padded on the right. */
 const INPUT = 640;
 const SHRUNK_W = 360;
@@ -290,13 +294,14 @@ export function chinTrack(samples) {
  * @property {'face'|'fallback'} source
  * @property {number} face_ratio        Share of samples that held a face.
  * @property {number} [chin_y]          Chin height used (unzoomed frame).
+ * @property {number} [head_top_y]      Top of the head in the output frame while the hook card is up (first 2.5 s, at the zoom the camera has then).
  * @property {string} [note]            Plain sentence when the fallback was used.
  */
 
 /**
  * Work out the one caption anchor for a video.
  * @param {import('../types.mjs').FaceSample[]} samples
- * @param {{zoom?: number}} [options]  Largest zoom the plan uses; the chin sits lower at higher zoom.
+ * @param {{zoom?: number, hook_zoom?: number}} [options]  `zoom` is the largest zoom the plan uses (the chin sits lower at higher zoom); `hook_zoom` is the zoom while the hook card is up.
  * @returns {CaptionAnchor}
  */
 export function anchorFromSamples(samples, options = {}) {
@@ -323,13 +328,29 @@ export function anchorFromSamples(samples, options = {}) {
   const gap = Math.max(ANCHOR_RULES.inflate_px, ANCHOR_RULES.min_gap_ratio * H);
   const raw = chinAtZoom(chin, zoom) + gap;
   const y = Math.round(Math.min(ANCHOR_RULES.clamp_max * H, Math.max(ANCHOR_RULES.clamp_min * H, raw)));
+  // Top of the head while the hook card is up: the face box top over the first 2.5 s (all samples if none are there).
+  const early = samples.filter((s) => s.box && s.t_ms <= HOOK_WINDOW_MS);
+  // The face box ends at the forehead; hair adds a little more above it.
+  const tops = (early.length ? early : samples.filter((s) => s.box)).map((s) => {
+    const box = /** @type {{y: number, h: number}} */ (s.box);
+    return box.y - HAIR_ALLOWANCE * box.h;
+  });
+  const headTop = chinAtZoom(median(tops), Math.max(1, options.hook_zoom ?? 1));
   return {
     x: FRAME.width / 2,
     y,
     source: 'face',
     face_ratio: Math.round(ratio * 100) / 100,
     chin_y: Math.round(chin),
+    head_top_y: Math.round(headTop),
   };
+}
+
+/** Zoom the camera has while the hook card is up (the first 2 s). @param {import('../types.mjs').ShotPlan | undefined} plan */
+export function hookZoomOf(plan) {
+  if (!plan || !plan.camera?.length) return 1;
+  const early = plan.camera.filter((m) => m.out_start_ms < HOOK_WINDOW_MS);
+  return Math.max(1, ...early.map((m) => Math.max(m.zoom_from, m.zoom_to)));
 }
 
 /** Largest zoom a plan reaches. @param {import('../types.mjs').ShotPlan | undefined} plan */
@@ -379,7 +400,7 @@ export async function ensureFaceSamples(projectId, onProgress, force = false) {
  */
 export async function anchorForPlan(projectId, plan, onProgress) {
   const { samples, problem } = await ensureFaceSamples(projectId, onProgress);
-  const anchor = anchorFromSamples(samples, { zoom: maxZoomOf(plan) });
+  const anchor = anchorFromSamples(samples, { zoom: maxZoomOf(plan), hook_zoom: hookZoomOf(plan) });
   if (problem) anchor.note = `The face finder could not run (${problem}). Captions sit at a fixed height.`;
   return anchor;
 }

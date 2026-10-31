@@ -3,6 +3,8 @@
 // so it always matches the card. It lists exact file paths and says what to do next.
 // No stack traces, no dashes used as punctuation, no hype.
 
+import { countedLength } from './lib/counted.mjs';
+
 /** @typedef {Record<string, any>} Data */
 
 const CHANNEL_NAMES = /** @type {Record<string, string>} */ ({
@@ -178,14 +180,22 @@ function textLooks(d) {
   return lines.join('\n');
 }
 
+/** Said wherever an auto-made hook is shown, in the text twin and on the card (the card says "below" for the text box). */
+export const AUTO_HOOK_NOTE =
+  "Made from the words in the video. Write your own with hook_text; the kit's suggestions are fallbacks.";
+
 /** @param {Data} d */
 function textShotPlan(d) {
   const hook = d.hook ?? {};
   const good = Number(hook.score) >= 70;
+  const auto = hook.source === 'auto';
   const lines = [
     `Shot plan for ${d.look_name ?? d.look_id} (${d.caption_theme} captions, accent ${d.accent}), ${clock(d.duration_ms)} long.`,
-    `Hook (${Math.round(hook.score || 0)} out of 100, ${good ? 'good' : 'weak, think about another'}): "${hook.text}"`,
+    auto
+      ? `Hook (auto-made, scored ${Math.round(hook.score || 0)} out of 100): "${hook.text}"`
+      : `Hook (${Math.round(hook.score || 0)} out of 100, ${good ? 'good' : 'weak, think about another'}): "${hook.text}"`,
   ];
+  if (auto) lines.push(AUTO_HOOK_NOTE);
   const others = (hook.candidates ?? []).filter((/** @type {any} */ c) => c.text !== hook.text).slice(0, 4);
   if (others.length) {
     lines.push('Other hooks:', ...others.map((/** @type {any} */ c) => `- "${c.text}" (${Math.round(c.score)})`));
@@ -199,7 +209,7 @@ function textShotPlan(d) {
   lines.push(...capped(rows, 80));
   const s = d.stats ?? {};
   lines.push('', `${plural(s.captions ?? 0, 'caption cue')}, ${plural(s.camera ?? 0, 'camera move')}, ${plural(s.sfx ?? 0, 'sound cue')}.`);
-  lines.push('Show the person the hook and beats and get a yes. To change one, call update_shot_plan. Next: render_reel with quality draft.');
+  lines.push(auto ? 'Write a better hook yourself from what the video says, then call update_shot_plan with hook_text. Show the person the hook and beats and get a yes. Next: render_reel with quality draft.' : 'Show the person the hook and beats and get a yes. To change one, call update_shot_plan. Next: render_reel with quality draft.');
   return lines.join('\n');
 }
 
@@ -282,13 +292,16 @@ function copyLines(copy) {
   return out.length ? out : ['(no words yet)'];
 }
 
-/** The length of the main text field and its limit. @param {Data} entry */
-function meter(entry) {
+/** The length of the main text field and its limit. @param {Data} entry @param {string} [platform] */
+function meter(entry, platform) {
   const c = entry.copy ?? {};
   const l = entry.limits ?? {};
   const parts = [];
   const count = (/** @type {string|undefined} */ t) => [...(t ?? '')].length;
-  if (c.caption !== undefined && l.caption_max) parts.push(`caption ${count(c.caption)} of ${l.caption_max}`);
+  if (c.caption !== undefined && l.caption_max) {
+    const counted = countedLength(platform, c);
+    parts.push(`caption ${counted.total} of ${l.caption_max}${counted.with_hashtags ? ' with hashtags' : ''}`);
+  }
   if (c.title !== undefined && l.title_max) parts.push(`title ${count(c.title)} of ${l.title_max}`);
   if (c.description !== undefined && l.description_max) parts.push(`description ${count(c.description)} of ${l.description_max}`);
   if (l.hashtags_max !== undefined) parts.push(`${plural((c.hashtags ?? []).length, 'hashtag')} of ${l.hashtags_max}`);
@@ -342,7 +355,7 @@ function textPost(d) {
     lines.push('');
     for (const [id, entry] of Object.entries(b.channels ?? {})) {
       const e = /** @type {Data} */ (entry);
-      lines.push(`${channelName(id)}${e.format ? ` (${e.format})` : ''}: ${meter(e)}`);
+      lines.push(`${channelName(id)}${e.format ? ` (${e.format})` : ''}: ${meter(e, id)}`);
       for (const l of copyLines(e.copy ?? {})) lines.push(`  ${l.replace(/\n/g, '\n  ')}`);
       for (const w of e.warnings ?? []) lines.push(`  ! ${w}`);
     }

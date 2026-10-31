@@ -28,6 +28,7 @@
     var hook = d.hook || {};
     var cands = Array.isArray(hook.candidates) ? hook.candidates : [];
     var edits = {};
+    var auto = hook.source === "auto";
     var st = { hook: hook.text || "", hookOrig: hook.text || "", busy: "", error: "", saved: !!d.saved, showAll: false };
     var body = h("div");
 
@@ -80,15 +81,16 @@
     function hookSection() {
       var wrap = h("div");
       wrap.appendChild(h("p", { class: "sec-title", text: "The hook (first 2 seconds)" }));
+      if (auto && st.hook === st.hookOrig) wrap.appendChild(h("p", { class: "small mt-s", text: "Made from the words in the video. Write your own below; the kit's suggestions are fallbacks." }));
       var group = h("div", { role: "radiogroup", "aria-label": "Hook choices" });
       cands.forEach(function (c) {
         var on = st.hook === c.text;
-        var good = Number(c.score) >= 70;
+        var good = Number(c.score) >= 70 && !auto;
         var b = h("button", { type: "button", class: "hookopt", role: "radio", "aria-checked": on ? "true" : "false", disabled: !!st.busy },
           h("span", { class: "radio", "aria-hidden": "true" }),
           h("span", { class: "grow", text: c.text }),
-          DK.pill(String(Math.round(Number(c.score) || 0)), good ? "ok" : "warn", good ? "check" : "alert"));
-        b.setAttribute("aria-label", c.text + ". Score " + Math.round(Number(c.score) || 0) + (good ? ", good" : ", weak"));
+          auto ? DK.pill(String(Math.round(Number(c.score) || 0)), "off", null) : DK.pill(String(Math.round(Number(c.score) || 0)), good ? "ok" : "warn", good ? "check" : "alert"));
+        b.setAttribute("aria-label", c.text + ". Score " + Math.round(Number(c.score) || 0) + (auto ? "" : good ? ", good" : ", weak"));
         b.addEventListener("click", function () { st.hook = c.text; st.saved = false; render(); });
         group.appendChild(b);
       });
@@ -103,7 +105,7 @@
       var wc = h("p", { class: "tiny num muted", text: DK.wordCount(st.hook) + " / 9 words" });
       wrap.appendChild(h("div", { class: "mt" }, f.el, wc));
       if (st.hook === st.hookOrig && hook.score) {
-        wrap.appendChild(h("p", { class: "small muted mt-s", text: "Score " + Math.round(hook.score) + " of 100" + (hook.formula ? ", from the " + nice(hook.formula) + " pattern" : "") + "." }));
+        wrap.appendChild(h("p", { class: "small muted mt-s", text: (auto ? "Auto-made, scored " : "Score ") + Math.round(hook.score) + " of 100" + (hook.formula ? ", from the " + nice(hook.formula) + " pattern" : "") + "." }));
       }
       return wrap;
     }
