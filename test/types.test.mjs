@@ -18,6 +18,23 @@ test('closed lists have the sizes the plan names', () => {
   assert.equal(types.TREATMENTS.length, 6);
   assert.deepEqual([...types.POST_KINDS], ['text', 'image', 'carousel', 'video', 'thread']);
   assert.deepEqual([...types.CHECK_STATUSES], ['pass', 'warn', 'stop']);
+  assert.equal(types.TOOL_NAMES.length, 25);
+  assert.equal(types.WIDGET_IDS.length, 8);
+  assert.equal(types.SFX_NAMES.length, 10);
+  assert.ok(types.APP_ONLY_TOOLS.every((t) => types.TOOL_NAMES.includes(t)));
+});
+
+test('tool and widget lists match the files on disk', () => {
+  const names = (dir, ext) =>
+    readdirSync(join(ROOT, 'server', dir))
+      .filter((f) => f.endsWith(ext))
+      .map((f) => f.slice(0, -ext.length))
+      .sort();
+  assert.deepEqual(names('tools', '.mjs'), [...types.TOOL_NAMES].sort());
+  assert.deepEqual(
+    names('widgets', '.js').filter((f) => f.startsWith('kit-')),
+    [...types.WIDGET_IDS].sort(),
+  );
 });
 
 test('image sizes', () => {
@@ -40,6 +57,12 @@ test('lists are frozen and have no duplicates', () => {
     'TREATMENTS',
     'LAYOUT_IDS',
     'POST_KINDS',
+    'TOOL_NAMES',
+    'APP_ONLY_TOOLS',
+    'WIDGET_IDS',
+    'SFX_NAMES',
+    'TRANSCRIBE_ENGINES',
+    'ASSET_KINDS',
   ]) {
     const list = types[key];
     assert.ok(Object.isFrozen(list), `${key} is frozen`);

@@ -15,7 +15,7 @@ Dandelion Kit is MIT licensed (see LICENSE). It uses the components below. Each 
 | Montserrat       | SIL OFL 1.1 | assets/fonts, assets/font-licenses/Montserrat-OFL.txt      |
 | Space Mono       | SIL OFL 1.1 | assets/fonts, assets/font-licenses/SpaceMono-OFL.txt       |
 
-The fonts are used as separate font files. They are not modified and are not sold on their own.
+The fonts are unmodified upstream releases as published on Google Fonts (the `google/fonts` repository, `ofl/` folder). They are used as separate font files, are not modified and are not sold on their own. Each license text is the standard SIL OFL 1.1 with that font's own copyright line.
 
 ## Installed from npm when you first run the kit
 

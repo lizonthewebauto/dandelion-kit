@@ -6,6 +6,56 @@
 // Closed lists (frozen so every module imports the same values)
 // ---------------------------------------------------------------------------
 
+/** Every tool the kit server registers. server/index.mjs registers exactly these; widgets may call only these. */
+export const TOOL_NAMES = Object.freeze([
+  'doctor',
+  'open_video',
+  'get_project',
+  'list_projects',
+  'rough_cut',
+  'update_cut',
+  'pick_look',
+  'plan_shots',
+  'update_shot_plan',
+  'render_reel',
+  'check_reel',
+  'make_variants',
+  'make_carousel',
+  'update_slides',
+  'make_image',
+  'export',
+  'offer_post',
+  'set_channel_copy',
+  'connect_dandelion',
+  'dandelion_status',
+  'send_to_dandelion',
+  'approve_post',
+  'skip_post',
+  'read_asset',
+  'open_path',
+]);
+
+/** Tools only widgets call. They carry _meta.ui.visibility: ["app"]. */
+export const APP_ONLY_TOOLS = Object.freeze([
+  'update_cut',
+  'update_shot_plan',
+  'update_slides',
+  'set_channel_copy',
+  'read_asset',
+]);
+
+/** The eight cards, served as ui://dandelion-kit/v1/<id>.html. */
+export const WIDGET_IDS = Object.freeze([
+  'kit-project',
+  'kit-cut-review',
+  'kit-look-picker',
+  'kit-shot-plan',
+  'kit-preview',
+  'kit-carousel',
+  'kit-export',
+  'kit-post',
+]);
+
 /** Social apps the kit writes for. The ids match Dandelion's platform ids. */
 export const CHANNEL_IDS = Object.freeze([
   'instagram',
@@ -86,6 +136,23 @@ export const IMAGE_SIZES = Object.freeze({
   story: { id: 'story', width: 1080, height: 1920 },
 });
 
+/** The sound effects the first-party synth makes (one WAV each in ~/.dandelion-kit/sfx). */
+export const SFX_NAMES = Object.freeze([
+  'tap',
+  'submit',
+  'pop',
+  'whoosh',
+  'ding',
+  'riser',
+  'bass-hit',
+  'snap',
+  'page',
+  'complete',
+]);
+
+/** Speech engines, in the order the kit prefers them when more than one is available. */
+export const TRANSCRIBE_ENGINES = Object.freeze(['whisper-cli', 'transformers', 'ffmpeg']);
+
 /** Kinds of social content the post offer accepts. */
 export const POST_KINDS = Object.freeze(['text', 'image', 'carousel', 'video', 'thread']);
 
@@ -103,6 +170,7 @@ export const ASSET_KINDS = Object.freeze([
   'caption',
   'output',
   'slide',
+  'sample',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -153,8 +221,29 @@ export const ASSET_KINDS = Object.freeze([
  * @property {string} [accent]        Accent color, "#RRGGBB".
  * @property {ShotPlan} [shot_plan]
  * @property {Record<string, RenderResult>} [renders]  Keyed by "draft", "final" or a variant id.
+ * @property {Variant[]} [variants]
  * @property {CarouselSpec} [carousel]
- * @property {{x:number,y:number,w:number,h:number}[]} [face_boxes]  Head boxes found in sampled frames.
+ * @property {FaceSample[]} [face_samples]  One entry per sampled frame (every 500 ms), in time order.
+ */
+
+/**
+ * The head box found in one sampled frame of the work copy, or null when no face was found there.
+ * @typedef {object} FaceSample
+ * @property {number} t_ms            Time in the work copy.
+ * @property {{x:number,y:number,w:number,h:number}|null} box  Pixels in the 1080x1920 frame.
+ */
+
+/**
+ * What doctor reports. It is a status, never an error, so isError stays false.
+ * @typedef {object} DoctorReport
+ * @property {boolean} ok                  True when a reel can be edited on this machine right now.
+ * @property {{found:boolean, path?:string, version?:string, has_ass:boolean, has_loudnorm:boolean, has_whisper:boolean, install_hint?:string}} ffmpeg
+ * @property {{version:string, ok:boolean}} node   ok when the version satisfies package.json engines.
+ * @property {{free_bytes:number, ok:boolean}} disk  ok when at least 3 GB is free.
+ * @property {{dir:string, whisper:boolean, yunet:boolean}} models  Which model files are already downloaded.
+ * @property {string} home                 The kit home folder (DANDELION_KIT_HOME or ~/.dandelion-kit).
+ * @property {DandelionState} dandelion
+ * @property {string[]} next_steps         Plain sentences, in order.
  */
 
 // ---------------------------------------------------------------------------
@@ -186,7 +275,7 @@ export const ASSET_KINDS = Object.freeze([
  * @property {Segment[]} segments
  * @property {string} language        For example "en".
  * @property {'precise'|'coarse'} quality  "coarse" when only the ffmpeg whisper filter was available.
- * @property {string} engine          "transformers", "whisper-cli" or "ffmpeg".
+ * @property {typeof TRANSCRIBE_ENGINES[number]} engine
  */
 
 // ---------------------------------------------------------------------------
@@ -240,6 +329,7 @@ export const ASSET_KINDS = Object.freeze([
  * @property {number} cut_every_ms_min        Shortest time between visual changes.
  * @property {number} cut_every_ms_max
  * @property {number} sfx_per_minute          Sound effect budget.
+ * @property {{min:number,target:number,max:number}} [density_per_10s]  Visual changes per rolling 10 s; the governor's 4/6/8 when absent.
  * @property {{saturation:number,contrast:number,warmth:number}} grade
  * @property {string} accent                  Default accent color, "#RRGGBB".
  */
@@ -285,7 +375,7 @@ export const ASSET_KINDS = Object.freeze([
  * One sound effect cue.
  * @typedef {object} SfxCue
  * @property {number} out_ms
- * @property {'tap'|'submit'|'pop'|'whoosh'|'ding'|'riser'|'bass-hit'|'snap'|'page'|'complete'} name
+ * @property {typeof SFX_NAMES[number]} name
  * @property {number} gain_db              Relative to speech, usually -12.
  */
 
@@ -350,6 +440,15 @@ export const ASSET_KINDS = Object.freeze([
  * @property {RenderResult} [render]
  */
 
+/**
+ * What export writes. summary.md lists the files in plain words; source-map.json maps each output to its plan hash.
+ * @typedef {object} ExportResult
+ * @property {string} dir                  Absolute folder path.
+ * @property {{path:string, bytes:number, kind:'video'|'image'|'caption'|'doc'}[]} files
+ * @property {string} summary_path
+ * @property {string} source_map_path
+ */
+
 // ---------------------------------------------------------------------------
 // Carousels and images
 // ---------------------------------------------------------------------------
@@ -404,6 +503,57 @@ export const ASSET_KINDS = Object.freeze([
  */
 
 /**
+ * One format a platform accepts (for example an Instagram reel or a Pinterest pin).
+ * @typedef {object} PlatformFormat
+ * @property {string} id                   For example "reel", "carousel", "short", "pin".
+ * @property {string} label
+ * @property {('video'|'image'|'text')[]} accepts
+ * @property {string} [aspect]             For example "9:16" or "4:5".
+ * @property {number} [maxSeconds]
+ * @property {number} [idealSeconds]
+ * @property {number} [maxImages]
+ */
+
+/**
+ * One platform's rules, as served by GET https://dandelionapp.io/api/kit/platform-rules.
+ * @typedef {object} PlatformRule
+ * @property {string} name
+ * @property {PlatformFormat[]} formats
+ * @property {ChannelLimits} limits
+ * @property {string} style                One short paragraph on how the words should read there.
+ */
+
+/**
+ * The whole rules document. Fetched live with a 1-day disk cache; assets/platform-rules.snapshot.json is the fallback.
+ * @typedef {object} PlatformRules
+ * @property {Record<string, PlatformRule>} platforms  Keyed by CHANNEL_IDS.
+ * @property {string} [fetched_at]         ISO time of the live fetch; absent for the bundled snapshot.
+ */
+
+/**
+ * One Dandelion job (one piece of content going to one channel), as the post card shows it after a send.
+ * @typedef {object} PostJob
+ * @property {string} id                   Dandelion job id.
+ * @property {string} channel_id           Dandelion channel id.
+ * @property {typeof CHANNEL_IDS[number]} platform
+ * @property {string} handle
+ * @property {'review'|'scheduled'|'posting'|'posted'|'skipped'|'failed'} status
+ * @property {string} [post_at]            ISO time when scheduled.
+ * @property {ChannelCopy} copy
+ * @property {string[]} checks             Plain sentences from Dandelion's review.checks that must be fixed first.
+ */
+
+/**
+ * What send_to_dandelion recorded on the bundle.
+ * @typedef {object} SentBundle
+ * @property {string} brand_id
+ * @property {string} content_id           Dandelion library item id.
+ * @property {'library'|'review'} mode
+ * @property {PostJob[]} jobs              Empty in library mode or when no channel can post.
+ * @property {number} sent_at              Unix ms.
+ */
+
+/**
  * The offer to post: content plus a draft for each channel.
  * @typedef {object} PostBundle
  * @property {string} id
@@ -411,7 +561,9 @@ export const ASSET_KINDS = Object.freeze([
  * @property {string[]} files              Absolute paths of images or videos (empty for text only).
  * @property {string} [text]               The original text the agent wrote.
  * @property {string} [project_id]
- * @property {Record<string, {copy: ChannelCopy, warnings: string[]}>} channels  Keyed by CHANNEL_IDS.
+ * @property {Record<string, {copy: ChannelCopy, limits: ChannelLimits, warnings: string[]}>} channels  Keyed by CHANNEL_IDS.
+ * @property {'live'|'snapshot'} rules_source  Where the limits came from.
+ * @property {SentBundle} [sent]           Set after send_to_dandelion.
  * @property {number} created_at           Unix ms.
  */
 
@@ -419,9 +571,11 @@ export const ASSET_KINDS = Object.freeze([
  * What the post card needs to know about the Dandelion account.
  * @typedef {object} DandelionState
  * @property {boolean} connected
+ * @property {{id:string,name:string}} [workspace]
  * @property {string} [plan]
+ * @property {{used:number,limit:number,resets_at?:string}} [usage]  Monthly AI actions.
  * @property {{id:string,name:string}[]} [brands]
- * @property {{id:string,platform:string,handle:string,can_post:boolean}[]} [channels]
+ * @property {{id:string,brand_id:string,platform:string,handle:string,can_post:boolean}[]} [channels]
  * @property {{platform:string,url:string}[]} [connect_links]
  */
 
