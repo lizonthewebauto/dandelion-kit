@@ -1,0 +1,972 @@
+{
+  "look_id": "karaoke-clean",
+  "caption_theme": "karaoke-highlight",
+  "accent": "#FFD93D",
+  "seed": 1,
+  "duration_ms": 25257,
+  "beats": [
+    {
+      "id": "b1",
+      "kind": "default",
+      "out_start_ms": 0,
+      "out_end_ms": 2804,
+      "first_word": 1,
+      "last_word": 7,
+      "text": "so if you edit videos you probably",
+      "treatment": "hook-card",
+      "emphasis_words": [],
+      "screen_text": "Most people get captions wrong"
+    },
+    {
+      "id": "b2",
+      "kind": "default",
+      "out_start_ms": 2804,
+      "out_end_ms": 5921,
+      "first_word": 8,
+      "last_word": 14,
+      "text": "waste three hours every week on captions.",
+      "treatment": "punch-in",
+      "emphasis_words": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "b3",
+      "kind": "default",
+      "out_start_ms": 5921,
+      "out_end_ms": 9456,
+      "first_word": 16,
+      "last_word": 24,
+      "text": "the biggest mistake is doing it all by hand.",
+      "treatment": "punch-in",
+      "emphasis_words": [
+        17,
+        22
+      ]
+    },
+    {
+      "id": "b4",
+      "kind": "default",
+      "out_start_ms": 9456,
+      "out_end_ms": 12248,
+      "first_word": 28,
+      "last_word": 35,
+      "text": "I want to show you a faster way.",
+      "treatment": "face",
+      "emphasis_words": []
+    },
+    {
+      "id": "b5",
+      "kind": "list-step",
+      "out_start_ms": 12248,
+      "out_end_ms": 14370,
+      "first_word": 36,
+      "last_word": 40,
+      "text": "First, drop in your clip.",
+      "treatment": "face",
+      "emphasis_words": [],
+      "wanted_treatment": "numbered-build",
+      "rendered_as": "face"
+    },
+    {
+      "id": "b6",
+      "kind": "list-step",
+      "out_start_ms": 14370,
+      "out_end_ms": 18205,
+      "first_word": 41,
+      "last_word": 50,
+      "text": "Second, pick a look and let it cut the pauses.",
+      "treatment": "face",
+      "emphasis_words": [],
+      "wanted_treatment": "numbered-build",
+      "rendered_as": "face"
+    },
+    {
+      "id": "b7",
+      "kind": "default",
+      "out_start_ms": 18205,
+      "out_end_ms": 20511,
+      "first_word": 53,
+      "last_word": 57,
+      "text": "it takes about ten minutes.",
+      "treatment": "hold-wide",
+      "emphasis_words": [
+        56
+      ]
+    },
+    {
+      "id": "b8",
+      "kind": "question",
+      "out_start_ms": 20511,
+      "out_end_ms": 23070,
+      "first_word": 58,
+      "last_word": 62,
+      "text": "Is that really all? Yes.",
+      "treatment": "punch-in",
+      "emphasis_words": []
+    },
+    {
+      "id": "b9",
+      "kind": "cta",
+      "out_start_ms": 23070,
+      "out_end_ms": 25257,
+      "first_word": 63,
+      "last_word": 67,
+      "text": "Follow me for more tips.",
+      "treatment": "cta-end",
+      "emphasis_words": []
+    }
+  ],
+  "captions": [
+    {
+      "start_ms": 0,
+      "end_ms": 391,
+      "word_indexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "text": "so if you edit",
+      "active_word": 0
+    },
+    {
+      "start_ms": 391,
+      "end_ms": 672,
+      "word_indexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "text": "so if you edit",
+      "active_word": 1
+    },
+    {
+      "start_ms": 672,
+      "end_ms": 1011,
+      "word_indexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "text": "so if you edit",
+      "active_word": 2
+    },
+    {
+      "start_ms": 1011,
+      "end_ms": 1298,
+      "word_indexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "text": "so if you edit",
+      "active_word": 3
+    },
+    {
+      "start_ms": 1298,
+      "end_ms": 1931,
+      "word_indexes": [
+        5,
+        6,
+        7
+      ],
+      "text": "videos you probably",
+      "active_word": 0
+    },
+    {
+      "start_ms": 1931,
+      "end_ms": 2270,
+      "word_indexes": [
+        5,
+        6,
+        7
+      ],
+      "text": "videos you probably",
+      "active_word": 1
+    },
+    {
+      "start_ms": 2270,
+      "end_ms": 2749,
+      "word_indexes": [
+        5,
+        6,
+        7
+      ],
+      "text": "videos you probably",
+      "active_word": 2
+    },
+    {
+      "start_ms": 2749,
+      "end_ms": 3314,
+      "word_indexes": [
+        8,
+        9,
+        10
+      ],
+      "text": "waste three hours",
+      "active_word": 0
+    },
+    {
+      "start_ms": 3314,
+      "end_ms": 3749,
+      "word_indexes": [
+        8,
+        9,
+        10
+      ],
+      "text": "waste three hours",
+      "active_word": 1
+    },
+    {
+      "start_ms": 3749,
+      "end_ms": 4084,
+      "word_indexes": [
+        8,
+        9,
+        10
+      ],
+      "text": "waste three hours",
+      "active_word": 2
+    },
+    {
+      "start_ms": 4084,
+      "end_ms": 4629,
+      "word_indexes": [
+        11,
+        12,
+        13
+      ],
+      "text": "every week on",
+      "active_word": 0
+    },
+    {
+      "start_ms": 4629,
+      "end_ms": 5026,
+      "word_indexes": [
+        11,
+        12,
+        13
+      ],
+      "text": "every week on",
+      "active_word": 1
+    },
+    {
+      "start_ms": 5026,
+      "end_ms": 5217,
+      "word_indexes": [
+        11,
+        12,
+        13
+      ],
+      "text": "every week on",
+      "active_word": 2
+    },
+    {
+      "start_ms": 5217,
+      "end_ms": 5896,
+      "word_indexes": [
+        14
+      ],
+      "text": "captions.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 5896,
+      "end_ms": 6385,
+      "word_indexes": [
+        16,
+        17,
+        18
+      ],
+      "text": "the biggest mistake",
+      "active_word": 0
+    },
+    {
+      "start_ms": 6385,
+      "end_ms": 6926,
+      "word_indexes": [
+        16,
+        17,
+        18
+      ],
+      "text": "the biggest mistake",
+      "active_word": 1
+    },
+    {
+      "start_ms": 6926,
+      "end_ms": 7357,
+      "word_indexes": [
+        16,
+        17,
+        18
+      ],
+      "text": "the biggest mistake",
+      "active_word": 2
+    },
+    {
+      "start_ms": 7357,
+      "end_ms": 7738,
+      "word_indexes": [
+        19,
+        20,
+        21,
+        22
+      ],
+      "text": "is doing it all",
+      "active_word": 0
+    },
+    {
+      "start_ms": 7738,
+      "end_ms": 8153,
+      "word_indexes": [
+        19,
+        20,
+        21,
+        22
+      ],
+      "text": "is doing it all",
+      "active_word": 1
+    },
+    {
+      "start_ms": 8153,
+      "end_ms": 8434,
+      "word_indexes": [
+        19,
+        20,
+        21,
+        22
+      ],
+      "text": "is doing it all",
+      "active_word": 2
+    },
+    {
+      "start_ms": 8434,
+      "end_ms": 8673,
+      "word_indexes": [
+        19,
+        20,
+        21,
+        22
+      ],
+      "text": "is doing it all",
+      "active_word": 3
+    },
+    {
+      "start_ms": 8673,
+      "end_ms": 9044,
+      "word_indexes": [
+        23,
+        24
+      ],
+      "text": "by hand.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 9044,
+      "end_ms": 9431,
+      "word_indexes": [
+        23,
+        24
+      ],
+      "text": "by hand.",
+      "active_word": 1
+    },
+    {
+      "start_ms": 9431,
+      "end_ms": 9814,
+      "word_indexes": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "text": "I want to show",
+      "active_word": 0
+    },
+    {
+      "start_ms": 9814,
+      "end_ms": 10181,
+      "word_indexes": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "text": "I want to show",
+      "active_word": 1
+    },
+    {
+      "start_ms": 10181,
+      "end_ms": 10482,
+      "word_indexes": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "text": "I want to show",
+      "active_word": 2
+    },
+    {
+      "start_ms": 10482,
+      "end_ms": 10769,
+      "word_indexes": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "text": "I want to show",
+      "active_word": 3
+    },
+    {
+      "start_ms": 10769,
+      "end_ms": 11168,
+      "word_indexes": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "text": "you a faster way.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 11168,
+      "end_ms": 11411,
+      "word_indexes": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "text": "you a faster way.",
+      "active_word": 1
+    },
+    {
+      "start_ms": 11411,
+      "end_ms": 11884,
+      "word_indexes": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "text": "you a faster way.",
+      "active_word": 2
+    },
+    {
+      "start_ms": 11884,
+      "end_ms": 12223,
+      "word_indexes": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "text": "you a faster way.",
+      "active_word": 3
+    },
+    {
+      "start_ms": 12223,
+      "end_ms": 12848,
+      "word_indexes": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "text": "First, drop in your",
+      "active_word": 0
+    },
+    {
+      "start_ms": 12848,
+      "end_ms": 13215,
+      "word_indexes": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "text": "First, drop in your",
+      "active_word": 1
+    },
+    {
+      "start_ms": 13215,
+      "end_ms": 13496,
+      "word_indexes": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "text": "First, drop in your",
+      "active_word": 2
+    },
+    {
+      "start_ms": 13496,
+      "end_ms": 13783,
+      "word_indexes": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "text": "First, drop in your",
+      "active_word": 3
+    },
+    {
+      "start_ms": 13783,
+      "end_ms": 14280,
+      "word_indexes": [
+        40
+      ],
+      "text": "clip.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 14430,
+      "end_ms": 15113,
+      "word_indexes": [
+        41,
+        42,
+        43,
+        44
+      ],
+      "text": "Second, pick a look",
+      "active_word": 0
+    },
+    {
+      "start_ms": 15113,
+      "end_ms": 15470,
+      "word_indexes": [
+        41,
+        42,
+        43,
+        44
+      ],
+      "text": "Second, pick a look",
+      "active_word": 1
+    },
+    {
+      "start_ms": 15470,
+      "end_ms": 15713,
+      "word_indexes": [
+        41,
+        42,
+        43,
+        44
+      ],
+      "text": "Second, pick a look",
+      "active_word": 2
+    },
+    {
+      "start_ms": 15713,
+      "end_ms": 16000,
+      "word_indexes": [
+        41,
+        42,
+        43,
+        44
+      ],
+      "text": "Second, pick a look",
+      "active_word": 3
+    },
+    {
+      "start_ms": 16000,
+      "end_ms": 16449,
+      "word_indexes": [
+        45,
+        46,
+        47,
+        48
+      ],
+      "text": "and let it cut",
+      "active_word": 0
+    },
+    {
+      "start_ms": 16449,
+      "end_ms": 16758,
+      "word_indexes": [
+        45,
+        46,
+        47,
+        48
+      ],
+      "text": "and let it cut",
+      "active_word": 1
+    },
+    {
+      "start_ms": 16758,
+      "end_ms": 17049,
+      "word_indexes": [
+        45,
+        46,
+        47,
+        48
+      ],
+      "text": "and let it cut",
+      "active_word": 2
+    },
+    {
+      "start_ms": 17049,
+      "end_ms": 17288,
+      "word_indexes": [
+        45,
+        46,
+        47,
+        48
+      ],
+      "text": "and let it cut",
+      "active_word": 3
+    },
+    {
+      "start_ms": 17288,
+      "end_ms": 17697,
+      "word_indexes": [
+        49,
+        50
+      ],
+      "text": "the pauses.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 17697,
+      "end_ms": 18180,
+      "word_indexes": [
+        49,
+        50
+      ],
+      "text": "the pauses.",
+      "active_word": 1
+    },
+    {
+      "start_ms": 18180,
+      "end_ms": 18621,
+      "word_indexes": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "text": "it takes about ten",
+      "active_word": 0
+    },
+    {
+      "start_ms": 18621,
+      "end_ms": 19066,
+      "word_indexes": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "text": "it takes about ten",
+      "active_word": 1
+    },
+    {
+      "start_ms": 19066,
+      "end_ms": 19501,
+      "word_indexes": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "text": "it takes about ten",
+      "active_word": 2
+    },
+    {
+      "start_ms": 19501,
+      "end_ms": 19740,
+      "word_indexes": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "text": "it takes about ten",
+      "active_word": 3
+    },
+    {
+      "start_ms": 19740,
+      "end_ms": 20391,
+      "word_indexes": [
+        57
+      ],
+      "text": "minutes.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 20601,
+      "end_ms": 21032,
+      "word_indexes": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "text": "Is that really all?",
+      "active_word": 0
+    },
+    {
+      "start_ms": 21032,
+      "end_ms": 21419,
+      "word_indexes": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "text": "Is that really all?",
+      "active_word": 1
+    },
+    {
+      "start_ms": 21419,
+      "end_ms": 21892,
+      "word_indexes": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "text": "Is that really all?",
+      "active_word": 2
+    },
+    {
+      "start_ms": 21892,
+      "end_ms": 22251,
+      "word_indexes": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "text": "Is that really all?",
+      "active_word": 3
+    },
+    {
+      "start_ms": 22401,
+      "end_ms": 22910,
+      "word_indexes": [
+        62
+      ],
+      "text": "Yes.",
+      "active_word": 0
+    },
+    {
+      "start_ms": 23200,
+      "end_ms": 23813,
+      "word_indexes": [
+        63,
+        64,
+        65,
+        66
+      ],
+      "text": "Follow me for more",
+      "active_word": 0
+    },
+    {
+      "start_ms": 23813,
+      "end_ms": 24094,
+      "word_indexes": [
+        63,
+        64,
+        65,
+        66
+      ],
+      "text": "Follow me for more",
+      "active_word": 1
+    },
+    {
+      "start_ms": 24094,
+      "end_ms": 24433,
+      "word_indexes": [
+        63,
+        64,
+        65,
+        66
+      ],
+      "text": "Follow me for more",
+      "active_word": 2
+    },
+    {
+      "start_ms": 24433,
+      "end_ms": 24720,
+      "word_indexes": [
+        63,
+        64,
+        65,
+        66
+      ],
+      "text": "Follow me for more",
+      "active_word": 3
+    },
+    {
+      "start_ms": 24720,
+      "end_ms": 25217,
+      "word_indexes": [
+        67
+      ],
+      "text": "tips.",
+      "active_word": 0
+    }
+  ],
+  "camera": [
+    {
+      "out_start_ms": 0,
+      "out_end_ms": 2804,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.05
+    },
+    {
+      "out_start_ms": 2804,
+      "out_end_ms": 4363,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.05
+    },
+    {
+      "out_start_ms": 4363,
+      "out_end_ms": 5921,
+      "kind": "wide",
+      "zoom_from": 1,
+      "zoom_to": 1
+    },
+    {
+      "out_start_ms": 5921,
+      "out_end_ms": 6462,
+      "kind": "wide",
+      "zoom_from": 1,
+      "zoom_to": 1
+    },
+    {
+      "out_start_ms": 6462,
+      "out_end_ms": 7961,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.0539
+    },
+    {
+      "out_start_ms": 7961,
+      "out_end_ms": 9456,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.0532
+    },
+    {
+      "out_start_ms": 9456,
+      "out_end_ms": 11228,
+      "kind": "micro-punch",
+      "zoom_from": 1,
+      "zoom_to": 1.03
+    },
+    {
+      "out_start_ms": 11228,
+      "out_end_ms": 12248,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.0572
+    },
+    {
+      "out_start_ms": 12248,
+      "out_end_ms": 13774,
+      "kind": "micro-punch",
+      "zoom_from": 1,
+      "zoom_to": 1.03
+    },
+    {
+      "out_start_ms": 13774,
+      "out_end_ms": 15887,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.0533
+    },
+    {
+      "out_start_ms": 15887,
+      "out_end_ms": 17046,
+      "kind": "wide",
+      "zoom_from": 1,
+      "zoom_to": 1
+    },
+    {
+      "out_start_ms": 17046,
+      "out_end_ms": 18205,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.0586
+    },
+    {
+      "out_start_ms": 18205,
+      "out_end_ms": 19358,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.0558
+    },
+    {
+      "out_start_ms": 19358,
+      "out_end_ms": 20511,
+      "kind": "wide",
+      "zoom_from": 1,
+      "zoom_to": 1
+    },
+    {
+      "out_start_ms": 20511,
+      "out_end_ms": 21631,
+      "kind": "punch-in",
+      "zoom_from": 1,
+      "zoom_to": 1.05
+    },
+    {
+      "out_start_ms": 21631,
+      "out_end_ms": 23070,
+      "kind": "wide",
+      "zoom_from": 1,
+      "zoom_to": 1
+    },
+    {
+      "out_start_ms": 23070,
+      "out_end_ms": 25257,
+      "kind": "wide",
+      "zoom_from": 1,
+      "zoom_to": 1
+    }
+  ],
+  "sfx": [
+    {
+      "out_ms": 12348,
+      "name": "ding",
+      "gain_db": -12
+    }
+  ],
+  "hook": {
+    "text": "Most people get captions wrong",
+    "formula": "most-people-wrong",
+    "score": 76,
+    "candidates": [
+      {
+        "text": "Most people get captions wrong",
+        "formula": "most-people-wrong",
+        "score": 76
+      },
+      {
+        "text": "Nobody tells you this about captions",
+        "formula": "forbidden-knowledge",
+        "score": 75
+      },
+      {
+        "text": "The mistake everyone makes with captions",
+        "formula": "mistake-autopsy",
+        "score": 70
+      }
+    ]
+  },
+  "caption_anchor": null,
+  "hash": "d58d93b0f534e175"
+}

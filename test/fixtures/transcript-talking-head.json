@@ -1,0 +1,483 @@
+{
+  "duration_ms": 30694,
+  "transcript": {
+    "words": [
+      {
+        "text": "Um,",
+        "start_ms": 620,
+        "end_ms": 811,
+        "conf": 0.93
+      },
+      {
+        "text": "so",
+        "start_ms": 971,
+        "end_ms": 1162,
+        "conf": 0.93
+      },
+      {
+        "text": "if",
+        "start_ms": 1272,
+        "end_ms": 1463,
+        "conf": 0.93
+      },
+      {
+        "text": "you",
+        "start_ms": 1553,
+        "end_ms": 1792,
+        "conf": 0.93
+      },
+      {
+        "text": "edit",
+        "start_ms": 1892,
+        "end_ms": 2179,
+        "conf": 0.93
+      },
+      {
+        "text": "videos",
+        "start_ms": 2299,
+        "end_ms": 2682,
+        "conf": 0.93
+      },
+      {
+        "text": "you",
+        "start_ms": 2812,
+        "end_ms": 3051,
+        "conf": 0.93
+      },
+      {
+        "text": "probably",
+        "start_ms": 3151,
+        "end_ms": 3630,
+        "conf": 0.93
+      },
+      {
+        "text": "waste",
+        "start_ms": 3740,
+        "end_ms": 4075,
+        "conf": 0.93
+      },
+      {
+        "text": "three",
+        "start_ms": 4195,
+        "end_ms": 4530,
+        "conf": 0.93
+      },
+      {
+        "text": "hours",
+        "start_ms": 4630,
+        "end_ms": 4965,
+        "conf": 0.93
+      },
+      {
+        "text": "every",
+        "start_ms": 5085,
+        "end_ms": 5420,
+        "conf": 0.93
+      },
+      {
+        "text": "week",
+        "start_ms": 5510,
+        "end_ms": 5797,
+        "conf": 0.93
+      },
+      {
+        "text": "on",
+        "start_ms": 5907,
+        "end_ms": 6098,
+        "conf": 0.93
+      },
+      {
+        "text": "captions.",
+        "start_ms": 6198,
+        "end_ms": 6677,
+        "conf": 0.93
+      },
+      {
+        "text": "The",
+        "start_ms": 7057,
+        "end_ms": 7296,
+        "conf": 0.93
+      },
+      {
+        "text": "the",
+        "start_ms": 7416,
+        "end_ms": 7655,
+        "conf": 0.93
+      },
+      {
+        "text": "biggest",
+        "start_ms": 7755,
+        "end_ms": 8186,
+        "conf": 0.93
+      },
+      {
+        "text": "mistake",
+        "start_ms": 8296,
+        "end_ms": 8727,
+        "conf": 0.93
+      },
+      {
+        "text": "is",
+        "start_ms": 8817,
+        "end_ms": 9008,
+        "conf": 0.93
+      },
+      {
+        "text": "doing",
+        "start_ms": 9108,
+        "end_ms": 9443,
+        "conf": 0.93
+      },
+      {
+        "text": "it",
+        "start_ms": 9523,
+        "end_ms": 9714,
+        "conf": 0.93
+      },
+      {
+        "text": "all",
+        "start_ms": 9804,
+        "end_ms": 10043,
+        "conf": 0.93
+      },
+      {
+        "text": "by",
+        "start_ms": 10143,
+        "end_ms": 10334,
+        "conf": 0.93
+      },
+      {
+        "text": "hand.",
+        "start_ms": 10414,
+        "end_ms": 10701,
+        "conf": 0.93
+      },
+      {
+        "text": "I",
+        "start_ms": 11041,
+        "end_ms": 11184,
+        "conf": 0.93
+      },
+      {
+        "text": "want",
+        "start_ms": 11274,
+        "end_ms": 11561,
+        "conf": 0.93
+      },
+      {
+        "text": "to",
+        "start_ms": 11641,
+        "end_ms": 11832,
+        "conf": 0.93
+      },
+      {
+        "text": "I",
+        "start_ms": 11982,
+        "end_ms": 12125,
+        "conf": 0.93
+      },
+      {
+        "text": "want",
+        "start_ms": 12215,
+        "end_ms": 12502,
+        "conf": 0.93
+      },
+      {
+        "text": "to",
+        "start_ms": 12582,
+        "end_ms": 12773,
+        "conf": 0.93
+      },
+      {
+        "text": "show",
+        "start_ms": 12883,
+        "end_ms": 13170,
+        "conf": 0.93
+      },
+      {
+        "text": "you",
+        "start_ms": 13260,
+        "end_ms": 13499,
+        "conf": 0.93
+      },
+      {
+        "text": "a",
+        "start_ms": 13569,
+        "end_ms": 13712,
+        "conf": 0.93
+      },
+      {
+        "text": "faster",
+        "start_ms": 13812,
+        "end_ms": 14195,
+        "conf": 0.93
+      },
+      {
+        "text": "way.",
+        "start_ms": 14285,
+        "end_ms": 14524,
+        "conf": 0.93
+      },
+      {
+        "text": "First,",
+        "start_ms": 15874,
+        "end_ms": 16209,
+        "conf": 0.93
+      },
+      {
+        "text": "drop",
+        "start_ms": 16349,
+        "end_ms": 16636,
+        "conf": 0.93
+      },
+      {
+        "text": "in",
+        "start_ms": 16716,
+        "end_ms": 16907,
+        "conf": 0.93
+      },
+      {
+        "text": "your",
+        "start_ms": 16997,
+        "end_ms": 17284,
+        "conf": 0.93
+      },
+      {
+        "text": "clip.",
+        "start_ms": 17374,
+        "end_ms": 17661,
+        "conf": 0.93
+      },
+      {
+        "text": "Second,",
+        "start_ms": 18081,
+        "end_ms": 18464,
+        "conf": 0.93
+      },
+      {
+        "text": "pick",
+        "start_ms": 18614,
+        "end_ms": 18901,
+        "conf": 0.93
+      },
+      {
+        "text": "a",
+        "start_ms": 18971,
+        "end_ms": 19114,
+        "conf": 0.93
+      },
+      {
+        "text": "look",
+        "start_ms": 19214,
+        "end_ms": 19501,
+        "conf": 0.93
+      },
+      {
+        "text": "and",
+        "start_ms": 19621,
+        "end_ms": 19860,
+        "conf": 0.93
+      },
+      {
+        "text": "let",
+        "start_ms": 19950,
+        "end_ms": 20189,
+        "conf": 0.93
+      },
+      {
+        "text": "it",
+        "start_ms": 20259,
+        "end_ms": 20450,
+        "conf": 0.93
+      },
+      {
+        "text": "cut",
+        "start_ms": 20550,
+        "end_ms": 20789,
+        "conf": 0.93
+      },
+      {
+        "text": "the",
+        "start_ms": 20869,
+        "end_ms": 21108,
+        "conf": 0.93
+      },
+      {
+        "text": "pauses.",
+        "start_ms": 21198,
+        "end_ms": 21581,
+        "conf": 0.93
+      },
+      {
+        "text": "You",
+        "start_ms": 22101,
+        "end_ms": 22340,
+        "conf": 0.93
+      },
+      {
+        "text": "know,",
+        "start_ms": 22410,
+        "end_ms": 22697,
+        "conf": 0.93
+      },
+      {
+        "text": "it",
+        "start_ms": 23027,
+        "end_ms": 23218,
+        "conf": 0.93
+      },
+      {
+        "text": "takes",
+        "start_ms": 23318,
+        "end_ms": 23653,
+        "conf": 0.93
+      },
+      {
+        "text": "about",
+        "start_ms": 23763,
+        "end_ms": 24098,
+        "conf": 0.93
+      },
+      {
+        "text": "ten",
+        "start_ms": 24198,
+        "end_ms": 24437,
+        "conf": 0.93
+      },
+      {
+        "text": "minutes.",
+        "start_ms": 24537,
+        "end_ms": 24968,
+        "conf": 0.93
+      },
+      {
+        "text": "Is",
+        "start_ms": 25448,
+        "end_ms": 25639,
+        "conf": 0.93
+      },
+      {
+        "text": "that",
+        "start_ms": 25729,
+        "end_ms": 26016,
+        "conf": 0.93
+      },
+      {
+        "text": "really",
+        "start_ms": 26116,
+        "end_ms": 26499,
+        "conf": 0.93
+      },
+      {
+        "text": "all?",
+        "start_ms": 26589,
+        "end_ms": 26828,
+        "conf": 0.93
+      },
+      {
+        "text": "Yes.",
+        "start_ms": 27248,
+        "end_ms": 27487,
+        "conf": 0.93
+      },
+      {
+        "text": "Follow",
+        "start_ms": 28047,
+        "end_ms": 28430,
+        "conf": 0.93
+      },
+      {
+        "text": "me",
+        "start_ms": 28510,
+        "end_ms": 28701,
+        "conf": 0.93
+      },
+      {
+        "text": "for",
+        "start_ms": 28791,
+        "end_ms": 29030,
+        "conf": 0.93
+      },
+      {
+        "text": "more",
+        "start_ms": 29130,
+        "end_ms": 29417,
+        "conf": 0.93
+      },
+      {
+        "text": "tips.",
+        "start_ms": 29507,
+        "end_ms": 29794,
+        "conf": 0.93
+      }
+    ],
+    "segments": [
+      {
+        "start_ms": 620,
+        "end_ms": 6677,
+        "text": "Um, so if you edit videos you probably waste three hours every week on captions.",
+        "first_word": 0,
+        "last_word": 14
+      },
+      {
+        "start_ms": 7057,
+        "end_ms": 10701,
+        "text": "The the biggest mistake is doing it all by hand.",
+        "first_word": 15,
+        "last_word": 24
+      },
+      {
+        "start_ms": 11041,
+        "end_ms": 14524,
+        "text": "I want to I want to show you a faster way.",
+        "first_word": 25,
+        "last_word": 35
+      },
+      {
+        "start_ms": 15874,
+        "end_ms": 17661,
+        "text": "First, drop in your clip.",
+        "first_word": 36,
+        "last_word": 40
+      },
+      {
+        "start_ms": 18081,
+        "end_ms": 21581,
+        "text": "Second, pick a look and let it cut the pauses.",
+        "first_word": 41,
+        "last_word": 50
+      },
+      {
+        "start_ms": 22101,
+        "end_ms": 24968,
+        "text": "You know, it takes about ten minutes.",
+        "first_word": 51,
+        "last_word": 57
+      },
+      {
+        "start_ms": 25448,
+        "end_ms": 26828,
+        "text": "Is that really all?",
+        "first_word": 58,
+        "last_word": 61
+      },
+      {
+        "start_ms": 27248,
+        "end_ms": 27487,
+        "text": "Yes.",
+        "first_word": 62,
+        "last_word": 62
+      },
+      {
+        "start_ms": 28047,
+        "end_ms": 29794,
+        "text": "Follow me for more tips.",
+        "first_word": 63,
+        "last_word": 67
+      }
+    ],
+    "language": "en",
+    "quality": "precise",
+    "engine": "transformers"
+  }
+}
