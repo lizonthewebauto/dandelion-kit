@@ -27,7 +27,7 @@ import { buildVideoGraph, gradeFilters, QUALITY, snapPieces, WORK_FPS } from './
 import { ffmpegLog } from './run.mjs';
 
 /** Bump when the render recipe changes, so cached files from an older recipe are not reused. */
-export const RENDER_VERSION = 1;
+export const RENDER_VERSION = 2;
 
 /** @typedef {(stage: string, fraction: number, message?: string) => void} ProgressFn */
 

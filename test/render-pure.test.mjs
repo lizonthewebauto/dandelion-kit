@@ -517,3 +517,18 @@ test('a punchier pace changes the picture more often than a gentle one', () => {
     `${punchy.camera.length} vs ${gentle.camera.length}`,
   );
 });
+
+// ---------------------------------------------------------------------------
+// Command line
+// ---------------------------------------------------------------------------
+
+test('the edit command line reads flags and keeps the video path', async () => {
+  const { parseEditArgs } = await import('../core/render/cli.mjs');
+  const { flags, positional } = parseEditArgs(['clip.mp4', '--look', 'bold-value', '--out', 'out dir', '--variants', '3', '--hook', 'Stop doing this']);
+  assert.deepEqual(positional, ['clip.mp4']);
+  assert.equal(flags.look, 'bold-value');
+  assert.equal(flags.out, 'out dir');
+  assert.equal(flags.variants, '3');
+  assert.equal(flags.hook, 'Stop doing this');
+  assert.equal(parseEditArgs(['a.mp4', '--variants']).flags.variants, true);
+});
