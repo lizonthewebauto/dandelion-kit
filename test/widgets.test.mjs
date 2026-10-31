@@ -63,10 +63,11 @@ test('withWidgetMeta adds the card uri, and app-only visibility for the tools on
   assert.equal(withWidgetMeta('approve_post', plain), plain);
 });
 
-test('CSP: no network of our own, no extra domains', () => {
+test('CSP: no network of our own, only the data: and blob: schemes for pictures and video', () => {
   const meta = widgetResourceMeta();
   assert.deepEqual(meta.ui.csp.connectDomains, []);
-  assert.deepEqual(meta.ui.csp.resourceDomains, []);
+  assert.deepEqual(meta.ui.csp.resourceDomains, ['data:', 'blob:']);
+  for (const entry of meta.ui.csp.resourceDomains) assert.doesNotMatch(entry, /[;'" \r\n]|https?:\/\//, `${entry} must be a bare scheme, never a host`);
   assert.equal(meta.ui.prefersBorder, false);
 });
 

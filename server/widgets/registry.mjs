@@ -67,13 +67,17 @@ export function toolWidgetUri(tool) {
 
 /**
  * The resource's _meta.ui. The cards make no network calls of their own (every action is a tool call through the host,
- * pictures and video arrive as data: URLs), so both lists stay empty and the host's default CSP applies.
+ * pictures and video arrive as data: URLs), so connectDomains stays empty. resourceDomains names only the data: and
+ * blob: schemes: the reference host already allows them, and MCP Inspector 2.13 builds img-src and media-src from this
+ * list alone, so without them every picture and video in a card is blocked there.
  * prefersBorder is false because each card draws its own Marigold card.
  */
+export const RESOURCE_SCHEMES = Object.freeze(['data:', 'blob:']);
+
 export function widgetResourceMeta() {
   return {
     ui: {
-      csp: { connectDomains: /** @type {string[]} */ ([]), resourceDomains: /** @type {string[]} */ ([]) },
+      csp: { connectDomains: /** @type {string[]} */ ([]), resourceDomains: [...RESOURCE_SCHEMES] },
       prefersBorder: false,
     },
   };
