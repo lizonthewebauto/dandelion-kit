@@ -50,13 +50,17 @@ test('the MCP server entry starts bin/kit.mjs serve', () => {
   assert.deepEqual(mcpb.server.mcp_config.args.slice(1), ['serve']);
 });
 
-test('the Codex plugin starts the kit without a plugin root variable', () => {
+test('the Codex plugin starts its own installed copy, without a plugin root variable', () => {
+  // Codex does not expand ${PLUGIN_ROOT} in a plugin's server args, but it resolves a relative cwd against the plugin
+  // folder. npx github:... downloaded the kit again on every start (20 to 70 s), so Codex began the turn without it.
   const codex = readJson('.codex-plugin/plugin.json');
   assert.equal(codex.mcpServers, './mcp.json');
   const server = readJson('mcp.json').mcpServers['dandelion-kit'];
-  assert.equal(server.command, 'npx');
-  assert.deepEqual(server.args, ['-y', 'github:lizonthewebauto/dandelion-kit', 'serve']);
+  assert.equal(server.command, 'node');
+  assert.deepEqual(server.args, ['./bin/kit.mjs', 'serve']);
+  assert.equal(server.cwd, '.');
   assert.ok(!JSON.stringify(server).includes('PLUGIN_ROOT'));
+  assert.ok(!JSON.stringify(server).includes('npx'));
 });
 
 test('each skill has front matter that matches its folder', () => {
