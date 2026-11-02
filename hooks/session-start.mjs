@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // SessionStart hook for Claude Code. Prints one JSON object on stdout: the post-anything rule as added context.
 // No dependencies, no network. Written as plain statements, which the host treats as facts about this setup.
-import { existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { depsReady as packagesReachable } from '../bin/deps.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const depsReady = existsSync(join(ROOT, 'node_modules', '@modelcontextprotocol', 'sdk', 'package.json'));
+const depsReady = packagesReachable(ROOT);
 
 const lines = [
   'The Dandelion Kit plugin is installed. Its MCP server is dandelion-kit with these tools: doctor, open_video, rough_cut, pick_look, plan_shots, render_reel, make_variants, export, make_carousel, make_image, offer_post, connect_dandelion, dandelion_status, send_to_dandelion.',

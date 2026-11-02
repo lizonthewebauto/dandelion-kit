@@ -14,6 +14,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createForwarder } from './shim-forward.mjs';
+import { depsReady as packagesReachable } from './deps.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
@@ -42,9 +43,9 @@ function sleep(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
-/** True when the packages are installed. */
+/** True when the packages are installed, here or in a parent folder (npx puts them one level up). */
 function depsReady() {
-  return existsSync(join(ROOT, 'node_modules', '@modelcontextprotocol', 'sdk', 'package.json'));
+  return packagesReachable(ROOT);
 }
 
 /**
