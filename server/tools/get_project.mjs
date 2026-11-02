@@ -8,7 +8,7 @@ export const tool = defineTool({
   name: 'get_project',
   title: 'Project status',
   description:
-    'Where a reel project stands: length, whether the words are ready, the rough cut, the look, the shot plan, and the draft and final renders. Also tells you the next step, and says so when a reel or its variants are still being built.',
+    'Show the reel editor card for a project (each step with its button). Use it when the person asks to open, see or pick up a video project. Where a reel project stands: length, whether the words are ready, the rough cut, the look, the shot plan, and the draft and final renders. Also tells you the next step, and says so when a reel or its variants are still being built.',
   input: { project_id: z.string().describe('The id from open_video, for example p_3fa91c07.') },
   annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   async run(args) {
