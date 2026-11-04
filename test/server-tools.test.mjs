@@ -322,6 +322,9 @@ test('offer_post refuses missing words, missing files and the wrong file type', 
   const wrong = await kit.call('offer_post', { kind: 'video', text: 'Hi', files: [join(ROOT, 'assets', 'platform-rules.snapshot.json')] });
   assert.equal(wrong.isError, true);
   assert.match(textOf(wrong), /needs a video/);
+  const tooMany = await kit.call('offer_post', { kind: 'video', text: 'Hi', files: ['a.mp4', 'b.mp4'] });
+  assert.equal(tooMany.isError, true);
+  assert.match(textOf(tooMany), /takes one video/);
 });
 
 test('offer_post for a carousel project uses its slides and gives the card thumbnails to read', async () => {

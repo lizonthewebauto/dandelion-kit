@@ -48,10 +48,15 @@
     ];
   }
 
+  var checkedNote = "";
+
   function build(d) {
     if (d.pending) return buildPending(d);
+    var note = checkedNote;
+    checkedNote = "";
     var pid = d.project_id;
     var renders = Array.isArray(d.renders) ? d.renders : [];
+    var finalStale = renders.some(function (r) { return r.quality === "final" && r.stale; });
     var st = { active: d.active || (renders[renders.length - 1] && renders[renders.length - 1].id) || "", busy: "", error: "" };
     var body = h("div");
     function byId(id) { for (var i = 0; i < renders.length; i++) if (renders[i].id === id) return renders[i]; return renders[0] || null; }
@@ -75,6 +80,7 @@
       st.busy = "Checking the file..."; st.error = ""; render();
       DK.call("check_reel", { project_id: pid, file: rr.file }).then(function (r) {
         DK.tellModel("In the Dandelion Kit card the person ran the checks again on " + DK.base(rr.file) + ".");
+        checkedNote = "Checks ran again just now.";
         DK.go("check_reel", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
@@ -132,7 +138,7 @@
         var tabs = h("div", { class: "tabs", role: "tablist", "aria-label": "Versions" });
         renders.forEach(function (r) {
           var b = h("button", { type: "button", class: "tab", role: "tab", "aria-selected": r.id === rr.id ? "true" : "false", disabled: !!st.busy }, r.label || nice(r.id));
-          b.addEventListener("click", function () { st.active = r.id; render(); });
+          b.addEventListener("click", function () { st.active = r.id; note = ""; render(); });
           tabs.appendChild(b);
         });
         body.appendChild(tabs);
@@ -145,7 +151,8 @@
       var isFinal = rr.quality === "final";
       if (rr.stale) body.appendChild(h("div", { class: "mt-s" }, DK.note("The shot plan changed after this was built, so this one is out of date. Build it again to match.", "warn")));
       var actions = h("div", { class: "actions" });
-      if (!hasFinal() || (isFinal && rr.stale)) actions.appendChild(DK.btn(hasFinal() ? "Render final again" : "Render final", { kind: "gold", icon: "film", disabled: !!st.busy, onclick: doFinal }));
+      if (note) body.appendChild(h("p", { class: "ok-line", role: "status" }, DK.glyph("check"), note));
+      if (!hasFinal() || finalStale) actions.appendChild(DK.btn(hasFinal() ? "Render final again" : "Render final", { kind: "gold", icon: "film", disabled: !!st.busy, onclick: doFinal }));
       if (isFinal) actions.appendChild(DK.btn("Post with Dandelion", { kind: "gold", icon: "send", disabled: !!st.busy || tally.stop > 0, onclick: function () { doPost(rr); } }));
       actions.appendChild(DK.btn("Make 2 variants", { icon: "layers", disabled: !!st.busy, onclick: doVariants }));
       actions.appendChild(DK.btn("Run checks again", { kind: "quiet", small: true, disabled: !!st.busy, onclick: function () { doCheck(rr); } }));

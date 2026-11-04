@@ -48,6 +48,7 @@ export const tool = defineTool({
     else if (!files.length && args.project_id) files = await filesFromProject(args.project_id, kind);
     if (kind !== 'text' && kind !== 'thread') {
       if (!files.length) return fail(`A ${kind} post needs files. Pass the file paths (files) or a project id (project_id).`);
+      if (kind === 'video' && files.length > 1) return fail(`A video post takes one video, and this has ${files.length}. Offer one at a time.`);
       const missing = files.filter((f) => !isFile(f));
       if (missing.length) return fail(`I could not find ${missing.length === 1 ? 'this file' : 'these files'}: ${missing.join(', ')}`);
       const wrong = files.filter((f) => (kind === 'video' ? !isVideoFile(f) : !isImageFile(f)));

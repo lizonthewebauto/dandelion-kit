@@ -191,6 +191,13 @@ test('the post card asks again while a send is running, and offers no Approve on
   assert.match(post, /j\.status === "preparing"[\s\S]*?DK\.btn\("Check again"/);
 });
 
+test('the export card posts only the main reel; the preview offers a stale final from any tab and says when checks ran', () => {
+  assert.match(viewSource('kit-export'), /videos\.slice\(0, 1\)/);
+  const preview = viewSource('kit-preview');
+  assert.match(preview, /!hasFinal\(\) \|\| finalStale/);
+  assert.match(preview, /checkedNote = "Checks ran again/);
+});
+
 test('each release is a new card address, so a host never pairs new tools with an old card', () => {
   const version = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
   for (const w of WIDGETS) assert.equal(w.uri, `ui://dandelion-kit/v${version}/${w.id}.html`);

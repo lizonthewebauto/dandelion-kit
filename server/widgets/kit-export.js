@@ -20,7 +20,8 @@
       }, function (e) { st.error = e.message; render(); });
     }
     function post() {
-      var picked = videos.length ? videos : media;
+      // Variants are other versions of the same video, not parts of one post. The main reel comes first.
+      var picked = videos.length ? videos.slice(0, 1) : media;
       var kind = videos.length ? "video" : picked.length === 1 ? "image" : "carousel";
       st.busy = "Getting the channel versions ready..."; st.error = ""; render();
       var args = { kind: kind, files: picked.map(function (f) { return f.path; }) };

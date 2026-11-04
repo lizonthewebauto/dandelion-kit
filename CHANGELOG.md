@@ -2,6 +2,14 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.6 (2026-11-04)
+
+Found by tapping every button on the real cards in Claude Desktop.
+
+- Fix: Post with Dandelion on the export card put the reel and its variants into one video post. It now offers only the main reel, and `offer_post` refuses a video post with more than one video.
+- Fix: with an out of date final, the Draft tab offered no way to build it again. Render final again now shows on every tab.
+- Fix: Run checks again gave no sign that it ran. The card now says so.
+
 ## 1.0.5 (2026-11-04)
 
 - Fix: after a kit update, Claude Desktop kept showing the old card with the new tools until the app restarted. The card address now carries the kit version (`ui://dandelion-kit/v<version>/<id>.html`), so each release is a new card. Cards in chats from an older version may not draw; their text is still there.
