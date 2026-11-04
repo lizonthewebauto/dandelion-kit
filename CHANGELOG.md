@@ -2,6 +2,13 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.5 (2026-11-04)
+
+- Fix: after a kit update, Claude Desktop kept showing the old card with the new tools until the app restarted. The card address now carries the kit version (`ui://dandelion-kit/v<version>/<id>.html`), so each release is a new card. Cards in chats from an older version may not draw; their text is still there.
+- Fix: a scheduled post can now be cancelled from the post card, in two taps. `skip_post` waits out the few seconds after scheduling when Dandelion answers that the post changed.
+- Fix: while a post is "Getting ready", the card shows the person's words, not Dandelion's draft. This changes `PostJob.copy` for a `preparing` job.
+- Fix: `export` could copy a final reel older than the shot plan and say nothing. `export` now answers with `warnings`, the export card and summary.md say so, and the preview card marks an out of date reel and offers Render final again.
+
 ## 1.0.4 (2026-11-04)
 
 Found by tapping Approve on the real post card in Claude Desktop.

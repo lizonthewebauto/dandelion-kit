@@ -143,8 +143,9 @@
 
       var tally = DK.checkTally(rr.checks);
       var isFinal = rr.quality === "final";
+      if (rr.stale) body.appendChild(h("div", { class: "mt-s" }, DK.note("The shot plan changed after this was built, so this one is out of date. Build it again to match.", "warn")));
       var actions = h("div", { class: "actions" });
-      if (!hasFinal()) actions.appendChild(DK.btn("Render final", { kind: "gold", icon: "film", disabled: !!st.busy, onclick: doFinal }));
+      if (!hasFinal() || (isFinal && rr.stale)) actions.appendChild(DK.btn(hasFinal() ? "Render final again" : "Render final", { kind: "gold", icon: "film", disabled: !!st.busy, onclick: doFinal }));
       if (isFinal) actions.appendChild(DK.btn("Post with Dandelion", { kind: "gold", icon: "send", disabled: !!st.busy || tally.stop > 0, onclick: function () { doPost(rr); } }));
       actions.appendChild(DK.btn("Make 2 variants", { icon: "layers", disabled: !!st.busy, onclick: doVariants }));
       actions.appendChild(DK.btn("Run checks again", { kind: "quiet", small: true, disabled: !!st.busy, onclick: function () { doCheck(rr); } }));

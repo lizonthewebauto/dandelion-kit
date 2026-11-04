@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import { APP_ONLY_TOOLS, CHANNEL_IDS, TOOL_NAMES, WIDGET_IDS } from '../core/types.mjs';
 import { makeTempDir } from '../core/util/fs.mjs';
 import { connectKit, textOf, DASH_RE } from './server-helpers.mjs';
+import { widgetById } from '../server/widgets/registry.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -42,8 +43,8 @@ test('lists exactly the 25 tools in order and the 8 card resources', async () =>
   assert.deepEqual(tools.map((t) => t.name), [...TOOL_NAMES]);
   const { resources } = await kit.client.listResources();
   assert.equal(resources.length, 8);
-  assert.deepEqual(resources.map((r) => r.uri).sort(), WIDGET_IDS.map((id) => `ui://dandelion-kit/v1/${id}.html`).sort());
-  const read = await kit.client.readResource({ uri: 'ui://dandelion-kit/v1/kit-post.html' });
+  assert.deepEqual(resources.map((r) => r.uri).sort(), WIDGET_IDS.map((id) => widgetById(id)?.uri).sort());
+  const read = await kit.client.readResource({ uri: String(widgetById('kit-post')?.uri) });
   assert.match(String(/** @type {any} */ (read.contents[0]).text), /<html/i);
 });
 
@@ -57,8 +58,8 @@ test('app-only tools are hidden from the model, card tools point at their card, 
     assert.ok(byName[name].description.length > 30, `${name} has a description`);
     assert.ok(byName[name].annotations, `${name} has annotations`);
   }
-  assert.equal(byName.rough_cut._meta.ui.resourceUri, 'ui://dandelion-kit/v1/kit-cut-review.html');
-  assert.equal(byName.offer_post._meta.ui.resourceUri, 'ui://dandelion-kit/v1/kit-post.html');
+  assert.equal(byName.rough_cut._meta.ui.resourceUri, widgetById('kit-cut-review')?.uri);
+  assert.equal(byName.offer_post._meta.ui.resourceUri, widgetById('kit-post')?.uri);
   assert.equal(byName.approve_post.annotations.destructiveHint, true);
   assert.equal(byName.approve_post.annotations.openWorldHint, true);
   assert.equal(byName.doctor.annotations.readOnlyHint, true);

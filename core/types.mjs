@@ -44,7 +44,7 @@ export const APP_ONLY_TOOLS = Object.freeze([
   'read_asset',
 ]);
 
-/** The eight cards, served as ui://dandelion-kit/v1/<id>.html. */
+/** The eight cards, served as ui://dandelion-kit/v<kit version>/<id>.html. */
 export const WIDGET_IDS = Object.freeze([
   'kit-project',
   'kit-cut-review',

@@ -36,7 +36,7 @@ test('eight widgets, one per id, with versioned ui:// uris', () => {
   assert.deepEqual(WIDGETS.map((w) => w.id), [...WIDGET_IDS]);
   assert.equal(new Set(WIDGETS.map((w) => w.uri)).size, 8);
   for (const w of WIDGETS) {
-    assert.match(w.uri, /^ui:\/\/dandelion-kit\/v\d+\/[a-z-]+\.html$/);
+    assert.match(w.uri, /^ui:\/\/dandelion-kit\/v\d+\.\d+\.\d+\/[a-z-]+\.html$/);
     assert.equal(w.uri.endsWith(`/${w.id}.html`), true);
     assert.ok(w.title && w.description);
   }
@@ -189,6 +189,18 @@ test('the post card asks again while a send is running, and offers no Approve on
   assert.equal((post.match(/label: "Approve now"/g) || []).length, 1);
   assert.match(post, /if \(job\.status === "review"\) \{\s*if \(local\.stopped\)[^\n]*\n\s*var actions = [^\n]*\n[\s\S]{0,700}?label: "Approve now"/);
   assert.match(post, /j\.status === "preparing"[\s\S]*?DK\.btn\("Check again"/);
+});
+
+test('each release is a new card address, so a host never pairs new tools with an old card', () => {
+  const version = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
+  for (const w of WIDGETS) assert.equal(w.uri, `ui://dandelion-kit/v${version}/${w.id}.html`);
+});
+
+test('a scheduled post can be cancelled from the card, in two taps; stale reels and exports say so', () => {
+  const post = viewSource('kit-post');
+  assert.match(post, /job\.status === "scheduled"[\s\S]*?DK\.twoTap\(\{\s*label: "Cancel this post"[\s\S]*?DK\.call\("skip_post"/);
+  assert.match(viewSource('kit-preview'), /rr\.stale[\s\S]*?out of date/);
+  assert.match(viewSource('kit-export'), /d\.warnings/);
 });
 
 test('the post card offers Post it anyway only after Dandelion stops a post, and it takes two taps', () => {

@@ -272,6 +272,7 @@ test('send review: a post that stays "processing" is shown with a check, not as 
     t.fake.state.processingPolls = 1000;
     const { sent } = await sendBundle({ bundle, brandId: t.fake.brandId, mode: 'review', channels: ['instagram'], pollMs: 5, preparingMs: 60 });
     assert.equal(sent.jobs[0].status, 'preparing');
+    assert.equal(sent.jobs[0].copy.caption, 'Only words.', 'shows the words that will be saved, not the draft from Dandelion');
     assert.match(sent.jobs[0].checks.join(' '), /still getting this post ready/);
     assert.equal(t.fake.state.calls.some((c) => c.tool === 'update_job_copy'), false, 'no words sent while Dandelion refuses them');
   } finally {
@@ -528,6 +529,26 @@ test('tools: a post Dandelion stops says why in plain words, posts nothing, and 
     const forced = await kit.call('approve_post', { job_id: jobId, force: true });
     assert.equal(forced.isError, undefined, textOf(forced));
     assert.equal(forced.structuredContent.job.status, 'posting');
+  } finally {
+    await kit.close();
+    await t.stop();
+  }
+});
+
+test('tools: skip_post waits out the moment a scheduled post is being handed over', async () => {
+  const t = await useFakeDandelion({ withChannels: true });
+  process.env.DANDELION_KIT_CONNECT_WAIT_MS = '15000';
+  const kit = await connectKit();
+  try {
+    await kit.call('connect_dandelion');
+    const offer = await kit.call('offer_post', { kind: 'text', text: 'My own words.', channels: ['instagram'] });
+    const rev = await kit.call('send_to_dandelion', { bundle_id: offer.structuredContent.bundle.id, brand_id: t.fake.brandId, mode: 'review', channels: ['instagram'] });
+    const jobId = rev.structuredContent.sent.jobs[0].id;
+    t.fake.state.skipChanged = 1;
+    const skipped = await kit.call('skip_post', { job_id: jobId });
+    assert.equal(skipped.isError, undefined, textOf(skipped));
+    assert.equal(skipped.structuredContent.job.status, 'skipped');
+    assert.equal(t.fake.state.jobs.get(jobId).status, 'skipped');
   } finally {
     await kit.close();
     await t.stop();

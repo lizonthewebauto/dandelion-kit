@@ -71,6 +71,8 @@ export async function startFakeDandelion(options = {}) {
     notReady: 0,
     /** Make update_job_copy reject. */
     copyError: /** @type {string | null} */ (null),
+    /** Make the next skip_job say the post changed this many times, as during a schedule handover. */
+    skipChanged: 0,
     /** Make approve_job stop unless it is forced, with this reason. */
     approveStop: /** @type {string | null} */ (null),
     plan: 'Free',
@@ -188,6 +190,10 @@ export async function startFakeDandelion(options = {}) {
     tool('skip_job', { job_id: z.string() }, (a) => {
       const j = state.jobs.get(a.job_id);
       if (!j) return bad('not_found', 'We could not find that post.');
+      if (state.skipChanged > 0) {
+        state.skipChanged -= 1;
+        return bad('conflict', 'This post changed while you were looking at it. Refresh and try again.');
+      }
       j.status = 'skipped';
       return ok({ job: jobView(j) });
     });

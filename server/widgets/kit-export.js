@@ -45,6 +45,7 @@
       body.appendChild(h("div", { class: "row wrap" }, DK.pill(DK.plural(files.length, "file"), "ok", "check"), h("span", { class: "small muted num", text: DK.bytes(total) + " in all" })));
       body.appendChild(h("p", { class: "small muted mt-s", text: "Saved to this folder on your computer:" }));
       body.appendChild(h("div", { class: "code", text: d.dir || "" }));
+      (Array.isArray(d.warnings) ? d.warnings : []).forEach(function (w) { body.appendChild(h("div", { class: "mt-s" }, DK.note(w, "warn"))); });
       var ul = h("ul", { class: "mt" });
       files.forEach(function (f) { ul.appendChild(fileRow(f)); });
       body.appendChild(ul);

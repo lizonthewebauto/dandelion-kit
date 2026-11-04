@@ -292,6 +292,7 @@ function textCarousel(d) {
 function textExport(d) {
   const files = Array.isArray(d.files) ? d.files : [];
   const lines = [`Exported ${plural(files.length, 'file')} to ${d.dir}`, '', ...files.map((f) => `- ${f.path} (${sizeText(f.bytes)}, ${f.kind})`)];
+  for (const w of Array.isArray(d.warnings) ? d.warnings : []) lines.push('', `Out of date: ${w}`);
   lines.push('', `Summary: ${d.summary_path}`, 'To show the folder, call open_path with the folder. Next: offer_post to post it.');
   return lines.join('\n');
 }

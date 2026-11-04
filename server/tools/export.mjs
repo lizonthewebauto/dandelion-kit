@@ -66,6 +66,8 @@ export const tool = defineTool({
     const map = [];
     /** @type {string[]} */
     const lines = [`# ${project.title}`, '', `Exported by the Dandelion Kit on ${new Date().toISOString().slice(0, 10)}.`, ''];
+    /** @type {string[]} */
+    const warnings = [];
 
     if (project.type === 'carousel') {
       const slides = project.carousel?.rendered ?? [];
@@ -95,6 +97,10 @@ export const tool = defineTool({
         map.push({ file: name, kind: 'video', from: r.file, plan_hash: r.plan_hash, quality: r.quality });
         const bad = (r.checks ?? []).filter((c) => c.status !== 'pass').length;
         lines.push(`- ${name}: ${renderLabel(key)}, 1080 by 1920, ${size(bytes)}, ${bad === 0 ? 'all checks passed' : `${bad} check${bad === 1 ? '' : 's'} to look at`}`);
+        if (!r.variant_id && project.shot_plan && r.plan_hash !== project.shot_plan.hash) {
+          warnings.push(`${name} was built before the last change to the shot plan, so it does not match it. Build the final reel again, then export again.`);
+          lines.push(`  Out of date: built before the last change to the shot plan.`);
+        }
       }
       if (project.shot_plan?.captions?.length) {
         const to = join(dir, `${slug}-captions.srt`);
@@ -112,6 +118,6 @@ export const tool = defineTool({
     await writeFile(summaryPath, `${lines.join('\n')}\n`, 'utf8');
     files.push({ path: summaryPath, bytes: (await stat(summaryPath)).size, kind: 'doc' });
     files.push({ path: sourceMapPath, bytes: (await stat(sourceMapPath)).size, kind: 'doc' });
-    return ok({ project_id: project.id, dir, files, summary_path: summaryPath, source_map_path: sourceMapPath });
+    return ok({ project_id: project.id, dir, files, summary_path: summaryPath, source_map_path: sourceMapPath, ...(warnings.length ? { warnings } : {}) });
   },
 });

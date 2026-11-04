@@ -460,6 +460,22 @@
         }
         if (local.msg) host.appendChild(h("p", { class: "ok-line", role: "status" }, DK.glyph("check"), local.msg));
         if (local.err) host.appendChild(DK.err(local.err));
+        if (job.status === "scheduled") {
+          host.appendChild(h("div", { class: "actions" }, DK.twoTap({
+            label: "Cancel this post", icon: "x", small: true,
+            question: "Cancel this post?",
+            detail: "It will not go out. The files stay in your Dandelion library.",
+            yes: "Yes, cancel it",
+            onConfirm: function () {
+              return DK.call("skip_post", { job_id: job.id }).then(function (r) {
+                setStatus(r, "skipped");
+                local.msg = "Cancelled. It will not post.";
+                DK.tellModel("In the Dandelion Kit card the person cancelled the scheduled " + label + " (job " + job.id + "). It will not post.");
+                paint();
+              });
+            }
+          })));
+        }
         if (job.status === "review") {
           if (local.stopped) host.appendChild(DK.err(local.stopped + " Nothing went out."));
           var actions = h("div", { class: "actions" });

@@ -230,7 +230,8 @@ async function describeJob(
     platform: /** @type {any} */ (kit),
     handle,
     status: preparing ? 'preparing' : kitJobStatus(job.status, Boolean(job.scheduled_for)),
-    copy: kitCopyFromDandelion(job.copy),
+    // While it is preparing, Dandelion's copy is its own draft. Show the words that will be saved.
+    copy: preparing && entry?.copy ? entry.copy : kitCopyFromDandelion(job.copy),
     checks,
   };
   if (job.scheduled_for) out.post_at = String(job.scheduled_for);

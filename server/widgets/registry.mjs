@@ -1,5 +1,6 @@
 // ui:// resources for the eight kit cards, the tool to card map, and the CSP meta.
 // server/index.mjs calls registerWidgets(server) once, before it registers any tool.
+import { readFileSync } from 'node:fs';
 import { RESOURCE_MIME_TYPE, RESOURCE_URI_META_KEY, registerAppResource } from '@modelcontextprotocol/ext-apps/server';
 import { APP_ONLY_TOOLS } from '../../core/types.mjs';
 import { widgetPage } from './page.mjs';
@@ -7,21 +8,27 @@ import { widgetPage } from './page.mjs';
 /**
  * @typedef {object} WidgetDef
  * @property {string} id
- * @property {string} uri       Bump the version in the URI when a change must not use a host's cached copy.
+ * @property {string} uri
  * @property {string} title
  * @property {string} description
  */
 
+// Hosts keep a card by its URI, and Claude Desktop keeps the old card after a kit update until it restarts.
+// The version in the URI makes each release a new card, so the card always matches the tools.
+const KIT_VERSION = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version;
+/** @param {string} id */
+const cardUri = (id) => `ui://dandelion-kit/v${KIT_VERSION}/${id}.html`;
+
 /** @type {readonly WidgetDef[]} */
 export const WIDGETS = Object.freeze([
-  { id: 'kit-project', uri: 'ui://dandelion-kit/v1/kit-project.html', title: 'Video project', description: 'Where a video project stands and the next step: transcript, rough cut, look, shot plan, draft and final. Also the kit check.' },
-  { id: 'kit-cut-review', uri: 'ui://dandelion-kit/v1/kit-cut-review.html', title: 'Rough cut', description: 'Before and after length, and every piece the rough cut would remove, with a switch to keep each one.' },
-  { id: 'kit-look-picker', uri: 'ui://dandelion-kit/v1/kit-look-picker.html', title: 'Pick a look', description: 'Five looks with a caption sample, an accent color and a caption style.' },
-  { id: 'kit-shot-plan', uri: 'ui://dandelion-kit/v1/kit-shot-plan.html', title: 'Shot plan', description: 'The hook with scored choices, then each beat with how it is shown and its on-screen text.' },
-  { id: 'kit-preview', uri: 'ui://dandelion-kit/v1/kit-preview.html', title: 'Reel preview', description: 'Plays the draft or final reel with 8 frames, every check, variant tabs, and buttons to render, vary or post.' },
-  { id: 'kit-carousel', uri: 'ui://dandelion-kit/v1/kit-carousel.html', title: 'Carousel and images', description: 'Slide strip, a fields editor for the chosen slide, layout picker and brand colors.' },
-  { id: 'kit-export', uri: 'ui://dandelion-kit/v1/kit-export.html', title: 'Exported files', description: 'The files that were written, with Open folder and Post with Dandelion.' },
-  { id: 'kit-post', uri: 'ui://dandelion-kit/v1/kit-post.html', title: 'Post with Dandelion', description: 'A version for each app with limit meters, connect Dandelion, send, then approve, schedule or skip each post.' },
+  { id: 'kit-project', uri: cardUri('kit-project'), title: 'Video project', description: 'Where a video project stands and the next step: transcript, rough cut, look, shot plan, draft and final. Also the kit check.' },
+  { id: 'kit-cut-review', uri: cardUri('kit-cut-review'), title: 'Rough cut', description: 'Before and after length, and every piece the rough cut would remove, with a switch to keep each one.' },
+  { id: 'kit-look-picker', uri: cardUri('kit-look-picker'), title: 'Pick a look', description: 'Five looks with a caption sample, an accent color and a caption style.' },
+  { id: 'kit-shot-plan', uri: cardUri('kit-shot-plan'), title: 'Shot plan', description: 'The hook with scored choices, then each beat with how it is shown and its on-screen text.' },
+  { id: 'kit-preview', uri: cardUri('kit-preview'), title: 'Reel preview', description: 'Plays the draft or final reel with 8 frames, every check, variant tabs, and buttons to render, vary or post.' },
+  { id: 'kit-carousel', uri: cardUri('kit-carousel'), title: 'Carousel and images', description: 'Slide strip, a fields editor for the chosen slide, layout picker and brand colors.' },
+  { id: 'kit-export', uri: cardUri('kit-export'), title: 'Exported files', description: 'The files that were written, with Open folder and Post with Dandelion.' },
+  { id: 'kit-post', uri: cardUri('kit-post'), title: 'Post with Dandelion', description: 'A version for each app with limit meters, connect Dandelion, send, then approve, schedule or skip each post.' },
 ]);
 
 /**
