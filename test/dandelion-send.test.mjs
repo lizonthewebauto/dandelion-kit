@@ -507,6 +507,33 @@ test('tools: a send that takes too long answers "still sending", the same call j
   }
 });
 
+test('tools: a post Dandelion stops says why in plain words, posts nothing, and only goes with force', async () => {
+  const t = await useFakeDandelion({ withChannels: true });
+  process.env.DANDELION_KIT_CONNECT_WAIT_MS = '15000';
+  const kit = await connectKit();
+  try {
+    await kit.call('connect_dandelion');
+    const offer = await kit.call('offer_post', { kind: 'text', text: 'My own words.', channels: ['instagram'] });
+    const rev = await kit.call('send_to_dandelion', { bundle_id: offer.structuredContent.bundle.id, brand_id: t.fake.brandId, mode: 'review', channels: ['instagram'] });
+    const jobId = rev.structuredContent.sent.jobs[0].id;
+
+    t.fake.state.approveStop = 'This already went to this Instagram account.';
+    const stopped = await kit.call('approve_post', { job_id: jobId });
+    assert.equal(stopped.isError, true);
+    assert.match(textOf(stopped), /This already went to this Instagram account/);
+    assert.match(textOf(stopped), /Nothing went out/);
+    assert.doesNotMatch(textOf(stopped), /send force/);
+    assert.equal(t.fake.state.jobs.get(jobId).status, 'review');
+
+    const forced = await kit.call('approve_post', { job_id: jobId, force: true });
+    assert.equal(forced.isError, undefined, textOf(forced));
+    assert.equal(forced.structuredContent.job.status, 'posting');
+  } finally {
+    await kit.close();
+    await t.stop();
+  }
+});
+
 test('tools: connect_dandelion answers "waiting" with the link when the person is slow, and dandelion_status sees it finish', async () => {
   const t = await useFakeDandelion();
   process.env.DANDELION_KIT_CONNECT_WAIT_MS = '250';

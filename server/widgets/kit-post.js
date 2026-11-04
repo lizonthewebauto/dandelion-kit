@@ -368,7 +368,7 @@
     /* ---------------- after a send: one card per post ---------------- */
     function jobCard(job) {
       var card = h("article", { class: "jobcard" });
-      var local = { open: false, when: "", msg: "", err: "" };
+      var local = { open: false, when: "", msg: "", err: "", stopped: "" };
       var name = DK.plat(job.platform).n;
       var label = name + " post" + (job.handle ? " to @" + String(job.handle).replace(/^@/, "") : "");
       var host = h("div");
@@ -376,15 +376,26 @@
         var s = r && r.job && r.job.status ? r.job.status : fallback;
         job.status = s;
         if (r && r.job && r.job.post_at) job.post_at = r.job.post_at;
+        paintSentNote();
       }
-      function approveNow() {
-        return DK.call("approve_post", { job_id: job.id }).then(function (r) {
+      function post(force) {
+        var args = { job_id: job.id };
+        if (force) args.force = true;
+        return DK.call("approve_post", args).then(function (r) {
           setStatus(r, "posting");
+          local.stopped = "";
           local.msg = "On its way. It goes out in a minute or two.";
-          DK.tellModel("In the Dandelion Kit card the person tapped Approve now on the " + label + " (job " + job.id + "). It is approved and goes out now. Do not approve it again.");
+          DK.tellModel("In the Dandelion Kit card the person tapped " + (force ? "Post it anyway" : "Approve now") + " on the " + label + " (job " + job.id + "). It is approved and goes out now. Do not approve it again.");
+          paint();
+        }, function (e) {
+          // Dandelion stopped it: say why in plain words and let the person decide. Anything else stays an error in the confirm box.
+          var m = /^([\s\S]*?)\s*Nothing went out\. To post it anyway/.exec((e && e.message) || "");
+          if (!m) throw e;
+          local.stopped = m[1];
           paint();
         });
       }
+      function approveNow() { return post(false); }
       function schedule(iso, ms) {
         return DK.call("approve_post", { job_id: job.id, post_at: iso }).then(function (r) {
           setStatus(r, "scheduled");
@@ -450,8 +461,15 @@
         if (local.msg) host.appendChild(h("p", { class: "ok-line", role: "status" }, DK.glyph("check"), local.msg));
         if (local.err) host.appendChild(DK.err(local.err));
         if (job.status === "review") {
+          if (local.stopped) host.appendChild(DK.err(local.stopped + " Nothing went out."));
           var actions = h("div", { class: "actions" });
-          actions.appendChild(DK.twoTap({
+          actions.appendChild(local.stopped ? DK.twoTap({
+            label: "Post it anyway", icon: "send", small: true,
+            question: "Post it anyway?",
+            detail: "Dandelion stopped this post for the reason above. It goes out on " + name + " right away if you say yes.",
+            yes: "Yes, post it anyway",
+            onConfirm: function () { return post(true); }
+          }) : DK.twoTap({
             label: "Approve now", icon: "send", kind: "gold", small: true,
             question: "Post this now?",
             detail: "It goes out on " + name + " right away." + (checks.length ? " Dandelion found things to fix above." : ""),
@@ -469,14 +487,23 @@
       return card;
     }
 
+    var sentNote = null;
+    function paintSentNote() {
+      if (!sentNote) return;
+      var jobs = bundle.sent && Array.isArray(bundle.sent.jobs) ? bundle.sent.jobs : [];
+      var goes = jobs.some(function (j) { return j.status === "posting" || j.status === "posted" || j.status === "scheduled"; });
+      sentNote.textContent = goes ? "" : "Nothing has gone out yet.";
+    }
+
     function paintJobs() {
       jobsHost.textContent = "";
       var sent = bundle.sent;
       if (!sent) return;
       var jobs = Array.isArray(sent.jobs) ? sent.jobs : [];
       var box = h("section", { class: "card" });
-      box.appendChild(h("div", { class: "row wrap" }, DK.pill(sent.mode === "review" ? "Sent for review" : "Saved to library", "ok", "check"),
-        h("span", { class: "small muted", text: "Nothing has gone out yet." })));
+      sentNote = h("span", { class: "small muted" });
+      box.appendChild(h("div", { class: "row wrap" }, DK.pill(sent.mode === "review" ? "Sent for review" : "Saved to library", "ok", "check"), sentNote));
+      paintSentNote();
       if (!jobs.length) {
         if (sent.mode === "library") box.appendChild(h("p", { class: "small mt-s", text: "Your files are in your Dandelion library as Not shared yet." }));
         var ready = postable();

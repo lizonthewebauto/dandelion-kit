@@ -185,8 +185,16 @@ test('read_asset chunks are whole base64 groups and under the 200000 byte limit'
 test('the post card asks again while a send is running, and offers no Approve on a post still being prepared', () => {
   const post = viewSource('kit-post');
   assert.match(post, /if \(r && r\.pending\) \{[\s\S]*?setTimeout\(ask, 1500\)/);
-  assert.match(post, /if \(job\.status === "review"\) \{\s*var actions = h\("div", \{ class: "actions" \}\);\s*actions\.appendChild\(DK\.twoTap\(\{\s*label: "Approve now"/);
+  // Approve lives only inside the review branch, so a preparing post never offers it.
+  assert.equal((post.match(/label: "Approve now"/g) || []).length, 1);
+  assert.match(post, /if \(job\.status === "review"\) \{\s*if \(local\.stopped\)[^\n]*\n\s*var actions = [^\n]*\n[\s\S]{0,700}?label: "Approve now"/);
   assert.match(post, /j\.status === "preparing"[\s\S]*?DK\.btn\("Check again"/);
+});
+
+test('the post card offers Post it anyway only after Dandelion stops a post, and it takes two taps', () => {
+  const post = viewSource('kit-post');
+  assert.match(post, /local\.stopped \? DK\.twoTap\(\{\s*label: "Post it anyway"[\s\S]*?onConfirm: function \(\) \{ return post\(true\); \}/);
+  assert.equal((post.match(/post\(true\)/g) || []).length, 1);
 });
 
 test('post and approve always take two taps, and schedule uses datetime-local with an offset', () => {

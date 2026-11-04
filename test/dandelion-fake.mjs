@@ -71,6 +71,8 @@ export async function startFakeDandelion(options = {}) {
     notReady: 0,
     /** Make update_job_copy reject. */
     copyError: /** @type {string | null} */ (null),
+    /** Make approve_job stop unless it is forced, with this reason. */
+    approveStop: /** @type {string | null} */ (null),
     plan: 'Free',
   };
 
@@ -174,10 +176,11 @@ export async function startFakeDandelion(options = {}) {
       j.copy = { ...j.copy, ...fields };
       return ok({ job: jobView(j), warnings: [] });
     });
-    tool('approve_job', { job_id: z.string(), post_at: z.string().optional() }, (a) => {
+    tool('approve_job', { job_id: z.string(), post_at: z.string().optional(), force: z.boolean().optional() }, (a) => {
       const j = state.jobs.get(a.job_id);
       if (!j) return bad('not_found', 'We could not find that post.');
       if (j.status !== 'review') return bad('conflict', `Only posts waiting for review can be approved. This one is ${j.status}.`);
+      if (state.approveStop && !a.force) return bad('conflict', `Dandelion stopped this post: ${state.approveStop} Fix it first. To post it anyway, ask the person, then send force: true.`);
       j.status = a.post_at ? 'scheduled' : 'approved';
       j.scheduled_for = a.post_at ?? null;
       return ok({ job: jobView(j), warnings: [] });

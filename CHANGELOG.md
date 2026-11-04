@@ -2,6 +2,13 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.4 (2026-11-04)
+
+Found by tapping Approve on the real post card in Claude Desktop.
+
+- Fix: a post Dandelion stops, such as a duplicate, was a dead end in the card, with "send force: true" on screen. The card now says why in plain words and offers Post it anyway, which takes two taps. `approve_post` gained an optional `force`, and its stop message no longer tells a person to send a field.
+- Fix: the post card kept saying "Nothing has gone out yet" after a post was approved.
+
 ## 1.0.3 (2026-11-04)
 
 - Fix: a caption with no hashtags now means none. Dandelion drafts its own hashtags, and they stayed on the post when the person's words had none. The post card also shows a post's hashtags now, so nothing goes out unseen. Found by checking 1.0.2 against real Dandelion.

@@ -213,9 +213,10 @@ export async function listFlows(brandId) {
  * Approve one post. This publishes to a real account: only after the person said yes to this exact post.
  * @param {string} jobId
  * @param {string} [postAt]  ISO time with a zone.
+ * @param {boolean} [force]  Post even though Dandelion stopped it, after the person saw why and said yes.
  */
-export function approveJob(jobId, postAt) {
-  return callTool('approve_job', { job_id: jobId, ...(postAt ? { post_at: postAt } : {}) });
+export function approveJob(jobId, postAt, force = false) {
+  return callTool('approve_job', { job_id: jobId, ...(postAt ? { post_at: postAt } : {}), ...(force ? { force: true } : {}) });
 }
 
 /** @param {string} jobId */
