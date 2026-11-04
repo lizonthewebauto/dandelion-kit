@@ -18,6 +18,8 @@ test('ids: x is twitter on Dandelion, both ways, and copy fields map without los
   for (const id of CHANNEL_IDS) assert.equal(toKitPlatform(toDandelionPlatform(id)), id);
   assert.deepEqual(dandelionCopyFromKit({ caption: 'Hi', hashtags: ['#a', '#b'] }), { caption: 'Hi', hashtags: ['a', 'b'] });
   assert.deepEqual(dandelionCopyFromKit({ caption: 'Hi', hashtags: ['#a'] }, { skipHashtags: true }), { caption: 'Hi' });
+  assert.deepEqual(dandelionCopyFromKit({ caption: 'Hi' }), { caption: 'Hi', hashtags: [] }, 'no hashtags replaces the ones Dandelion drafted');
+  assert.deepEqual(dandelionCopyFromKit({ caption: 'Hi' }, { skipHashtags: true }), { caption: 'Hi' });
   assert.deepEqual(dandelionCopyFromKit({ title: 'T', description: 'D' }), { title: 'T', description: 'D' });
   assert.deepEqual(kitCopyFromDandelion({ caption: 'Hi', hashtags: ['a', '#b'], first_comment: 'x' }), { caption: 'Hi', hashtags: ['#a', '#b'] });
   assert.deepEqual(kitCopyFromDandelion(null), {});

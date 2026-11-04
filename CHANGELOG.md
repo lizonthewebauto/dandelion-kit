@@ -2,6 +2,10 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.3 (2026-11-04)
+
+- Fix: a caption with no hashtags now means none. Dandelion drafts its own hashtags, and they stayed on the post when the person's words had none. The post card also shows a post's hashtags now, so nothing goes out unseen. Found by checking 1.0.2 against real Dandelion.
+
 ## 1.0.2 (2026-11-04)
 
 Found by the first real post from the kit (Instagram, 3 slide carousel).

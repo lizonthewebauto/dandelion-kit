@@ -438,6 +438,8 @@
           DK.pill(pillText, stt[1], stt[2])));
         var words = mainText(job.copy);
         if (words) host.appendChild(h("p", { class: "cap", text: words }));
+        var tags = job.copy && job.copy.hashtags ? job.copy.hashtags : [];
+        if (tags.length) host.appendChild(h("p", { class: "small muted", text: tags.join(" ") }));
         var checks = Array.isArray(job.checks) ? job.checks : [];
         if (checks.length && (job.status === "review" || job.status === "preparing")) {
           var ul = h("div", { class: "stack-s mt-s" });

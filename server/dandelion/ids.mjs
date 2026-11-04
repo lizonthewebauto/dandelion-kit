@@ -72,6 +72,7 @@ export function dandelionCopyFromKit(copy, options = {}) {
   if (copy.caption) out.caption = copy.caption;
   if (copy.title) out.title = copy.title;
   if (copy.description) out.description = copy.description;
-  if (copy.hashtags?.length && !options.skipHashtags) out.hashtags = copy.hashtags.map((h) => String(h).replace(/^#+/, '')).filter(Boolean);
+  // A caption with no hashtags means none: an empty list replaces the ones Dandelion drafted, which the person never chose.
+  if ((copy.hashtags?.length || copy.caption) && !options.skipHashtags) out.hashtags = (copy.hashtags ?? []).map((h) => String(h).replace(/^#+/, '')).filter(Boolean);
   return out;
 }
