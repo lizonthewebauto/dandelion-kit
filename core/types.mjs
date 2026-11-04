@@ -538,7 +538,7 @@ export const ASSET_KINDS = Object.freeze([
  * @property {string} channel_id           Dandelion channel id.
  * @property {typeof CHANNEL_IDS[number]} platform
  * @property {string} handle
- * @property {'review'|'scheduled'|'posting'|'posted'|'skipped'|'failed'} status
+ * @property {'preparing'|'review'|'scheduled'|'posting'|'posted'|'skipped'|'failed'} status   preparing: Dandelion is not done and the words are not saved, so it cannot be approved.
  * @property {string} [post_at]            ISO time when scheduled.
  * @property {ChannelCopy} copy
  * @property {string[]} checks             Plain sentences from Dandelion's review.checks that must be fixed first.

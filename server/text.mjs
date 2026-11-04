@@ -358,12 +358,19 @@ function textSent(sent) {
     lines.push(`- ${channelName(j.platform)} @${String(j.handle).replace(/^@/, '')} [${j.id}]: ${j.status}${j.post_at ? ` for ${j.post_at}` : ''}`);
     for (const c of j.checks ?? []) lines.push(`    fix first: ${c}`);
   }
+  if (jobs.some((/** @type {Data} */ j) => j.status === 'preparing')) lines.push('', 'A post marked preparing cannot be approved yet. Call send_to_dandelion again with the same arguments to finish it and save its words.');
   lines.push('', 'Only approve with approve_post after the person says yes to that post. skip_post drops one.');
   return lines.join('\n');
 }
 
 /** @param {Data} d */
 function textPost(d) {
+  if (d.pending && d.tool === 'send_to_dandelion') {
+    return [
+      `Still sending to Dandelion. It is ${Math.round((Number(d.progress) || 0) * 100)}% done${d.message ? ` (${d.message})` : ''}. Nothing has gone out.`,
+      `Call send_to_dandelion again with the same arguments (bundle_id ${d.bundle_id}) to wait for it. A second call does not send it twice.`,
+    ].join('\n');
+  }
   if (d.bundle) {
     const b = d.bundle;
     const kinds = /** @type {Record<string, string>} */ ({ text: 'text post', image: 'image post', carousel: 'carousel post', video: 'video post', thread: 'thread' });

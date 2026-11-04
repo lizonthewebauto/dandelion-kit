@@ -1,4 +1,4 @@
-import { approveJob, invalidateState } from '../dandelion/client.mjs';
+import { approveJob, getJob, invalidateState } from '../dandelion/client.mjs';
 import { kitJobStatus } from '../dandelion/ids.mjs';
 import { defineTool, fail, ok, z } from '../lib/kit.mjs';
 import { asFail } from '../dandelion/outcome.mjs';
@@ -21,6 +21,10 @@ export const tool = defineTool({
       postAt = t.toISOString();
     }
     try {
+      const current = await getJob(args.job_id).catch(() => null);
+      if (current?.status === 'queued' || current?.status === 'processing') {
+        return fail('Dandelion is still getting this post ready, so it cannot be approved yet and your words may not be saved. Call send_to_dandelion again with the same arguments, then approve it.');
+      }
       const r = await approveJob(args.job_id, postAt);
       invalidateState();
       const job = r?.job ?? {};

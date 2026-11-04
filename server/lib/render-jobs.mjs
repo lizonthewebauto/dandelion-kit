@@ -25,13 +25,13 @@ export function renderWaitMs() {
 }
 
 /**
- * @typedef {'render_reel' | 'make_variants'} RenderTool
+ * @typedef {'render_reel' | 'make_variants' | 'send_to_dandelion'} RenderTool
  *
  * @typedef {object} RenderJob
  * @property {string} key
- * @property {string} projectId
+ * @property {string} projectId               A project id, or a post id for send_to_dandelion.
  * @property {RenderTool} tool
- * @property {'draft'|'final'} quality
+ * @property {'draft'|'final'} [quality]      Builds only.
  * @property {Record<string, any>} extra     Extra fields for the pending answer, for example the variant count.
  * @property {number} fraction               0 to 1, only goes up.
  * @property {string} message
@@ -66,7 +66,7 @@ export function activeRender(projectId) {
   /** @type {RenderJob | null} */
   let found = null;
   for (const job of jobs.values()) if (job.projectId === projectId && !job.done) found = job;
-  return found ? { quality: found.quality, progress: round2(found.fraction), tool: found.tool, message: found.message } : null;
+  return found ? { quality: found.quality ?? 'draft', progress: round2(found.fraction), tool: found.tool, message: found.message } : null;
 }
 
 /**
@@ -87,8 +87,7 @@ export function stageProgress(report) {
  */
 function pendingOutcome(job) {
   return ok({
-    project_id: job.projectId,
-    quality: job.quality,
+    ...(job.quality ? { project_id: job.projectId, quality: job.quality } : {}),
     tool: job.tool,
     ...job.extra,
     pending: true,
@@ -99,7 +98,7 @@ function pendingOutcome(job) {
 
 /**
  * Start the work.
- * @param {{key: string, projectId: string, tool: RenderTool, quality: 'draft'|'final', extra: Record<string, any>, start: (report: (fraction: number, message?: string) => void) => Promise<import('./kit.mjs').ToolOutcome>}} input
+ * @param {{key: string, projectId: string, tool: RenderTool, quality?: 'draft'|'final', extra: Record<string, any>, start: (report: (fraction: number, message?: string) => void) => Promise<import('./kit.mjs').ToolOutcome>}} input
  * @returns {RenderJob}
  */
 function begin({ key, projectId, tool, quality, extra, start }) {
@@ -183,7 +182,7 @@ function waitForJob(job, ms, signal) {
  * @param {string} input.key               Same key, same build. For example the project, the tool, the quality and the plan.
  * @param {string} input.projectId
  * @param {RenderTool} input.tool
- * @param {'draft'|'final'} input.quality
+ * @param {'draft'|'final'} [input.quality]
  * @param {Record<string, any>} [input.extra]
  * @param {(report: (fraction: number, message?: string) => void) => Promise<import('./kit.mjs').ToolOutcome>} input.start
  *   Does the work and returns what the tool returns. Called once per build.

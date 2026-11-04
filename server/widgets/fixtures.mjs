@@ -330,6 +330,21 @@ export const POST_JOBS = {
   dandelion: POST_CONNECTED.dandelion,
 };
 
+/** A post Dandelion is still preparing: no Approve yet, only Check again. */
+export const POST_JOBS_PREPARING = {
+  bundle: {
+    ...BUNDLE,
+    sent: {
+      brand_id: QA_BRAND.id,
+      content_id: 'ct_demo',
+      mode: 'review',
+      jobs: [{ id: 'j1', channel_id: 'c1', platform: 'instagram', handle: 'morningmethod', status: 'preparing', copy: {}, checks: ['Dandelion is still getting this post ready, so your words are not saved yet. Check again in a minute before you approve it.'] }],
+      sent_at: 1_790_000_100_000,
+    },
+  },
+  dandelion: POST_CONNECTED.dandelion,
+};
+
 /** After a library-only send with no app connected. */
 export const POST_LIBRARY_NO_CHANNELS = {
   bundle: { ...BUNDLE, sent: { brand_id: QA_BRAND.id, content_id: 'ct_demo', mode: 'library', jobs: [], sent_at: 1_790_000_100_000 } },
@@ -474,6 +489,9 @@ export function demoTool(tool, args, state) {
     case 'dandelion_status':
       return ok(state.connected ? 'Signed in.' : 'Not signed in.', { dandelion: copy(state.post.dandelion) });
     case 'send_to_dandelion': {
+      // The first ask is still sending, as a real send is after the 40 second wait. The card asks again by itself.
+      state.sendAsks = (state.sendAsks || 0) + 1;
+      if (state.sendAsks === 1) return ok('Still sending to Dandelion.', { tool: 'send_to_dandelion', bundle_id: args.bundle_id, pending: true, progress: 0.8, message: 'Making a waiting post for each app' });
       const want = new Set(args.channels || []);
       const jobs = args.mode === 'review' ? copy(state.sentJobs).filter((/** @type {any} */ j) => want.has(j.platform) && j.status === 'review') : [];
       state.post.bundle.sent = { brand_id: args.brand_id, content_id: 'ct_demo', mode: args.mode, jobs, sent_at: Date.now() };
@@ -510,5 +528,6 @@ export const CARD_FIXTURES = [
   { file: 'kit-post-connected', widget: 'kit-post', title: 'Post, state 2: connected', data: POST_CONNECTED },
   { file: 'kit-post-connect-links', widget: 'kit-post', title: 'Post, state 2: no app connected yet', data: POST_CONNECTED_NO_CHANNELS },
   { file: 'kit-post-jobs', widget: 'kit-post', title: 'Post, state 3: approve, schedule or skip', data: POST_JOBS },
+  { file: 'kit-post-preparing', widget: 'kit-post', title: 'Post, still being prepared by Dandelion', data: POST_JOBS_PREPARING },
   { file: 'kit-post-library', widget: 'kit-post', title: 'Post, saved to library, no app yet', data: POST_LIBRARY_NO_CHANNELS },
 ];

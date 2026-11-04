@@ -9,7 +9,7 @@
   var ORDER = ["instagram", "tiktok", "youtube", "linkedin", "x", "threads", "facebook", "pinterest"];
   var KIND = { text: "Text post", image: "Image post", carousel: "Carousel", video: "Video", thread: "Thread" };
   var STATUS = {
-    review: ["Needs your OK", "gold", "alert"], scheduled: ["Scheduled", "gold", "clock"], posting: ["Posting now", "gold", "clock"],
+    preparing: ["Getting ready", "off", "clock"], review: ["Needs your OK", "gold", "alert"], scheduled: ["Scheduled", "gold", "clock"], posting: ["Posting now", "gold", "clock"],
     posted: ["Posted", "ok", "check"], skipped: ["Skipped", "off", null], failed: ["Failed", "bad", "stop"]
   };
 
@@ -264,14 +264,24 @@
       st.busy = "Sending your files to Dandelion. Big videos can take a minute..."; st.error = ""; repaint();
       var args = { bundle_id: bundle.id, brand_id: curBrand(), mode: mode };
       if (chans.length) args.channels = chans;
-      DK.call("send_to_dandelion", args).then(function (r) {
-        st.busy = "";
-        absorb(r);
-        if (!bundle.sent) bundle.sent = { brand_id: curBrand(), content_id: "", mode: mode, jobs: [], sent_at: Date.now() };
-        var jobs = (bundle.sent.jobs || []).length;
-        DK.tellModel("In the Dandelion Kit card the person tapped Send to Dandelion (" + (mode === "review" ? "send for review" : "save to library") + "). " + (jobs ? jobs + " posts are waiting for their OK in the card. Nothing has gone out." : "The files are in their Dandelion library. Nothing has gone out."));
-        paintAll();
-      }, function (e) { st.busy = ""; st.error = e.message; repaint(); });
+      function ask() {
+        DK.call("send_to_dandelion", args).then(function (r) {
+          if (r && r.pending) {
+            // Still sending. The same call joins the same send, so it never goes twice.
+            st.busy = (r.message || "Still sending") + ". This can take a few minutes...";
+            repaint();
+            setTimeout(ask, 1500);
+            return;
+          }
+          st.busy = "";
+          absorb(r);
+          if (!bundle.sent) bundle.sent = { brand_id: curBrand(), content_id: "", mode: mode, jobs: [], sent_at: Date.now() };
+          var jobs = (bundle.sent.jobs || []).length;
+          DK.tellModel("In the Dandelion Kit card the person tapped Send to Dandelion (" + (mode === "review" ? "send for review" : "save to library") + "). " + (jobs ? jobs + " posts are waiting for their OK in the card. Nothing has gone out." : "The files are in their Dandelion library. Nothing has gone out."));
+          paintAll();
+        }, function (e) { st.busy = ""; st.error = e.message; repaint(); });
+      }
+      ask();
     }
 
     function channelRows() {
@@ -429,7 +439,7 @@
         var words = mainText(job.copy);
         if (words) host.appendChild(h("p", { class: "cap", text: words }));
         var checks = Array.isArray(job.checks) ? job.checks : [];
-        if (checks.length && job.status === "review") {
+        if (checks.length && (job.status === "review" || job.status === "preparing")) {
           var ul = h("div", { class: "stack-s mt-s" });
           checks.slice(0, 2).forEach(function (c) { ul.appendChild(DK.note(c, "warn")); });
           if (checks.length > 2) ul.appendChild(h("p", { class: "tiny muted", text: "And " + (checks.length - 2) + " more in Dandelion." }));
@@ -483,6 +493,11 @@
         box.appendChild(list);
         var open = DK.linkBtn("Open in Dandelion", DK.appUrl("/app"), { small: true });
         if (open) box.appendChild(h("div", { class: "mt-s" }, open));
+        if (jobs.some(function (j) { return j.status === "preparing"; })) {
+          box.appendChild(h("div", { class: "actions" }, DK.btn("Check again", { icon: "clock", disabled: !!st.busy, onclick: function () { send(sent.mode); } })));
+        }
+        if (st.busy) box.appendChild(h("div", { class: "mt" }, DK.busy(st.busy)));
+        if (st.error) box.appendChild(DK.err(st.error));
       }
       jobsHost.appendChild(box);
     }

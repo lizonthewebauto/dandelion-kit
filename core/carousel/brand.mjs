@@ -19,10 +19,10 @@ export class CarouselError extends Error {
   }
 }
 
-/** @type {BrandConfig} */
+/** No name or handle until the person gives one: placeholder words on a slide would go out in a real post. @type {BrandConfig} */
 export const DEFAULT_BRAND = Object.freeze({
-  name: 'Your Brand',
-  handle: '@yourhandle',
+  name: '',
+  handle: '',
   colors: Object.freeze({ bg: '#F5EFE3', fg: '#1C1B18', accent: '#D9441C', muted: '#6B655A' }),
   fonts: Object.freeze({ heading: 'Fraunces', body: 'Inter' }),
 });
@@ -31,8 +31,8 @@ const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'must look like #1A2B3C');
 
 /** Shape of a (possibly partial) brand.json. */
 export const brandSchema = z.strictObject({
-  name: z.string().trim().min(1).max(40).optional(),
-  handle: z.string().trim().min(1).max(30).optional(),
+  name: z.string().trim().max(40).optional(),
+  handle: z.string().trim().max(30).optional(),
   colors: z
     .object({ bg: hex.optional(), fg: hex.optional(), accent: hex.optional(), muted: hex.optional() })
     .strict()

@@ -182,6 +182,13 @@ test('read_asset chunks are whole base64 groups and under the 200000 byte limit'
   for (const name of ['asset', 'video', 'img']) assert.match(runtimeSource(), new RegExp(`DK\\.${name} = function`));
 });
 
+test('the post card asks again while a send is running, and offers no Approve on a post still being prepared', () => {
+  const post = viewSource('kit-post');
+  assert.match(post, /if \(r && r\.pending\) \{[\s\S]*?setTimeout\(ask, 1500\)/);
+  assert.match(post, /if \(job\.status === "review"\) \{\s*var actions = h\("div", \{ class: "actions" \}\);\s*actions\.appendChild\(DK\.twoTap\(\{\s*label: "Approve now"/);
+  assert.match(post, /j\.status === "preparing"[\s\S]*?DK\.btn\("Check again"/);
+});
+
 test('post and approve always take two taps, and schedule uses datetime-local with an offset', () => {
   const post = viewSource('kit-post');
   assert.match(post, /DK\.twoTap\(\{[\s\S]*?label: "Approve now"[\s\S]*?onConfirm: approveNow/);

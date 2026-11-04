@@ -169,6 +169,7 @@ export async function startFakeDandelion(options = {}) {
       const j = state.jobs.get(a.job_id);
       if (!j) return bad('not_found', 'We could not find that post.');
       if (state.copyError) return bad('invalid_input', state.copyError);
+      if (state.processingPolls > 0) return bad('conflict', 'You can only change posts that are waiting for review. This one is processing.');
       const { job_id: _drop, ...fields } = a;
       j.copy = { ...j.copy, ...fields };
       return ok({ job: jobView(j), warnings: [] });

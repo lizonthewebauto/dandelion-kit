@@ -47,7 +47,7 @@ export function libraryCaption(bundle) {
  * @returns {Promise<{sent: import('../../core/types.mjs').SentBundle, notes: string[]}>}
  */
 export async function sendBundle(options) {
-  const { bundle, brandId, mode = 'library', channels, progress, onSent, api = defaultApi, fetchImpl, pollMs = 3000, preparingMs = 45_000 } = options;
+  const { bundle, brandId, mode = 'library', channels, progress, onSent, api = defaultApi, fetchImpl, pollMs = 3000, preparingMs = 180_000 } = options;
   /** @type {string[]} */
   const notes = [];
   progress?.(0.02, 'Checking your Dandelion account');
@@ -109,6 +109,11 @@ export async function sendBundle(options) {
     return { sent, notes };
   }
 
+  // A post that was still being prepared when the last send ended: finish it now, so its words get saved and it is not shared twice.
+  for (let i = 0; i < sent.jobs.length; i += 1) {
+    if (sent.jobs[i].status === 'preparing') sent.jobs[i] = await describeJob(api, sent.jobs[i].id, { byChannel: new Map(), bundle, pollMs, preparingMs });
+  }
+
   // Review: one waiting post for each connected app the person chose.
   progress?.(0.72, 'Looking at your connected apps');
   const accountChannels = await api.listChannels(brandId);
@@ -145,11 +150,17 @@ export async function sendBundle(options) {
   progress?.(0.78, 'Making a waiting post for each app');
   const share = await shareWhenReady(api, { contentId: sent.content_id, channelIds: targets.map((t) => t.channel.id), pollMs, preparingMs });
   const byChannel = new Map(targets.map((t) => [t.channel.id, t]));
-  let n = 0;
-  for (const jobId of share.job_ids ?? []) {
-    n += 1;
-    progress?.(0.8 + (0.18 * n) / Math.max(1, share.job_ids.length), 'Writing the words for each app');
-    sent.jobs.push(await describeJob(api, jobId, { byChannel, bundle, pollMs, preparingMs }));
+  /** @type {string[]} */
+  const jobIds = share.job_ids ?? [];
+  const firstNew = sent.jobs.length;
+  // Keep the new posts at once, so a send that gets cut off here never shares them again.
+  jobIds.forEach((id, i) => {
+    sent.jobs.push({ id, channel_id: targets[i]?.channel.id ?? '', platform: /** @type {any} */ (targets[i]?.kit), handle: String(targets[i]?.channel.handle ?? ''), status: 'preparing', copy: {}, checks: [] });
+  });
+  await onSent?.(sent);
+  for (let i = 0; i < jobIds.length; i += 1) {
+    progress?.(0.8 + (0.18 * (i + 1)) / jobIds.length, 'Writing the words for each app');
+    sent.jobs[firstNew + i] = await describeJob(api, jobIds[i], { byChannel, bundle, pollMs, preparingMs });
   }
   sent.sent_at = Date.now();
   progress?.(1, 'Posts are waiting for your OK');
@@ -187,12 +198,14 @@ async function describeJob(
     await new Promise((r) => setTimeout(r, o.pollMs));
     job = await api.getJob(jobId);
   }
-  if (job.status === 'queued' || job.status === 'processing') extraChecks.push('Dandelion is still getting this post ready. Check again in a minute before you approve it.');
+  // Dandelion refuses words until the post is ready, and then shows its own draft. Approving that would post words the person never saw.
+  const preparing = job.status === 'queued' || job.status === 'processing';
+  if (preparing) extraChecks.push('Dandelion is still getting this post ready, so your words are not saved yet. Check again in a minute before you approve it.');
 
   const target = o.byChannel.get(job.channel_id);
   const kit = target?.kit ?? toKitPlatform(String(job.platform));
   const entry = o.bundle.channels?.[kit];
-  if (entry?.copy) {
+  if (!preparing && entry?.copy) {
     const fields = dandelionCopyFromKit(entry.copy, { skipHashtags: entry.limits?.hashtags_max === 0 });
     if (Object.keys(fields).length) {
       try {
@@ -216,7 +229,7 @@ async function describeJob(
     channel_id: String(job.channel_id ?? ''),
     platform: /** @type {any} */ (kit),
     handle,
-    status: kitJobStatus(job.status, Boolean(job.scheduled_for)),
+    status: preparing ? 'preparing' : kitJobStatus(job.status, Boolean(job.scheduled_for)),
     copy: kitCopyFromDandelion(job.copy),
     checks,
   };

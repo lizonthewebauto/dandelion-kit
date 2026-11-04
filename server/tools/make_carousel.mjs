@@ -6,7 +6,7 @@ export const tool = defineTool({
   name: 'make_carousel',
   title: 'Make a carousel',
   description:
-    `Render a carousel as JPEG slides (1080 by 1350 by default) from a layout and fields for each slide. Layouts: cover, list, steps, stat, comparison, quote, checklist, myth-fact, before-after, cta, photo-hero, framework. Text that is over a layout's limit is refused with the field name and the limit (nothing is cut silently); set allow_overflow to shrink the text instead. Uses brand.json if present. Always follow with offer_post so the person can post it.
+    `Render a carousel as JPEG slides (1080 by 1350 by default) from a layout and fields for each slide. Layouts: cover, list, steps, stat, comparison, quote, checklist, myth-fact, before-after, cta, photo-hero, framework. Text that is over a layout's limit is refused with the field name and the limit (nothing is cut silently); set allow_overflow to shrink the text instead. Uses brand.json if present; with no brand the slides carry no name or handle, so pass brand with the person's name and handle if you know them. Always follow with offer_post so the person can post it.
 
 Layouts and their fields:
 ${layoutHelp()}`,

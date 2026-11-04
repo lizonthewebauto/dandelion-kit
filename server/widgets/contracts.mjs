@@ -121,7 +121,10 @@
  *   dandelion_status    {dandelion}
  *   send_to_dandelion   {sent}                      (or {bundle} with bundle.sent set). The card sends
  *                                                    {bundle_id, brand_id, mode, channels?: platform ids} where channels lists the connected
- *                                                    apps to make posts for when mode is "review".
+ *                                                    apps to make posts for when mode is "review". If the send takes longer than the
+ *                                                    wait it answers {pending:true, tool, bundle_id, progress, message} and the card
+ *                                                    calls again with the same arguments. A job with status "preparing" cannot be
+ *                                                    approved: the card offers Check again, which sends again and finishes it.
  *   approve_post        {job:{id, status, post_at?}}
  *   skip_post           {job:{id, status}}
  * bundle.channels[p].format is an optional label such as "Reel"; bundle.preview_asset_ids are JPEG thumbnails or a video poster.

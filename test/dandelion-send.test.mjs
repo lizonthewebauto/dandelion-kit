@@ -271,7 +271,50 @@ test('send review: a post that stays "processing" is shown with a check, not as 
     const bundle = await makeBundle({ kind: 'text', files: [], text: 'Only words.' });
     t.fake.state.processingPolls = 1000;
     const { sent } = await sendBundle({ bundle, brandId: t.fake.brandId, mode: 'review', channels: ['instagram'], pollMs: 5, preparingMs: 60 });
+    assert.equal(sent.jobs[0].status, 'preparing');
     assert.match(sent.jobs[0].checks.join(' '), /still getting this post ready/);
+    assert.equal(t.fake.state.calls.some((c) => c.tool === 'update_job_copy'), false, 'no words sent while Dandelion refuses them');
+  } finally {
+    await t.stop();
+  }
+});
+
+test('send review: sending again finishes a post that was still preparing, saves the words, and does not share it twice', async () => {
+  const t = await useFakeDandelion({ withChannels: true });
+  try {
+    await t.client.connect({ waitMs: 15000 });
+    const bundle = await makeBundle({ kind: 'text', files: [], text: 'My own words.' });
+    t.fake.state.processingPolls = 1000;
+    const first = await sendBundle({ bundle, brandId: t.fake.brandId, mode: 'review', channels: ['instagram'], pollMs: 5, preparingMs: 30 });
+    assert.equal(first.sent.jobs[0].status, 'preparing');
+    bundle.sent = first.sent;
+
+    t.fake.state.processingPolls = 0;
+    const second = await sendBundle({ bundle, brandId: t.fake.brandId, mode: 'review', channels: ['instagram'], pollMs: 5, preparingMs: 30 });
+    assert.equal(second.sent.jobs.length, 1);
+    assert.equal(second.sent.jobs[0].id, first.sent.jobs[0].id);
+    assert.equal(second.sent.jobs[0].status, 'review');
+    assert.equal(second.sent.jobs[0].copy.caption, 'My own words.');
+    assert.deepEqual(second.sent.jobs[0].checks, []);
+    assert.equal(t.fake.state.calls.filter((c) => c.tool === 'share_content').length, 1);
+  } finally {
+    await t.stop();
+  }
+});
+
+test('send review: the new posts are kept before the wait, so a send cut off there cannot share them twice', async () => {
+  const t = await useFakeDandelion({ withChannels: true });
+  try {
+    await t.client.connect({ waitMs: 15000 });
+    const bundle = await makeBundle({ kind: 'text', files: [], text: 'Only words.' });
+    t.fake.state.processingPolls = 1000;
+    /** @type {any[]} */
+    const seen = [];
+    await sendBundle({ bundle, brandId: t.fake.brandId, mode: 'review', channels: ['instagram'], pollMs: 5, preparingMs: 20, onSent: (s) => { seen.push(JSON.parse(JSON.stringify(s))); } });
+    const last = seen[seen.length - 1];
+    assert.equal(last.jobs.length, 1);
+    assert.equal(last.jobs[0].status, 'preparing');
+    assert.equal(last.jobs[0].platform, 'instagram');
   } finally {
     await t.stop();
   }
@@ -422,6 +465,43 @@ test('tools: sign in, status, offer, send to the library, send for review, appro
     const everything = JSON.stringify([conn, lib, rev, approved, skipped]);
     assert.ok(!/access_token|refresh_token|at_[0-9a-f]{8}|rt_[0-9a-f]{8}/.test(everything), 'no token in any answer');
   } finally {
+    await kit.close();
+    await t.stop();
+  }
+});
+
+test('tools: a send that takes too long answers "still sending", the same call joins it, and a preparing post cannot be approved', async () => {
+  const t = await useFakeDandelion({ withChannels: true });
+  process.env.DANDELION_KIT_CONNECT_WAIT_MS = '15000';
+  const kit = await connectKit();
+  try {
+    await kit.call('connect_dandelion');
+    const offer = await kit.call('offer_post', { kind: 'text', text: 'My own words.', channels: ['instagram'] });
+    const args = { bundle_id: offer.structuredContent.bundle.id, brand_id: t.fake.brandId, mode: 'review', channels: ['instagram'] };
+
+    t.fake.state.processingPolls = 2;
+    process.env.DANDELION_KIT_RENDER_WAIT_MS = '1';
+    const first = await kit.call('send_to_dandelion', args);
+    assert.equal(first.isError, undefined, textOf(first));
+    assert.equal(first.structuredContent.pending, true);
+    assert.equal(first.structuredContent.bundle_id, args.bundle_id);
+    assert.match(textOf(first), /Still sending to Dandelion/);
+    assert.match(textOf(first), /Nothing has gone out/);
+
+    delete process.env.DANDELION_KIT_RENDER_WAIT_MS;
+    const done = await kit.call('send_to_dandelion', args);
+    assert.equal(done.isError, undefined, textOf(done));
+    assert.equal(done.structuredContent.sent.jobs[0].status, 'review');
+    assert.equal(done.structuredContent.sent.jobs[0].copy.caption, 'My own words.');
+    assert.equal(t.fake.state.calls.filter((c) => c.tool === 'share_content').length, 1, 'joined, not sent twice');
+
+    t.fake.state.processingPolls = 1000;
+    const tooSoon = await kit.call('approve_post', { job_id: done.structuredContent.sent.jobs[0].id });
+    assert.equal(tooSoon.isError, true);
+    assert.match(textOf(tooSoon), /still getting this post ready/);
+    assert.equal(t.fake.state.calls.some((c) => c.tool === 'approve_job'), false);
+  } finally {
+    delete process.env.DANDELION_KIT_RENDER_WAIT_MS;
     await kit.close();
     await t.stop();
   }

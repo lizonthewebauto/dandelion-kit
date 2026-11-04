@@ -80,6 +80,8 @@ test('the layout registry covers every layout id and every sample fits its own l
 test('sample text has no long dashes', () => {
   for (const id of LAYOUT_IDS) assert.equal(DASH.test(JSON.stringify(LAYOUTS[id].sample)), false, id);
   assert.equal(DASH.test(JSON.stringify(DEFAULT_BRAND)), false);
+  assert.equal(DEFAULT_BRAND.name, '', 'no placeholder words that could go out in a real post');
+  assert.equal(DEFAULT_BRAND.handle, '');
 });
 
 test('gate: 12 layouts x 3 sizes make 36 JPEGs with the right dimensions', async () => {

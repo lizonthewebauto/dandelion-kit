@@ -243,19 +243,22 @@ export function label(ctx, s, extra = {}) {
 
 /** @param {Ctx} ctx */
 function header(ctx) {
+  if (!ctx.logoUri && !ctx.brand.name) return h({ height: ctx.fs(44), flexShrink: 0 });
   const mark = ctx.logoUri
     ? { type: 'img', props: { src: ctx.logoUri, width: Math.round(ctx.fs(40) * ctx.logoRatio), height: ctx.fs(40), style: { width: Math.round(ctx.fs(40) * ctx.logoRatio), height: ctx.fs(40), marginRight: ctx.fs(16) } } }
     : h({ width: ctx.fs(16), height: ctx.fs(16), borderRadius: ctx.fs(5), background: ctx.c.accent, marginRight: ctx.fs(14) });
   return h({ alignItems: 'center', height: ctx.fs(44), flexShrink: 0 }, [
     mark,
-    t(ctx.brand.name, {
-      fontFamily: `${ctx.brand.fonts.body}, Inter`,
-      fontWeight: FONTS[ctx.brand.fonts.body].files.length > 1 ? 800 : 400,
-      fontSize: ctx.fs(22),
-      letterSpacing: ctx.fs(4),
-      textTransform: 'uppercase',
-      color: ctx.c.fg,
-    }),
+    ctx.brand.name
+      ? t(ctx.brand.name, {
+          fontFamily: `${ctx.brand.fonts.body}, Inter`,
+          fontWeight: FONTS[ctx.brand.fonts.body].files.length > 1 ? 800 : 400,
+          fontSize: ctx.fs(22),
+          letterSpacing: ctx.fs(4),
+          textTransform: 'uppercase',
+          color: ctx.c.fg,
+        })
+      : null,
   ]);
 }
 
@@ -279,12 +282,14 @@ function footer(ctx) {
       borderTop: `2px solid ${mixLine(ctx)}`,
     },
     [
-      t(ctx.brand.handle, {
-        fontFamily: `${ctx.brand.fonts.body}, Inter`,
-        fontWeight: FONTS[ctx.brand.fonts.body].files.length > 1 ? 600 : 400,
-        fontSize: ctx.fs(26),
-        color: ctx.c.muted,
-      }),
+      ctx.brand.handle
+        ? t(ctx.brand.handle, {
+            fontFamily: `${ctx.brand.fonts.body}, Inter`,
+            fontWeight: FONTS[ctx.brand.fonts.body].files.length > 1 ? 600 : 400,
+            fontSize: ctx.fs(26),
+            color: ctx.c.muted,
+          })
+        : h({}), // keeps the arrow on the right
       arrow,
     ],
   );

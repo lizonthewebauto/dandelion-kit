@@ -2,6 +2,15 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.2 (2026-11-04)
+
+Found by the first real post from the kit (Instagram, 3 slide carousel).
+
+- Fix: a post could go out with words the person never wrote. In review mode Dandelion takes about a minute to prepare a post and refuses new words until then. The kit waited 45 seconds, its save was refused, and the card still offered Approve on Dandelion's own draft. It now waits up to 3 minutes and never saves words early. A post still not ready gets the new `PostJob.status` value `preparing`: the card offers Check again instead of Approve, and `approve_post` refuses it while Dandelion is still preparing.
+- Fix: `send_to_dandelion` timed out in hosts that stop waiting after about a minute, and the card showed an error while the send carried on. It now runs in the background like `render_reel`: after 40 seconds it answers `{pending: true, tool, bundle_id, progress, message}`, and the same call joins the same send. `RenderJob.quality` is now optional.
+- Fix: new posts are saved to the bundle as soon as Dandelion makes them, so a send that gets cut off cannot share them twice. Sending again finishes them.
+- Fix: with no brand set, slides said "YOUR BRAND" and "@yourhandle", which would go out in a real post. `DEFAULT_BRAND` now has an empty `name` and `handle`, and the slides leave them out.
+
 ## 1.0.1 (2026-11-02)
 
 - Fix: the Codex plugin now starts its own installed copy (`node ./bin/kit.mjs serve` with `cwd: "."`, which Codex resolves to the plugin folder) instead of `npx -y github:lizonthewebauto/dandelion-kit serve`. npx downloaded the Kit again on every start (20 to 70 s), and Codex began the turn with only its built-in tools, so the Kit's tools never arrived. Codex does not expand `${PLUGIN_ROOT}` in a plugin's server args, so the relative `cwd` is the way in.
