@@ -10,7 +10,8 @@
 //   kit offer <bundle.json>             build the per-app versions for a post
 //   kit connect                         sign in to Dandelion
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { closeSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createForwarder } from './shim-forward.mjs';
@@ -18,6 +19,8 @@ import { depsHome, depsReady as packagesReachable } from './deps.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
+/** Two tries at the package install, and the age when a waiting start treats the install lock as stale. */
+const INSTALL_LIMIT_MS = 5 * 60 * 1000;
 
 const USAGE = `Dandelion Kit: edit videos into Reels, make carousels and images, post with Dandelion.
 
@@ -76,7 +79,7 @@ function ensureDependencies() {
       } catch {
         continue;
       }
-      if (age > 5 * 60 * 1000) {
+      if (age > INSTALL_LIMIT_MS) {
         rmSync(lock, { recursive: true, force: true });
         continue;
       }
@@ -94,13 +97,32 @@ function ensureDependencies() {
     if (home !== ROOT) {
       for (const file of ['package.json', 'package-lock.json']) copyFileSync(join(ROOT, file), join(home, file));
     }
-    const run = spawnSync(npm, ['install', '--omit=dev', '--no-audit', '--no-fund'], {
-      cwd: home,
-      shell: IS_WIN,
-      stdio: ['ignore', 2, 2],
-    });
+    // npm gets its own log file. A host can stop reading the stderr it gave the Kit, and on a Mac npm then never exits.
+    const logPath = join(tmpdir(), 'dandelion-kit-install.log');
+    const log = openSync(logPath, 'w');
+    const install = (/** @type {string[]} */ ...extra) =>
+      spawnSync(npm, ['install', '--omit=dev', '--no-audit', '--no-fund', ...extra], {
+        cwd: home,
+        shell: IS_WIN,
+        stdio: ['ignore', log, log],
+        timeout: INSTALL_LIMIT_MS / 2,
+        killSignal: 'SIGKILL',
+      });
+    let run;
+    try {
+      run = install();
+      if (run.error) {
+        // npm can stall for good reading its own cache: seen on a Mac when Claude Code started the Kit. A fresh cache gets past it.
+        err('Dandelion Kit: the install stalled, so it is trying once more with a fresh download.');
+        const cache = mkdtempSync(join(tmpdir(), 'dandelion-kit-npm-'));
+        run = install('--cache', cache);
+        rmSync(cache, { recursive: true, force: true });
+      }
+    } finally {
+      closeSync(log);
+    }
     if (run.status !== 0 || !depsReady()) {
-      err(`Dandelion Kit: the install did not finish. Run "npm install --omit=dev" in ${home} and look at the message.`);
+      err(`Dandelion Kit: the install did not finish. Run "npm install --omit=dev" in ${home}. The log is at ${logPath}.`);
       return false;
     }
     err('Dandelion Kit: packages installed.');
