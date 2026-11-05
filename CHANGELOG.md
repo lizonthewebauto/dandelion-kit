@@ -2,6 +2,10 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.12 (2026-11-04)
+
+- Fix: older Claude Code versions refused to install the plugin ("Unrecognized key: displayName"). Found on 2.1.22 and 2.1.71 on real Macs. The key is gone from `.claude-plugin/plugin.json`.
+
 ## 1.0.11 (2026-11-04)
 
 Found by running the public installers on real Macs.

@@ -25,6 +25,8 @@ test('the plugin files are valid JSON and agree on name and version', () => {
     assert.equal(m.name, 'dandelion-kit');
     assert.equal(m.version, PKG.version);
   }
+  // Older Claude Code versions refuse a whole plugin over a key they do not know.
+  assert.equal(claude.displayName, undefined);
   const marketplace = readJson('.claude-plugin/marketplace.json');
   assert.equal(marketplace.name, 'dandelion-kit');
   assert.deepEqual(
