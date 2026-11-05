@@ -115,7 +115,7 @@ export async function startFakeDandelion(options = {}) {
         plan_name: state.plan,
         usage: { used: 12, limit: 60, resets_at: '2026-11-01T00:00:00.000Z' },
         reposts: { used: 0, limit_text: '15' },
-        kit_url: 'https://dandelionapp.io/kit',
+        kit_url: 'https://dandelionapp.io/freekit',
         next_step: 'x',
       });
     });

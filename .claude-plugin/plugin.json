@@ -1,12 +1,12 @@
 {
   "name": "dandelion-kit",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Free kit: edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.",
   "author": {
     "name": "Dandelion",
     "url": "https://dandelionapp.io"
   },
-  "homepage": "https://dandelionapp.io/kit",
+  "homepage": "https://dandelionapp.io/freekit",
   "repository": "https://github.com/lizonthewebauto/dandelion-kit",
   "license": "MIT",
   "keywords": ["video", "reels", "captions", "carousel", "social", "dandelion"]

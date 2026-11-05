@@ -2,6 +2,10 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.14 (2026-11-05)
+
+- The free Kit page moved to https://dandelionapp.io/freekit (share link: https://dandelionapp.io/go/freekit). The paste sentence in INSTALL.md and the README, the homepage in every manifest, the sign-in app address (`CLIENT_URI`, now `/freekit`) and the sign-up link in `server/text.mjs` use it. The old `/kit` and `/go/kit` still work, and Kits installed earlier still count, so nothing already shared or installed breaks.
+
 ## 1.0.13 (2026-11-04)
 
 - Fix: first-run setup could wait forever. On one Mac, with Claude Code starting the Kit, `npm install` stalled for good reading its own cache (every file worker stuck in `open`), and the person only ever got "setting up". After 2.5 minutes the Kit now stops npm and tries once more with a fresh cache, so setup finishes or fails with a clear message. npm also writes to its own log file in the temp folder, not the host's stderr.

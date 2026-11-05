@@ -11,7 +11,7 @@ import { DandelionError, NotSignedInError, kitVersion, mcpUrl, plainDandelionErr
 
 /** What Dandelion shows on its consent page, and how it recognizes the Kit. Do not change these strings. */
 export const CLIENT_NAME = 'Dandelion Kit';
-export const CLIENT_URI = 'https://dandelionapp.io/kit';
+export const CLIENT_URI = 'https://dandelionapp.io/freekit';
 
 /** How long a sign-in may stay open. */
 export const SIGN_IN_WINDOW_MS = 3 * 60 * 1000;

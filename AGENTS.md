@@ -29,4 +29,4 @@ Read the matching file before you start the work.
 
 - Plain ESM JavaScript, no build step. `npm test` runs the unit tests, the type check and the copy check (`npm run check-copy`).
 - The tools are listed in `server/lib/tools.mjs`. Shared shapes live in `core/types.mjs`; changing one needs a note in `CHANGELOG.md`.
-- `INSTALL.md` is mirrored byte for byte at `https://dandelionapp.io/kit/install.md`. If you change it, say so, so the copy can be updated.
+- `INSTALL.md` is mirrored byte for byte at `https://dandelionapp.io/freekit/install.md`. If you change it, say so, so the copy can be updated.

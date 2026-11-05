@@ -8,7 +8,7 @@ It runs on your computer. It is open source (MIT). Posting is optional and goes 
 
 Paste this into your agent:
 
-> I want to create images and carousels and edit videos with this: https://dandelionapp.io/kit
+> I want to create images and carousels and edit videos with this: https://dandelionapp.io/freekit
 
 The agent reads the install page, sets the Kit up, and checks that it works. The steps it follows are in [INSTALL.md](INSTALL.md).
 

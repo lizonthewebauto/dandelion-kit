@@ -2,7 +2,7 @@
 
 You are an AI agent (Claude Code, Codex, Claude Desktop, or similar). A person pasted this:
 
-> I want to create images and carousels and edit videos with this: https://dandelionapp.io/kit
+> I want to create images and carousels and edit videos with this: https://dandelionapp.io/freekit
 
 Your job: install the free Dandelion Kit for them, check that it works, and tell them what to do next. Do the steps yourself and keep your messages short and in plain words.
 

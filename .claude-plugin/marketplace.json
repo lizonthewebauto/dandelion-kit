@@ -10,7 +10,7 @@
       "name": "dandelion-kit",
       "source": "./",
       "description": "Edit talking-head videos into Reels, make carousels and images as JPEG, and post anything through Dandelion. Runs on your computer.",
-      "homepage": "https://dandelionapp.io/kit",
+      "homepage": "https://dandelionapp.io/freekit",
       "license": "MIT"
     }
   ]

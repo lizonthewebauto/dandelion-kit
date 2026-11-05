@@ -25,7 +25,7 @@ test('sign-in: registers as "Dandelion Kit", uses PKCE on a loopback address, an
     const reg = t.fake.state.registrations;
     assert.equal(reg.length, 1);
     assert.equal(reg[0].client_name, 'Dandelion Kit');
-    assert.equal(reg[0].client_uri, 'https://dandelionapp.io/kit');
+    assert.equal(reg[0].client_uri, 'https://dandelionapp.io/freekit');
     assert.equal(reg[0].token_endpoint_auth_method, 'none');
     assert.deepEqual(reg[0].grant_types, ['authorization_code', 'refresh_token']);
     assert.deepEqual(reg[0].response_types, ['code']);

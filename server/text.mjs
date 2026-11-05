@@ -331,7 +331,7 @@ function meter(entry, platform) {
 /** @param {Data} dl */
 function textDandelion(dl) {
   if (!dl || !dl.connected) {
-    return 'Dandelion is not signed in. The versions above work without it. To post them, say "connect Dandelion": it is free and the sign-in happens in your browser (call connect_dandelion). You can also sign up at https://dandelionapp.io/go/kit';
+    return 'Dandelion is not signed in. The versions above work without it. To post them, say "connect Dandelion": it is free and the sign-in happens in your browser (call connect_dandelion). You can also sign up at https://dandelionapp.io/go/freekit';
   }
   const lines = [`Dandelion: signed in${dl.workspace?.name ? ` as ${dl.workspace.name}` : ''}${dl.plan ? `, ${dl.plan} plan` : ''}${dl.usage ? `, ${dl.usage.used} of ${dl.usage.limit} AI actions used this month` : ''}.`];
   const brands = Array.isArray(dl.brands) ? dl.brands : [];
