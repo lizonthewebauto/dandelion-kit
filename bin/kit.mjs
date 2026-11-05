@@ -16,6 +16,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createForwarder } from './shim-forward.mjs';
 import { depsHome, depsReady as packagesReachable } from './deps.mjs';
+import { nodeVersionProblem, installEnvironment } from './runtime.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
@@ -33,6 +34,7 @@ Usage:
   kit carousel <spec.json> [--out <folder>]
   kit offer <bundle.json>               Per-app versions for a post: {kind, text, files, channels}
   kit connect                           Sign in to Dandelion.
+  kit setup <client> [--config <file>] [--dry-run] [--replace]
   kit version
 `;
 
@@ -68,16 +70,29 @@ function ensureDependencies() {
   const lock = join(home, '.kit-install.lock');
   const started = Date.now();
   for (;;) {
+    if (Date.now() - started > 6 * 60 * 1000) {
+      err('Waited too long for another install to finish. Remove the folder .kit-install.lock and try again.');
+      return false;
+    }
     try {
       mkdirSync(lock);
       break;
-    } catch {
+    } catch (error) {
+      if (/** @type {any} */ (error)?.code !== 'EEXIST') {
+        err(`Dandelion Kit cannot write its setup folder: ${home}. Choose a folder you can write to, then try again.`);
+        return false;
+      }
       // Another start is installing. Wait for it; a lock older than 5 minutes is stale.
       let age = 0;
       try {
         age = Date.now() - statSync(lock).mtimeMs;
-      } catch {
-        continue;
+      } catch (error) {
+        if (/** @type {any} */ (error)?.code === 'ENOENT') {
+          sleep(50);
+          continue;
+        }
+        err(`Dandelion Kit cannot read its setup folder: ${home}. Choose a folder you can write to, then try again.`);
+        return false;
       }
       if (age > INSTALL_LIMIT_MS) {
         rmSync(lock, { recursive: true, force: true });
@@ -103,6 +118,7 @@ function ensureDependencies() {
     const install = (/** @type {string[]} */ ...extra) =>
       spawnSync(npm, ['install', '--omit=dev', '--no-audit', '--no-fund', ...extra], {
         cwd: home,
+        env: installEnvironment(),
         shell: IS_WIN,
         stdio: ['ignore', log, log],
         timeout: INSTALL_LIMIT_MS / 2,
@@ -444,6 +460,12 @@ async function main() {
     process.stdout.write(`${JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version}\n`);
     return 0;
   }
+  if (command === 'setup') {
+    const { setupCommand } = await import('./setup.mjs');
+    const result = await setupCommand(rest);
+    process.stdout.write(result.text + '\n');
+    return result.code;
+  }
   if (command === 'install-deps') return ensureDependencies() ? 0 : 1;
   if (command === 'serve' && !depsReady()) {
     await serveWithSetup(rest.includes('--demo'));
@@ -486,8 +508,14 @@ async function main() {
 }
 
 try {
-  const code = await main();
-  if (code !== null) process.exitCode = code;
+  const problem = nodeVersionProblem();
+  if (problem) {
+    err(problem);
+    process.exitCode = 1;
+  } else {
+    const code = await main();
+    if (code !== null) process.exitCode = code;
+  }
 } catch (error) {
   err(`${/** @type {any} */ (error)?.message ?? error}`);
   process.exitCode = 1;

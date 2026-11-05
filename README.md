@@ -24,9 +24,15 @@ codex plugin marketplace add lizonthewebauto/dandelion-kit
 codex plugin add dandelion-kit@dandelion-kit
 ```
 
-Codex without plugin support: clone this repo and run `codex mcp add dandelion-kit -- node <path>/bin/kit.mjs serve`.
+For source installs in Claude Desktop, Claude Code, Codex, Cursor, VS Code or another local MCP app, see [Set up the Kit in your app](CLIENTS.md). The setup command gives you the steps for your app:
 
-You need Node.js 20 or newer. The first start installs the Kit's own packages (about a minute). Video editing also needs ffmpeg, which the Kit detects but never ships. The `doctor` tool shows the exact install command for your computer.
+```text
+node bin/kit.mjs setup cursor
+```
+
+Use `--dry-run` to preview. Claude Desktop and Cursor setup can write a config file. VS Code can write a file you choose with `--config`; its default route prints config steps on Windows or a command on macOS and Linux. Other routes print a command or server entry for you to use. Printed steps do not register the server. Keep the source folder where it is after setup.
+
+You need Node.js 20.9.0 or newer. The first start installs the Kit's own packages (about a minute). Video editing also needs ffmpeg, which the Kit detects but never ships. The `doctor` tool shows the exact install command for your computer. Setup needs no Dandelion account and sends no posts.
 
 ## What you can do
 
@@ -43,12 +49,16 @@ You need Node.js 20 or newer. The first start installs the Kit's own packages (a
 | Claude Code (terminal) | plugin marketplace | text results |
 | Claude Code in the Claude Desktop Code tab | plugin marketplace | depends on the app version |
 | Claude Desktop chat | `.mcpb` bundle for Windows x64, Apple silicon Mac or Intel Mac | visual cards |
-| Codex CLI and app | plugin marketplace, or `codex mcp add` | text results, cards where the app draws them |
-| Any other agent that can run a command | clone and register `node bin/kit.mjs serve` over stdio | text results |
+| Codex CLI and app | plugin marketplace, or run the command from `setup codex` | text results, cards where the app draws them |
+| Cursor desktop | source copy and `setup cursor` | text results, cards where supported |
+| VS Code with an MCP client | source copy, then follow the config steps or command from `setup vscode` | text results, cards where supported |
+| Another local MCP app | source copy and `setup generic` | text results, cards where supported |
 
 Every tool result is complete text with exact file paths, so nothing depends on a card being drawn.
 
-Intel Macs can make images and carousels. Speech tools and Reel editing do not run on Intel Macs yet.
+Windows x64 and Apple silicon Macs have been checked with the full Kit. Intel Macs can make images and carousels; speech tools and Reel editing do not run on them yet. Linux x64, Linux arm64 and Windows ARM64 have a source setup route, but their full native runtime has not been checked. There are no Linux or Windows ARM64 `.mcpb` files.
+
+A browser or phone cannot start this local server on its own. Use a local MCP app or a supported remote view of a local session. See [client routes and limits](CLIENTS.md).
 
 ## Teach it your style
 

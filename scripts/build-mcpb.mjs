@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { installEnvironment, nodeVersionProblem } from '../bin/runtime.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
@@ -28,7 +29,7 @@ function run(cmd, args, cwd) {
   console.error(`> ${cmd} ${args.join(' ')}`);
   // With shell:true on Windows the arguments are joined as text, so quote any that hold a space.
   const safe = IS_WIN ? args.map((a) => (/\s/.test(a) ? `"${a}"` : a)) : args;
-  const r = spawnSync(cmd, safe, { cwd, stdio: 'inherit', shell: IS_WIN });
+  const r = spawnSync(cmd, safe, { cwd, stdio: 'inherit', shell: IS_WIN, env: installEnvironment() });
   if (r.status !== 0) {
     console.error(`[build-mcpb] "${cmd} ${args.join(' ')}" failed.`);
     process.exit(1);
@@ -70,6 +71,8 @@ function pruneOtherPlatforms(staging) {
 }
 
 function main() {
+  const problem = nodeVersionProblem();
+  if (problem) throw new Error(problem);
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   const version = pkg.version;
   const out = resolve(arg('--out') ?? join(ROOT, 'dist'));
@@ -81,7 +84,7 @@ function main() {
   mkdirSync(out, { recursive: true });
 
   for (const name of ['bin', 'core', 'server', 'assets']) cpSync(join(ROOT, name), join(staging, name), { recursive: true });
-  for (const name of ['package.json', 'package-lock.json', 'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md', 'README.md']) {
+  for (const name of ['package.json', 'package-lock.json', 'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md', 'README.md', 'CLIENTS.md']) {
     cpSync(join(ROOT, name), join(staging, name));
   }
 

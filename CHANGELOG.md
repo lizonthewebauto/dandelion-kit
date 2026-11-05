@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 (2026-11-05)
+
+- Add kit setup for local AI clients, safe JSON config merging and full-path launch entries. CLIENTS.md lists supported routes and their limits. Command previews do not sign in or post.
+- First setup checks for Node 20.9 or newer, uses CPU packages by default and stops with a clear note if it cannot write the install folder.
+
+
 ## 1.1.0 (2026-11-05)
 
 - Teach the Kit your style from one sample. analyze_samples, save_style and list_styles bring the tool count to 28. Your AI asks what you like and saves only those parts.

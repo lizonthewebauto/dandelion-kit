@@ -1,6 +1,10 @@
 # Dandelion Kit: instructions for coding agents
 
-This repo is the free Dandelion Kit: an MCP server (`node bin/kit.mjs serve`, server name `dandelion-kit`) plus three skills. To install it for a person, follow `INSTALL.md`.
+This repo is the free Dandelion Kit: an MCP server (`node bin/kit.mjs serve`, server name `dandelion-kit`) plus three skills. To install it for a person, follow `INSTALL.md`. For source setup in Claude Desktop, Claude Code, Codex, Cursor, VS Code or another local MCP app, also read `CLIENTS.md`.
+
+## Local app setup
+
+Use Node.js 20.9.0 or newer. From a stable source folder, run `node bin/kit.mjs setup <client>` with `claude-desktop`, `claude-code`, `codex`, `cursor`, `vscode`, or `generic`. Use `--dry-run` to preview. Claude Desktop and Cursor routes merge JSON; `--config` chooses a JSON file for either or VS Code. Claude Code and Codex print registration commands without running them. Their normal Windows commands are for PowerShell; unsafe shell marks in paths cause setup to print fixed plugin steps instead. Default VS Code setup prints JSON config guidance on Windows and a registration command on macOS and Linux. Generic prints a server entry only. Do not say the server is registered until that step has run and the client shows it. Preserve other servers. `--replace` applies only to a Kit entry in a JSON file written by setup, not to the printed CLI routes. Keep the source folder in place, since setup uses full paths. Restart the client, then call `doctor`. Do not sign in, link accounts or send a post as an install check. Browser and mobile clients need a local runner or a supported remote session; the optional Dandelion web server is not the local editor. Native runtime support and client config support are separate. See `CLIENTS.md` for the tested systems and limits.
 
 ## Standing rule for any agent that has the Kit tools
 
