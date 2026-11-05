@@ -2,6 +2,10 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.7 (2026-11-04)
+
+- Fix: video editing failed in Codex with "Cannot find package '@huggingface/transformers'". Codex replaces a plugin's whole version folder a few seconds into every session, which wiped a `node_modules` inside it while the Kit was already running. Inside a plugin cache the packages now go in the `plugins` folder (`depsHome` in `bin/deps.mjs`), which Node's lookup still reaches. `depsReady` also compares the Kit version there, so an update installs its own packages. Found by a model-driven run on a Mac, with a folder watch showing 154 packages drop to 0.
+
 ## 1.0.6 (2026-11-04)
 
 Found by tapping every button on the real cards in Claude Desktop.

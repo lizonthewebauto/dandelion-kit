@@ -10,11 +10,11 @@
 //   kit offer <bundle.json>             build the per-app versions for a post
 //   kit connect                         sign in to Dandelion
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createForwarder } from './shim-forward.mjs';
-import { depsReady as packagesReachable } from './deps.mjs';
+import { depsHome, depsReady as packagesReachable } from './deps.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const IS_WIN = process.platform === 'win32';
@@ -61,7 +61,8 @@ function ensureDependencies() {
     err(`(in the folder ${ROOT})`);
     return false;
   }
-  const lock = join(ROOT, '.kit-install.lock');
+  const home = depsHome(ROOT);
+  const lock = join(home, '.kit-install.lock');
   const started = Date.now();
   for (;;) {
     try {
@@ -90,13 +91,16 @@ function ensureDependencies() {
   try {
     if (depsReady()) return true;
     err('Dandelion Kit: installing its packages (once, about a minute)...');
+    if (home !== ROOT) {
+      for (const file of ['package.json', 'package-lock.json']) copyFileSync(join(ROOT, file), join(home, file));
+    }
     const run = spawnSync(npm, ['install', '--omit=dev', '--no-audit', '--no-fund'], {
-      cwd: ROOT,
+      cwd: home,
       shell: IS_WIN,
       stdio: ['ignore', 2, 2],
     });
     if (run.status !== 0 || !depsReady()) {
-      err(`Dandelion Kit: the install did not finish. Run "npm install --omit=dev" in ${ROOT} and look at the message.`);
+      err(`Dandelion Kit: the install did not finish. Run "npm install --omit=dev" in ${home} and look at the message.`);
       return false;
     }
     err('Dandelion Kit: packages installed.');
@@ -220,7 +224,7 @@ async function serveWithSetup(demo) {
   child.on('exit', async (code) => {
     if (code !== 0 || !depsReady()) {
       failed = true;
-      status = `Dandelion Kit could not finish its setup. Run "npm install --omit=dev" in ${ROOT} and look at the message, then start a new session.`;
+      status = `Dandelion Kit could not finish its setup. Run "npm install --omit=dev" in ${depsHome(ROOT)} and look at the message, then start a new session.`;
       return;
     }
     try {

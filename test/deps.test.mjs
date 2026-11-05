@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { depsReady, packageReachable } from '../bin/deps.mjs';
+import { depsHome, depsReady, packageReachable } from '../bin/deps.mjs';
 
 const DEPS = { '@modelcontextprotocol/sdk': '1.0.0', zod: '4.0.0' };
 
@@ -34,6 +34,33 @@ test('packages one level up, the way npx installs them, count as installed', () 
   const { base, kit } = layout('hoisted');
   try {
     assert.equal(packageReachable(kit, '@modelcontextprotocol/sdk'), true);
+    assert.equal(depsReady(kit), true);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('in a plugin cache the packages live outside the version folder, which Codex replaces each session', () => {
+  assert.equal(depsHome('/u/.codex/plugins/cache/dandelion-kit/dandelion-kit/1.0.7'), '/u/.codex/plugins');
+  assert.equal(depsHome('C:\\u\\.codex\\plugins\\cache\\dandelion-kit\\dandelion-kit\\1.0.7'), 'C:\\u\\.codex\\plugins');
+  assert.equal(depsHome('/u/App Repos/dandelion-kit'), '/u/App Repos/dandelion-kit');
+});
+
+test('packages in the plugins folder count only for the same Kit version, so an update installs its own', () => {
+  const base = mkdtempSync(join(tmpdir(), 'kit-deps-'));
+  try {
+    const plugins = join(base, 'plugins');
+    const kit = join(plugins, 'cache', 'dandelion-kit', 'dandelion-kit', '1.0.7');
+    mkdirSync(kit, { recursive: true });
+    writeFileSync(join(kit, 'package.json'), JSON.stringify({ version: '1.0.7', dependencies: DEPS }));
+    assert.equal(depsReady(kit), false);
+    for (const name of Object.keys(DEPS)) {
+      mkdirSync(join(plugins, 'node_modules', ...name.split('/')), { recursive: true });
+      writeFileSync(join(plugins, 'node_modules', ...name.split('/'), 'package.json'), '{}');
+    }
+    writeFileSync(join(plugins, 'package.json'), JSON.stringify({ version: '1.0.6', dependencies: DEPS }));
+    assert.equal(depsReady(kit), false, 'packages from an older Kit do not count');
+    writeFileSync(join(plugins, 'package.json'), JSON.stringify({ version: '1.0.7', dependencies: DEPS }));
     assert.equal(depsReady(kit), true);
   } finally {
     rmSync(base, { recursive: true, force: true });
