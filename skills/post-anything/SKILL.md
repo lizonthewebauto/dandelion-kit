@@ -5,6 +5,18 @@ description: Use whenever you have written or generated ANY social media content
 
 # Offer to post whatever you make
 
+## Learn a style from samples
+
+One image or one video is enough. Ask for full file or folder paths. Claude Desktop cannot pass chat attachments to tools, so ask them to put the files in a folder and share its path.
+
+1. Call `analyze_samples`. Look at the JPEG contact sheet and read the numbers. Open the given file path if the picture is not shown. Say what you notice in two or three short sentences.
+2. Ask one question at a time: "What do you like about this one?" Offer colors, fonts, overall feel, captions, cut speed, or opening. They can pick several or all. If there are too few cuts, also ask: "Is it fast and punchy, or calm?" Ask one short follow up only if needed.
+3. Borrow only what they pick. Leave all other fields out so the defaults stay in place. Use the returned guides to choose the closest of the 8 bundled fonts, the page feel, captions and look for the chosen parts. Say what you picked and why. Sound effects and zoom strength are judged, not measured.
+4. Ask: "What should I call this style?" Then ask: "Want me to use it from now on?" These are separate questions. Call `save_style` with only the chosen fields, `liked`, a short note and their default choice. Never save a full style without asking.
+5. Show a sample carousel with `style`, or call `pick_look` with `style` on a video. Ask what to adjust, then save again if needed. On later work, `list_styles` shows saved choices. The default style is used for images, carousels and rough cut pacing. The look menu names the default video style; call with `style` to apply it.
+
+Samples stay on this computer. The Kit measures, your AI looks, and the Kit saves. A short clip may not show enough cuts to measure its speed. Speech measurements can be unavailable, including on Intel Macs. Use the other measurements and ask the person.
+
 This is an always-on rule. Whenever you produce social content for the person, you finish by calling the Kit's `offer_post` tool. It does not matter how the content was made: a caption you typed, a thread, an image from another tool, a carousel from `make_carousel`, a reel from the editor.
 
 ## What to do

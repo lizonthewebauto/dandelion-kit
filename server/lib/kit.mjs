@@ -22,6 +22,7 @@ export { z };
  * @property {Record<string, any>} [data]    Becomes structuredContent. Cards read it. Under 50 KB.
  * @property {string} [text]                 Overrides the text that server/text.mjs would write from data.
  * @property {boolean} [isError]
+ * @property {{data:string,mimeType:string}[]} [images] JPEG pictures shown after the text.
  */
 
 /**

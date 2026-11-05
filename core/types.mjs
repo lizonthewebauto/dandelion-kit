@@ -594,7 +594,7 @@ export const ASSET_KINDS = Object.freeze([
 /**
  * What every kit tool returns. The text is always readable on its own.
  * @typedef {object} ToolResult
- * @property {{type:'text', text:string}[]} content
+ * @property {({type:'text', text:string}|{type:'image',data:string,mimeType:string})[]} content
  * @property {Record<string, any>} [structuredContent]   Under 50 KB. Media goes through read_asset.
  * @property {boolean} [isError]
  */

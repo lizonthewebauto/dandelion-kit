@@ -1,3 +1,4 @@
+import { STYLE_INTERVIEW } from './tools/analyze_samples.mjs';
 // MCP server for the Dandelion Kit: registers the eight cards and the 28 tools, the server instructions, and the stdio transport.
 // stdout carries MCP frames only. Everything else goes to stderr and ~/.dandelion-kit/logs/kit.log.
 import { readFileSync } from 'node:fs';
@@ -30,6 +31,8 @@ export const INSTRUCTIONS = [
   'Carousels and images: make_carousel or make_image. JPEG only. Plain words at about a third-grade reading level, no hype. Text over a layout limit is refused with the field name and the limit, so shorten it.',
   '',
   'Posting: whenever you have written or made ANY social content, even without these tools, call offer_post so the person sees a version for each app, before they sign up for anything. Never post without their clear yes. approve_post publishes to a real account, so ask first, for that exact post. Dandelion sign-in happens in their browser: never ask for a password or a token.',
+  '',
+  'Learn a style: ask for file paths or a folder. Claude Desktop chat attachments cannot be passed to tools. Call analyze_samples. ' + STYLE_INTERVIEW,
   '',
   'Style: no em dashes or en dashes in anything you write for the person. If you ever need a voice, use a female voice unless the person names another. Images are JPEG.',
 ].join('\n');
@@ -81,7 +84,7 @@ export function toMcpResult(name, outcome) {
     }
   }
   /** @type {Record<string, any>} */
-  const result = { content: [{ type: 'text', text }] };
+  const result = { content: [{ type: 'text', text }, ...(outcome.images ?? []).map(i => ({ type: 'image', data: i.data, mimeType: i.mimeType }))] };
   if (outcome.data) {
     result.structuredContent = outcome.data;
     if (name !== 'read_asset') {

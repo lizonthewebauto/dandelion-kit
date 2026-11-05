@@ -5,6 +5,18 @@ description: Use when the person wants to edit a video, reel, or raw footage: "e
 
 # Edit a video into a Reel
 
+## Learn a style from samples
+
+One image or one video is enough. Ask for full file or folder paths. Claude Desktop cannot pass chat attachments to tools, so ask them to put the files in a folder and share its path.
+
+1. Call `analyze_samples`. Look at the JPEG contact sheet and read the numbers. Open the given file path if the picture is not shown. Say what you notice in two or three short sentences.
+2. Ask one question at a time: "What do you like about this one?" Offer colors, fonts, overall feel, captions, cut speed, or opening. They can pick several or all. If there are too few cuts, also ask: "Is it fast and punchy, or calm?" Ask one short follow up only if needed.
+3. Borrow only what they pick. Leave all other fields out so the defaults stay in place. Use the returned guides to choose the closest of the 8 bundled fonts, the page feel, captions and look for the chosen parts. Say what you picked and why. Sound effects and zoom strength are judged, not measured.
+4. Ask: "What should I call this style?" Then ask: "Want me to use it from now on?" These are separate questions. Call `save_style` with only the chosen fields, `liked`, a short note and their default choice. Never save a full style without asking.
+5. Show a sample carousel with `style`, or call `pick_look` with `style` on a video. Ask what to adjust, then save again if needed. On later work, `list_styles` shows saved choices. The default style is used for images, carousels and rough cut pacing. The look menu names the default video style; call with `style` to apply it.
+
+Samples stay on this computer. The Kit measures, your AI looks, and the Kit saves. A short clip may not show enough cuts to measure its speed. Speech measurements can be unavailable, including on Intel Macs. Use the other measurements and ask the person.
+
 Use the Dandelion Kit tools (server `dandelion-kit`). Every tool returns plain text with exact file paths, so nothing depends on a card being drawn. Where the app can draw cards, they show the same thing and the person can tap them. Keep your own messages short and in plain words.
 
 ## The order
@@ -12,8 +24,8 @@ Use the Dandelion Kit tools (server `dandelion-kit`). Every tool returns plain t
 1. **Check the machine (once per session).** Call `doctor`. If ffmpeg is missing it returns the exact install command for this computer. Show it and wait for the person. Tell them before the first edit that a one-time download of about 75 MB (speech and face models) happens on the first video.
 2. **Open the video.** Call `open_video` with the full path. It makes a working copy, a small preview, and the transcript. Use `get_project` any time to see where things stand and what comes next.
 3. **Read the whole transcript before you plan anything.** Know what the person is saying, where the point is, and where the best opening line lives.
-4. **Rough cut.** Call `rough_cut` (preset `gentle`, `standard` or `punchy`; default `standard`). It removes filler words, stutters, restarts and long silences at breath-safe points. It does not render. Tell the person how much time came out. If they want a piece back or gone, call `update_cut` with `keep_ids` or `drop_ids`.
-5. **Pick a look.** Call `pick_look` with no look to show the five (`karaoke-clean` is the default, then `bold-value`, `minimal-educator`, `editorial-luxe`, `storytime-energy`). Call it again with `look`, and optionally `caption_theme` and `accent`, to choose. Changing the look clears the shot plan, so do this before planning.
+4. **Rough cut.** Call `rough_cut` (preset `gentle`, `standard` or `punchy`; the saved default style's pacing is used when set, else `standard`). It removes filler words, stutters, restarts and long silences at breath-safe points. It does not render. Tell the person how much time came out. If they want a piece back or gone, call `update_cut` with `keep_ids` or `drop_ids`.
+5. **Pick a look.** Call `pick_look` with no look to show the five (`karaoke-clean` is the default, then `bold-value`, `minimal-educator`, `editorial-luxe`, `storytime-energy`). The menu names a saved default video style when one exists. Call again with `style` to use it, or with `look` and optionally `caption_theme` and `accent` to choose. Changing the look clears the shot plan, so do this before planning.
 6. **Write the hook, then plan the shots.** Before you call `plan_shots`, write the on-screen hook yourself. You have read the whole transcript, so make it specific to what the speaker actually says: the real tool, number, mistake or promise from the video. Nine words or fewer, no dashes, plain words, and different words from the spoken opening line. Then call `plan_shots` with it as `hook_text`. The kit's own suggested hooks are a backstop for when you have nothing better. They are built from word counts, can miss the point, and are marked as made from the words in the video. Do not accept one without reading it against the transcript. A weak hook you pass in is refused with the reasons, so fix it and call again. The plan also gives you the beats and how each is shown, caption cues, camera moves and sound cues. Nothing is rendered yet. Edit a beat with `update_shot_plan`.
 7. **Show the plan and get a yes.** Say what the opening hook is, how many beats, which look, and what was cut. Do not build the final until the person says yes.
 8. **Build once.** Call `render_reel` with `quality: draft` first (small, under a minute). The checks run on the finished file. Tell the person what passed and what needs a look. Fix the plan, not the render: change the plan, then build again. Do not render to find out what you want.

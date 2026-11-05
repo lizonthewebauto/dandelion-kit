@@ -32,6 +32,7 @@ You need Node.js 20 or newer. The first start installs the Kit's own packages (a
 
 - **Edit a video into a Reel.** A transcript, a breath-safe rough cut, caption styles, punch-ins, loudness, sound effects and quality checks on the finished file. Plan first, then build once. Make 2 to 4 variants of the same speech.
 - **Make carousels and images.** Twelve clean layouts and a tiny `brand.json` (colors, handle, fonts). JPEG output at 1080 by 1350, 1080 by 1080 or 1080 by 1920. Text that does not fit is refused with the field name and the limit, never cut quietly.
+- **Teach it your style.** Show it one image or video you like. It measures the sample, your AI looks at it, and you choose which parts to save.
 - **See a post for every app.** For any caption, thread, image, carousel or video, the Kit shows a version for Instagram, TikTok, YouTube Shorts, LinkedIn, X, Threads, Facebook and Pinterest, checked against each app's limits. This works before you have a Dandelion account.
 - **Post with Dandelion.** Connect Dandelion (free plan) from inside the chat. Sign-in happens in your browser. Send the files up, then approve or schedule each post. Nothing goes out without your clear yes.
 
@@ -41,15 +42,34 @@ You need Node.js 20 or newer. The first start installs the Kit's own packages (a
 | --- | --- | --- |
 | Claude Code (terminal) | plugin marketplace | text results |
 | Claude Code in the Claude Desktop Code tab | plugin marketplace | depends on the app version |
-| Claude Desktop chat | `.mcpb` bundle (Windows x64 first, Mac later) | visual cards |
+| Claude Desktop chat | `.mcpb` bundle for Windows x64, Apple silicon Mac or Intel Mac | visual cards |
 | Codex CLI and app | plugin marketplace, or `codex mcp add` | text results, cards where the app draws them |
 | Any other agent that can run a command | clone and register `node bin/kit.mjs serve` over stdio | text results |
 
 Every tool result is complete text with exact file paths, so nothing depends on a card being drawn.
 
+Intel Macs can make images and carousels. Speech tools and Reel editing do not run on Intel Macs yet.
+
+## Teach it your style
+
+One image or one video is enough. More samples make the numbers steadier. Try: "Learn my style from the files in this folder."
+
+1. Give your AI the full file or folder paths. Claude Desktop cannot pass chat attachments to these tools, so put them in a folder and share its path.
+2. The AI calls `analyze_samples`, looks at the JPEG contact sheet and reads the numbers. If the picture is not shown, it opens the file path in the answer. It tells you what it sees in two or three short sentences.
+3. It asks one question at a time: "What do you like about this one?" You can choose the colors, fonts, overall feel, captions, cut speed, or opening. Choose several, or all. With too few cuts to measure speed, it asks: "Is it fast and punchy, or calm?"
+4. It borrows only the parts you choose. It uses the shared guides to pick the closest bundled fonts and the other choices, then tells you what it picked and why. The rest stay at the defaults.
+5. It asks what to call the style. Then it asks if you want it used from now on. It calls `save_style` with only your chosen parts and the `liked` labels.
+6. It makes a sample carousel with `style`, or uses `pick_look` with `style` on a video. Tell it what to adjust. It can save the style again.
+
+Saved styles live in `<kit home>/styles`. `list_styles` shows their names and which parts you liked. Images and carousels use the default style when you do not name one. Rough cuts use its pacing. The look menu tells your AI when a saved video style is ready to use.
+
+The Kit measures, your AI looks, and the Kit saves. The Kit does not call an AI service or need an API key. Samples stay on this computer: they are not uploaded or copied. Only choices and numbers are saved, plus small pictures for the contact sheet. A logo you choose is copied into the style folder so it can still be used if the source moves.
+
+There are still 12 fixed layouts and 8 bundled fonts. Your AI picks the nearest font, not the exact font in a sample. It judges captions, zoom strength and sound effects by eye; zoom and sound effects are not measured. The result is only as good as your AI's eyes. A short clip or one shot may have too few cuts to measure its pace. Speech measurements are not available on Intel Macs, or when no speech model is ready. The rest of the sample check still works.
+
 ## What is inside
 
-- An MCP server named `dandelion-kit` with 25 tools and 8 visual cards.
+- An MCP server named `dandelion-kit` with 28 tools and 8 visual cards.
 - Three skills: `reels-editor`, `carousel-maker` and `post-anything`.
 - A session-start hook (Claude Code) and `AGENTS.md` (Codex) that carry one standing rule: whenever the agent makes social content, it calls `offer_post` and shows the card, and it never posts without your yes.
 
@@ -68,7 +88,7 @@ npm test        # unit tests, type check, copy check
 node bin/kit.mjs serve --demo    # sample data in every tool, no video needed
 ```
 
-The `.mcpb` bundle for Claude Desktop is built with `node scripts/build-mcpb.mjs`. A Mac bundle is not built yet.
+The `.mcpb` bundle for Claude Desktop is built with `node scripts/build-mcpb.mjs` on each target computer. Release files cover Windows x64, Apple silicon Mac and Intel Mac.
 
 ## License
 

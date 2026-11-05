@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- ToolOutcome and ToolResult can include image blocks after the text. analyze_samples now returns a local JPEG sheet, measurements, shared rubrics and a partial suggestion. Large cut lists stay in a local JSON file so the reply stays small.
+
 - Add SampleVideo measurements and confidence. Short or single-shot clips leave cut speed, camera strength and density unset. Speech can be unavailable without blocking the other readings.
 
 - Add SavedStyle, VideoStyle, LookOverrides and SampleImage shapes. Image samples can be measured on this computer for colors, contrast, space and background detail.

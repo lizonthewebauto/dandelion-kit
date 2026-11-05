@@ -25,6 +25,10 @@ Read the matching file before you start the work.
 - If you ever need a voice, use a female voice unless the person names another. Never default to a male voice.
 - Images are JPEG.
 
+## Learn a style from samples
+
+One image or video is enough. Ask for file or folder paths; Claude Desktop cannot pass chat attachments to tools. Call `analyze_samples`, look at its contact sheet (open the given path if needed), and say what you see in two or three short sentences. Ask one question at a time: "What do you like about this one?" Offer colors, fonts, overall feel, captions, cut speed, or opening. Borrow only the parts they pick. For too few cuts, ask "Is it fast and punchy, or calm?" Use the returned guides to pick the closest of the 8 fonts and the other chosen parts. Say what you chose and why. Ask for a name, then ask if it should be the default. Call `save_style` with only the chosen fields and `liked`. Show a sample carousel or call `pick_look` with `style` on a video, ask what to adjust, and save again if needed. Never save a full style without asking. `list_styles` shows saved choices; default image styles and rough cut pacing work without a style argument. Samples stay on this computer.
+
 ## Working on this repo
 
 - Plain ESM JavaScript, no build step. `npm test` runs the unit tests, the type check and the copy check (`npm run check-copy`).
