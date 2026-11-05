@@ -22,7 +22,7 @@ export const tool = defineTool({
     const ready = await ensureTranscript(args.project_id, { onProgress: ctx.progress });
     const transcript = /** @type {import('../../core/types.mjs').Transcript} */ (ready.transcript);
     const cut = ready.cut ?? roughCut(transcript, { preset: 'standard', duration_ms: ready.media?.duration_ms });
-    const look = getLook(ready.look_id ?? DEFAULT_LOOK_ID, { caption_theme: ready.caption_theme, accent: ready.accent });
+    const look = getLook(ready.look_id ?? DEFAULT_LOOK_ID, { ...ready.look_overrides, caption_theme: ready.caption_theme, accent: ready.accent });
     ctx.progress(0.2, 'Planning the shots');
     const plan = planShots(transcript, cut, look, { hook_text: args.hook_text, seed: ready.id });
     await updateProject(ready.id, (p) => {

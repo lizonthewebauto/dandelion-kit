@@ -1,3 +1,4 @@
+import { readStyle, defaultStyle } from '../../core/style/store.mjs';
 import { CAPTION_THEMES, LOOK_IDS } from '../../core/types.mjs';
 import { DEFAULT_LOOK_ID, getLook, listLooks } from '../../core/edit/looks.mjs';
 import * as log from '../../core/util/log.mjs';
@@ -25,9 +26,10 @@ export const tool = defineTool({
   name: 'pick_look',
   title: 'Pick a look',
   description:
-    'Show the five looks (karaoke-clean, bold-value, minimal-educator, editorial-luxe, storytime-energy) with a caption sample picture from this video. Call with no look to show them. Call with look (and optionally caption_theme and accent) to choose one. Choosing a different look clears the shot plan, because the plan depends on it.',
+    'Show the five looks (karaoke-clean, bold-value, minimal-educator, editorial-luxe, storytime-energy) with a caption sample picture from this video. Call with no look to show them. Call with style to use saved choices, or with look (and optionally caption_theme and accent) to choose one. Choosing a different look clears the shot plan, because the plan depends on it.',
   input: {
     project_id: z.string(),
+    style: z.string().optional().describe('A saved style name or slug. Call list_styles to see them.'),
     look: z.enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (LOOK_IDS))).optional(),
     caption_theme: z.enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (CAPTION_THEMES))).optional().describe('One of eight caption styles. Defaults to the look\'s own.'),
     accent: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Use a color like #FFD93D.').optional().describe('Accent color for highlighted words, "#RRGGBB".'),
@@ -36,16 +38,24 @@ export const tool = defineTool({
   async run(args, ctx) {
     let project = await requireProject(args.project_id);
     if (project.type !== 'video') return fail('Looks are for video projects.');
-    const choosing = Boolean(args.look || args.caption_theme || args.accent);
+    const saved = args.style ? await readStyle(args.style) : null;
+    const video = saved?.video;
+    const fallback = await defaultStyle();
+    const choosing = Boolean(args.style || args.look || args.caption_theme || args.accent);
     if (choosing) {
-      const baseId = args.look ?? project.look_id ?? DEFAULT_LOOK_ID;
-      const switching = Boolean(args.look) && args.look !== project.look_id;
+      const baseId = args.look ?? video?.base_look ?? project.look_id ?? DEFAULT_LOOK_ID;
+      const switching = Boolean(args.style || (args.look && args.look !== project.look_id));
+      const overrides = args.style ? (video?.overrides ?? {}) : (switching ? {} : project.look_overrides ?? {});
       const look = getLook(baseId, {
-        caption_theme: args.caption_theme ?? (switching ? undefined : project.caption_theme),
-        accent: args.accent ?? (switching ? undefined : project.accent),
+        ...overrides,
+        caption_theme: args.caption_theme ?? video?.caption_theme ?? (switching ? undefined : project.caption_theme),
+        accent: args.accent ?? video?.accent ?? (switching ? undefined : project.accent),
       });
       ({ project } = await updateProject(args.project_id, (p) => {
-        const same = p.look_id === look.id && p.caption_theme === look.caption_theme && p.accent === look.accent;
+        const same = p.look_id === look.id && p.caption_theme === look.caption_theme && p.accent === look.accent && JSON.stringify(p.look_overrides ?? {}) === JSON.stringify(overrides);
+        p.look_overrides = overrides;
+        if (saved) p.style_name = saved.name;
+        else if (switching) delete p.style_name;
         p.look_id = look.id;
         p.caption_theme = look.caption_theme;
         p.accent = look.accent;
@@ -54,6 +64,7 @@ export const tool = defineTool({
       }));
     }
     const defaults = getLook(project.look_id ?? DEFAULT_LOOK_ID, {
+      ...project.look_overrides,
       caption_theme: project.caption_theme,
       accent: project.accent,
     });
@@ -63,7 +74,7 @@ export const tool = defineTool({
     let samples = true;
     let done = 0;
     for (const l of listLooks()) {
-      const card = /** @type {Record<string, any>} */ (lookCard(l));
+      const card = /** @type {Record<string, any>} */ (lookCard(l.id === current.look_id ? defaults : l));
       if (samples) {
         try {
           const makeSample = await renderFunction('render', 'renderLookSample', 'The caption sample pictures');
@@ -78,6 +89,6 @@ export const tool = defineTool({
       ctx.progress(++done / 5, `Look ${l.name}`);
       looks.push(card);
     }
-    return ok({ project_id: project.id, current, looks, ...(samples ? {} : { samples_unavailable: true }) });
+    return ok({ project_id: project.id, style_name: project.style_name, default_style: !choosing && fallback?.video ? fallback.name : undefined, current, looks, ...(samples ? {} : { samples_unavailable: true }) });
   },
 });

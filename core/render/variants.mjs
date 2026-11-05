@@ -120,7 +120,7 @@ export function planVariantAxes(plan, count) {
  * @returns {import('../types.mjs').ShotPlan}
  */
 export function buildVariantPlan(transcript, cut, base, axes) {
-  const look = getLook(base.look_id, { accent: base.accent });
+  const look = getLook(base.look_id, { ...base.look_overrides, accent: base.accent });
   const k = PACE_FACTOR[axes.pace];
   const paced = {
     ...look,
@@ -129,11 +129,15 @@ export function buildVariantPlan(transcript, cut, base, axes) {
     density_per_10s: look.density_per_10s
       ? {
           min: look.density_per_10s.min,
-          target: Math.max(look.density_per_10s.min, Math.round(look.density_per_10s.target / k)),
+          target: Math.min(look.density_per_10s.max, Math.max(look.density_per_10s.min, Math.round(look.density_per_10s.target / k))),
           max: look.density_per_10s.max,
         }
       : undefined,
   };
+  if (base.look_overrides) {
+    paced.cut_every_ms_min = Math.max(600, Math.min(8000, paced.cut_every_ms_min));
+    paced.cut_every_ms_max = Math.max(paced.cut_every_ms_min + 300, Math.min(12000, Math.max(900, paced.cut_every_ms_max)));
+  }
   const plan = planShots(transcript, cut, paced, {
     hook_text: axes.hook_text,
     seed: base.seed,

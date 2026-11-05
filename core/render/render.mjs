@@ -212,7 +212,7 @@ export async function renderPlan({
       progress('video', 0, 'Building the video');
       await writeFile(
         join(build, 'video.txt'),
-        buildVideoGraph({ segments, camera: use.camera, look_id: use.look_id, quality }),
+        buildVideoGraph({ segments, camera: use.camera, look_id: use.look_id, grade: getLook(use.look_id, use.look_overrides ?? project.look_overrides).grade, quality }),
       );
       const args = [
         '-i',
@@ -383,7 +383,7 @@ export async function renderReel({ projectId, quality, onProgress, signal, force
  */
 export async function renderLookSample({ projectId, look, captionTheme }) {
   const project = await requireProject(projectId);
-  const lk = getLook(look, captionTheme ? { caption_theme: captionTheme } : {});
+  const lk = getLook(look, { ...(look === project.look_id ? { ...project.look_overrides, accent: project.accent, caption_theme: project.caption_theme } : {}), ...(captionTheme ? { caption_theme: captionTheme } : {}) });
   const work = Object.values(project.assets).find((a) => a.kind === 'work');
   if (!work || !existsSync(work.path))
     throw new ProjectError('The working copy of this video is missing. Open the video again.');
@@ -430,6 +430,7 @@ export async function renderLookSample({ projectId, look, captionTheme }) {
     caption_anchor: anchor,
     hash: '',
   };
+  if (look === project.look_id && project.look_overrides && Object.keys(project.look_overrides).length) plan.look_overrides = project.look_overrides;
   plan.hash = hashShotPlan(plan);
 
   const folder = ensureDir(join(projectDir(projectId), 'samples'));
@@ -441,7 +442,7 @@ export async function renderLookSample({ projectId, look, captionTheme }) {
       const fontsDir = ensureDir(join(build, 'fonts'));
       for (const f of fontFilesFor()) copyFileSync(f, join(fontsDir, basename(f)));
       await writeFile(join(build, 'c.ass'), buildAss(plan, { quality: 'final' }).text);
-      const grade = gradeFilters(lk.id);
+      const grade = gradeFilters(lk.grade);
       await ffmpegLog(
         [
           '-ss',

@@ -168,6 +168,13 @@ export function planShots(transcript, cut, look, options = {}) {
     caption_anchor: null,
     hash: '',
   };
+  const original = getLook(lk.id);
+  /** @type {import('zod').infer<typeof import('../style/schema.mjs').overridesSchema>} */
+  const lookOverrides = {};
+  for (const field of /** @type {const} */ (['cut_every_ms_min', 'cut_every_ms_max', 'sfx_per_minute', 'density_per_10s', 'grade', 'camera_aggression'])) {
+    if (JSON.stringify(lk[field]) !== JSON.stringify(original[field])) lookOverrides[field] = /** @type {any} */ (lk[field]);
+  }
+  if (Object.keys(lookOverrides).length) plan.look_overrides = lookOverrides;
   plan.hash = hashShotPlan(plan);
   return plan;
 }
@@ -188,7 +195,7 @@ export function planShots(transcript, cut, look, options = {}) {
  * @returns {import('../types.mjs').ShotPlan}
  */
 export function editShotPlan(transcript, cut, plan, edits) {
-  const lk = getLook(plan.look_id, { caption_theme: plan.caption_theme, accent: plan.accent });
+  const lk = getLook(plan.look_id, { ...plan.look_overrides, caption_theme: plan.caption_theme, accent: plan.accent });
   const words = wordsOnTimeline(transcript, cut.pieces);
   const beats = plan.beats.map((b) => ({ ...b, emphasis_words: [...b.emphasis_words] }));
   for (const e of edits.beats ?? []) {

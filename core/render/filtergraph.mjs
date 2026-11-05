@@ -89,13 +89,13 @@ export function zoomExpression(camera) {
 
 /**
  * The color grade for a look as filters (empty when the look leaves color alone).
- * @param {string} lookId
+ * @param {string|import('../types.mjs').Look['grade']} lookId
  * @returns {string[]}
  */
 export function gradeFilters(lookId) {
   let grade;
   try {
-    grade = getLook(lookId).grade;
+    grade = typeof lookId === 'string' ? getLook(lookId).grade : lookId;
   } catch {
     return [];
   }
@@ -117,6 +117,7 @@ export function gradeFilters(lookId) {
  * @param {Segment[]} input.segments
  * @param {import('../types.mjs').CameraMove[]} input.camera
  * @param {string} input.look_id
+ * @param {import('../types.mjs').Look['grade']} [input.grade]
  * @param {'draft'|'final'} input.quality
  * @param {string} [input.ass_file]    Relative path of the .ass file (ffmpeg runs in its folder).
  * @param {string} [input.fonts_dir]   Relative path of the fonts folder.
@@ -126,6 +127,7 @@ export function buildVideoGraph({
   segments,
   camera,
   look_id,
+  grade,
   quality,
   ass_file = 'captions.ass',
   fonts_dir = 'fonts',
@@ -156,7 +158,7 @@ export function buildVideoGraph({
       `crop=${q.width}:${q.height}:(in_w-${q.width})/2:(in_h-${q.height})*${CROP_BIAS}`,
     );
   }
-  chain.push(...gradeFilters(look_id));
+  chain.push(...gradeFilters(grade ?? look_id));
   chain.push(`ass=${ass_file}:fontsdir=${fonts_dir}`, 'format=yuv420p');
   lines.push(`[cat]${chain.join(',')}[vout]`);
   return lines.join(';\n') + '\n';

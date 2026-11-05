@@ -71,3 +71,4 @@ export function parseStyle(input) {
   }
   return style;
 }
+/** @typedef {z.infer<typeof overridesSchema>} LookOverrides */

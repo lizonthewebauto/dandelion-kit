@@ -1,6 +1,7 @@
 // The five looks. A look is a named bundle of pacing, captions, camera, sound and color, so a different edit
 // is a different way of cutting and not just a new font. Data only, plus two small lookups.
 import { LOOK_IDS, CAPTION_THEMES, SFX_NAMES } from '../types.mjs';
+import { overridesSchema } from '../style/schema.mjs';
 
 /**
  * @type {Readonly<Record<string, import('../types.mjs').Look>>}
@@ -94,15 +95,27 @@ export function listLooks() {
 }
 
 /**
- * Find a look by id, with optional changes to its caption theme and accent color.
+ * Find a look by id and check each chosen field before it is used.
  * @param {string} [id]
- * @param {{caption_theme?: string, accent?: string}} [overrides]
+ * @param {import('zod').infer<typeof import('../style/schema.mjs').overridesSchema> & {caption_theme?: string, accent?: string}} [overrides]
  * @returns {import('../types.mjs').Look}
  */
 export function getLook(id = DEFAULT_LOOK_ID, overrides = {}) {
   const base = LOOKS[id];
   if (!base) throw new Error(`Unknown look "${id}". Use one of: ${LOOK_IDS.join(', ')}.`);
-  const look = { ...base, grade: { ...base.grade }, density_per_10s: base.density_per_10s ? { ...base.density_per_10s } : undefined };
+  const { caption_theme, accent, ...rest } = overrides;
+  const chosen = overridesSchema.parse(rest);
+  const look = {
+    ...base, ...chosen,
+    grade: { ...base.grade, ...chosen.grade },
+    density_per_10s: base.density_per_10s ? { ...base.density_per_10s, ...chosen.density_per_10s } : undefined,
+  };
+  // A partial choice must also fit the fields it keeps from the base look.
+  overridesSchema.parse({
+    cut_every_ms_min: look.cut_every_ms_min, cut_every_ms_max: look.cut_every_ms_max,
+    sfx_per_minute: look.sfx_per_minute, density_per_10s: look.density_per_10s,
+    grade: look.grade, camera_aggression: look.camera_aggression,
+  });
   if (overrides.caption_theme !== undefined) {
     if (!CAPTION_THEMES.includes(/** @type {any} */ (overrides.caption_theme))) {
       throw new Error(`Unknown caption theme "${overrides.caption_theme}". Use one of: ${CAPTION_THEMES.join(', ')}.`);

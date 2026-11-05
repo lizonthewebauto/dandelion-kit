@@ -166,6 +166,7 @@ function textCut(d) {
   } else {
     lines.push('Nothing needed cutting.');
   }
+  if (d.style_name) lines.push('', `Style used: ${d.style_name}`);
   lines.push('', 'To keep a piece, call update_cut with its id in keep_ids. Next: pick_look.');
   return lines.join('\n');
 }
@@ -182,6 +183,8 @@ function textLooks(d) {
     );
   }
   lines.push('', 'Caption styles: karaoke-highlight, karaoke-pill, one-word-pop, bold-stroke, clean-minimal, editorial-serif, box-caption, mono-terminal.');
+  if (d.style_name) lines.push(`Style used: ${d.style_name}`);
+  if (d.default_style) lines.push(`Your saved style ${d.default_style} is the default. Call pick_look with style to use it.`);
   lines.push('To choose, call pick_look with look (and optionally caption_theme and accent). Next: plan_shots.');
   return lines.join('\n');
 }

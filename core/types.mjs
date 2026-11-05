@@ -222,6 +222,7 @@ export const ASSET_KINDS = Object.freeze([
  * @property {string} [look_id]       One of LOOK_IDS.
  * @property {string} [caption_theme] One of CAPTION_THEMES.
  * @property {string} [accent]        Accent color, "#RRGGBB".
+ * @property {import('zod').infer<typeof import('./style/schema.mjs').overridesSchema>} [look_overrides] Saved video changes.
  * @property {ShotPlan} [shot_plan]
  * @property {Record<string, RenderResult>} [renders]  Keyed by "draft", "final" or a variant id.
  * @property {Variant[]} [variants]
@@ -397,6 +398,7 @@ export const ASSET_KINDS = Object.freeze([
 /**
  * Everything the renderer needs. The render is built once from this.
  * @typedef {object} ShotPlan
+ * @property {import('zod').infer<typeof import('./style/schema.mjs').overridesSchema>} [look_overrides] Video choices included in the cache hash.
  * @property {string} look_id
  * @property {string} caption_theme
  * @property {string} accent

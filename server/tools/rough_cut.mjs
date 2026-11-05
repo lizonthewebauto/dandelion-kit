@@ -1,3 +1,4 @@
+import { defaultStyle } from '../../core/style/store.mjs';
 import { ROUGH_CUT_PRESET_IDS, roughCut } from '../../core/edit/roughcut.mjs';
 import { updateProject } from '../store/project.mjs';
 import { cutData } from '../lib/data.mjs';
@@ -15,17 +16,18 @@ export const tool = defineTool({
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   async run(args, ctx) {
+    const saved = args.preset === undefined ? await defaultStyle() : null;
     const ready = await ensureTranscript(args.project_id, { onProgress: ctx.progress });
     const transcript = /** @type {import('../../core/types.mjs').Transcript} */ (ready.transcript);
     const { project } = await updateProject(args.project_id, (p) => {
       p.cut = roughCut(transcript, {
-        preset: /** @type {any} */ (args.preset ?? p.cut?.preset ?? 'standard'),
+        preset: /** @type {any} */ (args.preset ?? saved?.video?.rough_cut ?? p.cut?.preset ?? 'standard'),
         duration_ms: p.media?.duration_ms,
       });
       p.cut_applied = true;
       // A new cut moves every time in the plan, so the old plan and its renders no longer match.
       delete p.shot_plan;
     });
-    return ok(cutData(project));
+    return ok({ ...cutData(project), style_name: saved?.video?.rough_cut ? saved.name : undefined });
   },
 });

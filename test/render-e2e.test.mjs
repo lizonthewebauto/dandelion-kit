@@ -335,3 +335,36 @@ test('long words and wide pairs stay inside the safe zone as drawn by libass, at
     assert.ok(b.y_min >= SAFE_ZONE.y_min && b.y_max <= SAFE_ZONE.y_max, `${theme} y ${b.y_min}-${b.y_max}`);
   }
 });
+
+test('a saved look override renders and a grade change rebuilds its draft', { timeout: 180000 }, async (t) => {
+  const { detectFfmpeg } = await import('../core/media/ffmpeg.mjs');
+  const ffmpeg = await detectFfmpeg();
+  if (!ffmpeg.found || !ffmpeg.has_ass) return t.skip('ffmpeg with captions is not installed');
+  const { getLook } = await import('../core/edit/looks.mjs');
+  const p = await requireProject(projectId);
+  const choices = { grade: { saturation: 0.9, contrast: 1.16, warmth: -0.06 }, camera_aggression: 'calm' };
+  const makePlan = (overrides) => edit.planShots(
+    /** @type {any} */ (p.transcript), /** @type {any} */ (p.cut),
+    getLook('karaoke-clean', overrides), { seed: 7 },
+  );
+  const first = makePlan(choices);
+  await updateProject(projectId, (q) => {
+    q.look_id = 'karaoke-clean';
+    q.look_overrides = /** @type {any} */ (choices);
+    q.shot_plan = first;
+  });
+  const draft = await renderReel({ projectId, quality: 'draft' });
+  assert.ok(existsSync(draft.file) && draft.bytes > 10000);
+  assertChecks(draft.checks, 'style override draft');
+  assert.equal((await requireProject(projectId)).shot_plan?.look_overrides?.grade?.saturation, 0.9);
+  assert.ok(/** @type {any} */ (await renderReel({ projectId, quality: 'draft' })).reused);
+  const changed = { ...choices, grade: { ...choices.grade, warmth: 0.06 } };
+  await updateProject(projectId, (q) => {
+    q.look_overrides = /** @type {any} */ (changed);
+    q.shot_plan = makePlan(changed);
+  });
+  const rebuilt = await renderReel({ projectId, quality: 'draft' });
+  assert.ok(!(/** @type {any} */ (rebuilt).reused));
+  assert.notEqual(rebuilt.plan_hash, draft.plan_hash);
+  assertChecks(rebuilt.checks, 'changed style draft');
+});
