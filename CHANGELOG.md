@@ -2,6 +2,11 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.9 (2026-11-04)
+
+- Fix: on a Mac, reels hit "cannot draw captions". Homebrew's plain `ffmpeg` has no libass, so the install hint is now `brew install ffmpeg-full`. The Kit also finds ffmpeg-full by name, since Homebrew keeps it off PATH, and looks in Homebrew's folders when an app opened from the Dock has a short PATH.
+- New: Claude Desktop bundles for Mac (Apple Silicon and Intel) on the release.
+
 ## 1.0.8 (2026-11-04)
 
 - Fix: a render always asked for 3 GB free, even for a 10 second clip. It now asks for 1 GB plus 25 MB a second, up to 3 GB (`renderSpaceBytes` in `core/util/disk.mjs`). Reels of about 80 seconds or more still ask for the full 3 GB, and so does a length the kit cannot read.

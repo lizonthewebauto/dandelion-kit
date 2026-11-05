@@ -89,7 +89,7 @@ Node.js 20 or newer is required. The first start installs its own dependencies. 
 2. If the host needs a restart to load new tools, tell the person to start a new session, then call the Kit's `doctor` tool.
 3. `doctor` reports whether ffmpeg is installed. The Kit needs it to edit video and never ships it. If it is missing, show the person the exact command for their computer and wait for them to run it or say go ahead:
    - Windows: `winget install Gyan.FFmpeg`
-   - macOS: `brew install ffmpeg`
+   - macOS: `brew install ffmpeg-full`
    - Linux: `sudo apt install ffmpeg`
 4. The first video edit downloads small speech and face models (about 75 MB) into `~/.dandelion-kit/models`. Tell the person before it starts.
 

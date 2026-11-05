@@ -44,7 +44,7 @@ function jpegInfo(path) {
 
 test('install hints name the right command for each OS', () => {
   assert.equal(installHint('win32'), 'winget install Gyan.FFmpeg');
-  assert.equal(installHint('darwin'), 'brew install ffmpeg');
+  assert.equal(installHint('darwin'), 'brew install ffmpeg-full');
   assert.equal(installHint('linux'), 'sudo apt install ffmpeg');
   assert.match(installHint(), /ffmpeg|FFmpeg/);
 });
@@ -103,7 +103,8 @@ test('FFMPEG_PATH wins over PATH, and a bad FFMPEG_PATH falls back', async () =>
   }
 });
 
-test('a missing ffmpeg gives a plain message with the install command', async () => {
+// A Mac always searches Homebrew's folders, so emptying PATH does not hide ffmpeg there.
+test('a missing ffmpeg gives a plain message with the install command', { skip: process.platform === 'darwin' }, async () => {
   const savedPath = process.env.PATH;
   const savedKey = process.env.Path;
   const savedFfmpeg = process.env.FFMPEG_PATH;

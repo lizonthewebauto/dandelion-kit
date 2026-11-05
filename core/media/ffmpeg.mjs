@@ -1,4 +1,4 @@
-// Finds ffmpeg (FFMPEG_PATH, kit bin folder, PATH), checks features, shows the install command,
+// Finds ffmpeg (FFMPEG_PATH, kit bin folder, Homebrew, PATH), checks features, shows the install command,
 // and runs ffmpeg / ffprobe with plain-word errors.
 import { spawn } from 'node:child_process';
 import { delimiter, dirname, join } from 'node:path';
@@ -24,7 +24,8 @@ const EXE = IS_WIN ? '.exe' : '';
 /** The command that installs a full ffmpeg build on each OS. @param {string} [os] */
 export function installHint(os = process.platform) {
   if (os === 'win32') return 'winget install Gyan.FFmpeg';
-  if (os === 'darwin') return 'brew install ffmpeg';
+  // Homebrew's plain ffmpeg has no libass, so it cannot draw captions.
+  if (os === 'darwin') return 'brew install ffmpeg-full';
   return 'sudo apt install ffmpeg';
 }
 
@@ -58,8 +59,16 @@ function ffmpegCandidates() {
     list.push({ path: isFile(fromEnv) ? fromEnv : join(fromEnv, 'ffmpeg' + EXE), source: 'env' });
   }
   list.push({ path: join(kitHome(), 'bin', 'ffmpeg' + EXE), source: 'kit-bin' });
+  // Homebrew keeps ffmpeg-full off PATH, so look for it by name, ahead of a plain ffmpeg.
+  if (process.platform === 'darwin') {
+    for (const brew of ['/opt/homebrew', '/usr/local']) list.push({ path: `${brew}/opt/ffmpeg-full/bin/ffmpeg`, source: 'path' });
+  }
   const onPath = findOnPath('ffmpeg');
   if (onPath) list.push({ path: onPath, source: 'path' });
+  // An app opened from the Dock does not get Homebrew's folders on PATH.
+  if (process.platform === 'darwin') {
+    for (const brew of ['/opt/homebrew', '/usr/local']) list.push({ path: `${brew}/bin/ffmpeg`, source: 'path' });
+  }
   return list;
 }
 
