@@ -13,7 +13,7 @@ export const tool = defineTool({
     project_id: z.string(),
     quality: z.enum(['draft', 'final']).default('draft'),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   async run(args, ctx) {
     const project = await requireProject(args.project_id);
     if (project.type !== 'video') return fail('Only video projects can be built into a reel.');
@@ -30,6 +30,10 @@ export const tool = defineTool({
       async start(report) {
         // The build is not tied to this call's signal: a host that stops waiting must not stop the build.
         await renderReel({ projectId: project.id, quality: args.quality, onProgress: stageProgress(report) });
+        if (args.quality === 'final') {
+          const { usageReporter } = await import('../../core/util/usage-reporting.mjs');
+          await usageReporter.firstUse();
+        }
         return ok(await previewData(project.id, args.quality));
       },
     });

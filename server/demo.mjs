@@ -113,6 +113,8 @@ export async function demoOutcome(name, args, state) {
       return demoRead(/** @type {any} */ (args));
     case 'doctor':
       return ok(JSON.parse(JSON.stringify(DOCTOR)));
+    case 'usage_reporting':
+      return ok({ enabled: false }, 'This is a sample. Usage counts stay off.');
     case 'open_video':
       return ok(JSON.parse(JSON.stringify(PROJECT)));
     case 'list_projects':

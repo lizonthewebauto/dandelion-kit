@@ -35,6 +35,7 @@ Usage:
   kit offer <bundle.json>               Per-app versions for a post: {kind, text, files, channels}
   kit connect                           Sign in to Dandelion.
   kit setup <client> [--config <file>] [--dry-run] [--replace]
+  kit tracking on|off|status             Optional usage counts (off until you say yes).
   kit version
 `;
 
@@ -466,12 +467,28 @@ async function main() {
     process.stdout.write(result.text + '\n');
     return result.code;
   }
+  if (command === 'tracking') {
+    const { REPORTING_NOTICE, usageReporter } = await import('../core/util/usage-reporting.mjs');
+    const action = rest[0] ?? 'status';
+    if (!['on', 'off', 'status'].includes(action) || rest.length > 1) {
+      err('Usage: kit tracking on|off|status');
+      return 2;
+    }
+    const state = action === 'status' ? await usageReporter.status() : await usageReporter.setEnabled(action === 'on');
+    if (state.enabled && depsReady()) await usageReporter.installed();
+    process.stdout.write(`${state.enabled ? 'Optional usage counts are on.' : 'Optional usage counts are off.'}\n${REPORTING_NOTICE}\n`);
+    return 0;
+  }
   if (command === 'install-deps') return ensureDependencies() ? 0 : 1;
   if (command === 'serve' && !depsReady()) {
     await serveWithSetup(rest.includes('--demo'));
     return null; // keep running
   }
   if (!ensureDependencies()) return 1;
+  if (command !== 'serve' && !process.env.DANDELION_KIT_DEMO) {
+    const { usageReporter } = await import('../core/util/usage-reporting.mjs');
+    await usageReporter.installed();
+  }
 
   switch (command) {
     case 'serve': {

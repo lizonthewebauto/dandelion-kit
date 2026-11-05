@@ -18,7 +18,7 @@ ${layoutHelp()}`,
     size: sizeInput,
     allow_overflow: z.boolean().optional(),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   async run(args) {
     const project = await requireProject(args.project_id);
     if (project.type !== 'carousel' || !project.carousel) return fail('This project is not a carousel or image.');

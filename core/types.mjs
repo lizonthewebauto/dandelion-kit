@@ -12,6 +12,7 @@ export const TOOL_NAMES = Object.freeze([
   'save_style',
   'list_styles',
   'doctor',
+  'usage_reporting',
   'open_video',
   'get_project',
   'list_projects',

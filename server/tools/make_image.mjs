@@ -19,7 +19,7 @@ ${layoutHelp()}`,
     size: sizeInput,
     allow_overflow: z.boolean().optional(),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   async run(args) {
     const title = args.title ?? (typeof args.fields.title === 'string' ? args.fields.title : `${args.layout} image`);
     const project = await createProject({ type: 'carousel', title });

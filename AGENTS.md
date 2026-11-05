@@ -35,6 +35,8 @@ One image or video is enough. Ask for file or folder paths; Claude Desktop canno
 
 ## Working on this repo
 
+- Optional usage counts are off by default. After the first doctor check, read usage_reporting status. If chosen is false, read its notice and ask once whether the person wants to share ready-install and first-finished-output counts. Only turn it on after an explicit yes. An install request is not consent. Do not block setup or editing while waiting, and do not ask again after they chose. They can turn it off at any time. Use `DANDELION_KIT_TELEMETRY=0` for owner checks and QA.
+
 - Plain ESM JavaScript, no build step. `npm test` runs the unit tests, the type check and the copy check (`npm run check-copy`).
 - The tools are listed in `server/lib/tools.mjs`. Shared shapes live in `core/types.mjs`; changing one needs a note in `CHANGELOG.md`.
 - `INSTALL.md` is mirrored byte for byte at `https://dandelionapp.io/freekit/install.md`. If you change it, say so, so the copy can be updated.

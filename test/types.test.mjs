@@ -18,7 +18,7 @@ test('closed lists have the sizes the plan names', () => {
   assert.equal(types.TREATMENTS.length, 6);
   assert.deepEqual([...types.POST_KINDS], ['text', 'image', 'carousel', 'video', 'thread']);
   assert.deepEqual([...types.CHECK_STATUSES], ['pass', 'warn', 'stop']);
-  assert.equal(types.TOOL_NAMES.length, 28);
+  assert.equal(types.TOOL_NAMES.length, 29);
   assert.equal(types.WIDGET_IDS.length, 8);
   assert.equal(types.SFX_NAMES.length, 10);
   assert.ok(types.APP_ONLY_TOOLS.every((t) => types.TOOL_NAMES.includes(t)));

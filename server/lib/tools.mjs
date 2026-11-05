@@ -8,6 +8,7 @@ import { tool as check_reel } from '../tools/check_reel.mjs';
 import { tool as connect_dandelion } from '../tools/connect_dandelion.mjs';
 import { tool as dandelion_status } from '../tools/dandelion_status.mjs';
 import { tool as doctor } from '../tools/doctor.mjs';
+import { tool as usage_reporting } from '../tools/usage_reporting.mjs';
 import { tool as export_files } from '../tools/export.mjs';
 import { tool as get_project } from '../tools/get_project.mjs';
 import { tool as list_projects } from '../tools/list_projects.mjs';
@@ -32,6 +33,7 @@ import { tool as update_slides } from '../tools/update_slides.mjs';
 const BY_NAME = {
   analyze_samples, save_style, list_styles,
   doctor,
+  usage_reporting,
   open_video,
   get_project,
   list_projects,

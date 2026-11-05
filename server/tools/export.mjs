@@ -55,7 +55,7 @@ export const tool = defineTool({
     project_id: z.string(),
     to_dir: z.string().optional().describe('Folder to copy into. Created if missing.'),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   async run(args) {
     const project = await requireProject(args.project_id);
     const slug = slugify(project.title);
@@ -118,6 +118,8 @@ export const tool = defineTool({
     await writeFile(summaryPath, `${lines.join('\n')}\n`, 'utf8');
     files.push({ path: summaryPath, bytes: (await stat(summaryPath)).size, kind: 'doc' });
     files.push({ path: sourceMapPath, bytes: (await stat(sourceMapPath)).size, kind: 'doc' });
+    const { usageReporter } = await import('../../core/util/usage-reporting.mjs');
+    await usageReporter.firstUse();
     return ok({ project_id: project.id, dir, files, summary_path: summaryPath, source_map_path: sourceMapPath, ...(warnings.length ? { warnings } : {}) });
   },
 });

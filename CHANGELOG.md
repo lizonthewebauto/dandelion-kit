@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 (2026-11-05)
+
+- Add the usage_reporting tool slot and `kit tracking on|off|status`. Optional ready-install and first-finished-output counts require explicit consent, default off and share only a random Kit ID, version and system type with Dandelion. No files or account details leave the computer. Failed reporting never fails an install, render or export. Demo, test and forced-off runs send nothing.
+- Desktop install instructions use the owned download-count link with an exact GitHub asset fallback. Download requests, ready installs and first finished outputs are separate signals.
+
 ## 1.1.1 (2026-11-05)
 
 - Add kit setup for local AI clients, safe JSON config merging and full-path launch entries. CLIENTS.md lists supported routes and their limits. Command previews do not sign in or post.

@@ -81,7 +81,7 @@ test('serve --demo answers with sample data, including pictures through read_ass
   }
 });
 
-test('demo mode answers all 28 tools with text and, for tools with a card, the sample data', async () => {
+test('demo mode answers all 29 tools with text and, for tools with a card, the sample data', async () => {
   const kit = await connectKit({ demo: true });
   try {
     /** @type {Record<string, Record<string, any>>} */

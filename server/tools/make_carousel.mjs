@@ -18,7 +18,7 @@ ${layoutHelp()}`,
     size: sizeInput,
     allow_overflow: z.boolean().optional().describe('Shrink text that is over the limit instead of refusing.'),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   async run(args, ctx) {
     ctx.progress(0.1, 'Drawing the slides');
     const project = await createProject({ type: 'carousel', title: args.title });

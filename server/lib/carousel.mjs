@@ -126,6 +126,8 @@ export async function renderIntoProject(projectId, spec, options = {}) {
   for (const name of await readdir(base).catch(() => /** @type {string[]} */ ([]))) {
     if (name !== rev) await rm(join(base, name), { recursive: true, force: true }).catch(() => {});
   }
+  const { usageReporter } = await import('../../core/util/usage-reporting.mjs');
+  await usageReporter.firstUse();
   return carouselData(project, result.warnings);
 }
 

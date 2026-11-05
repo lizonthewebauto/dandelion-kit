@@ -38,7 +38,7 @@ const SIX = [
   { layout: 'cta', fields: { title: 'Try it for a week', line: 'Save this and tell me how day three goes.', handle: '@morningmethod' } },
 ];
 
-test('lists exactly the 28 tools in order and the 8 card resources', async () => {
+test('lists exactly the 29 tools in order and the 8 card resources', async () => {
   const { tools } = await kit.client.listTools();
   assert.deepEqual(tools.map((t) => t.name), [...TOOL_NAMES]);
   const { resources } = await kit.client.listResources();

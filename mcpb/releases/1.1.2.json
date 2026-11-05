@@ -1,0 +1,56 @@
+{
+  "version": "1.1.2",
+  "sourceTag": "v1.1.2",
+  "baseRelease": "https://github.com/lizonthewebauto/dandelion-kit/releases/tag/v1.1.1",
+  "method": "JavaScript-only overlay; native node_modules and assets unchanged from verified owned release",
+  "officialPackCli": "@anthropic-ai/mcpb 2.1.2",
+  "dependencyGraphUnchanged": true,
+  "windowsNativeImageSmokePassed": true,
+  "nativeMacRuntimeRetested": false,
+  "telemetryDuringSmoke": "forced off; zero events",
+  "assets": [
+    {
+      "target": "darwin-arm64",
+      "baseSha256": "9676201b9d2b5b04fe493ed49ec57ef58861cc90b75ce0cd67619e0cbc13782a",
+      "sha256": "93ffe5324793001312280d7be1042ed7f13597ba83bc0e3a1f4ad48b22e954db",
+      "bytes": 84875143,
+      "installedPackagesChecked": 175,
+      "protectedFileCount": 4278,
+      "sourceFilesMatched": 147,
+      "additionalCoreBinariesUnchanged": 10
+    },
+    {
+      "target": "darwin-x64",
+      "baseSha256": "6f05e1902385ffcc9b7f051eddbb7782bfc29861632d504266aeec980dab77b9",
+      "sha256": "b79c3a5f1a06cdcd24e1fb7f3436c2718c3c75643a735671766a51e59c031d14",
+      "bytes": 59875850,
+      "installedPackagesChecked": 175,
+      "protectedFileCount": 4275,
+      "sourceFilesMatched": 147,
+      "additionalCoreBinariesUnchanged": 10
+    },
+    {
+      "target": "win32-x64",
+      "baseSha256": "f69d7cdc28d950a0949d63cc04f17dae10832550da2a5d857dcbbb5119965728",
+      "sha256": "c9ab8da0990443cc76c66c7881e7e90e5d1cdd9f70e39754bb5df6223d796143",
+      "bytes": 84403970,
+      "installedPackagesChecked": 171,
+      "protectedFileCount": 4244,
+      "sourceFilesMatched": 147,
+      "additionalCoreBinariesUnchanged": 10
+    }
+  ],
+  "validation": {
+    "fullSerialRun": {
+      "tests": 454,
+      "passed": 452,
+      "skipped": 1,
+      "initialFailures": 1,
+      "correctedFailure": "One stale 28-tool assertion updated to 29; affected real-stdio rerun 9/9 passed"
+    },
+    "telemetryTestsPassed": 10,
+    "strictTypecheckPassed": true,
+    "copyCheckPassed": true,
+    "diffCheckPassed": true
+  }
+}

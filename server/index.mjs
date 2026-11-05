@@ -1,7 +1,8 @@
 import { STYLE_INTERVIEW } from './tools/analyze_samples.mjs';
-// MCP server for the Dandelion Kit: registers the eight cards and the 28 tools, the server instructions, and the stdio transport.
+// MCP server for the Dandelion Kit: registers the eight cards and the 29 tools, the server instructions, and the stdio transport.
 // stdout carries MCP frames only. Everything else goes to stderr and ~/.dandelion-kit/logs/kit.log.
 import { readFileSync } from 'node:fs';
+import { usageReporter } from '../core/util/usage-reporting.mjs';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import * as log from '../core/util/log.mjs';
@@ -35,6 +36,8 @@ export const INSTRUCTIONS = [
   'Learn a style: ask for file paths or a folder. Claude Desktop chat attachments cannot be passed to tools. Call analyze_samples. ' + STYLE_INTERVIEW,
   '',
   'Style: no em dashes or en dashes in anything you write for the person. If you ever need a voice, use a female voice unless the person names another. Images are JPEG.',
+  '',
+  'Optional usage counts: after the first doctor check, call usage_reporting with action status. If chosen is false, read its notice and ask once whether the person wants to help count ready Kits and first finished outputs. Only call action on after their explicit yes; call off for no. A Kit install request is not consent. Never block setup or editing for this choice and never ask again after chosen is true. The person may turn it off at any time.',
 ].join('\n');
 
 /**
@@ -149,5 +152,6 @@ export async function startStdio(options = {}) {
   const transport = new StdioServerTransport(options.stdin, options.stdout);
   server.server.onclose = () => process.exit(0);
   await server.connect(transport);
+  if (!options.demo && !process.env.DANDELION_KIT_DEMO) void usageReporter.installed();
   log.info(`Dandelion Kit ${serverVersion()} is running${options.demo || process.env.DANDELION_KIT_DEMO ? ' in demo mode (sample data)' : ''}.`);
 }

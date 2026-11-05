@@ -55,7 +55,7 @@ For Claude Desktop chat, read the latest release data:
 
     https://api.github.com/repos/lizonthewebauto/dandelion-kit/releases/latest
 
-Read tag_name and assets. Match the exact version, operating system and CPU. Use the matching asset's browser_download_url. Do not invent a file URL, hard-code an old version, or choose the wrong CPU because its file exists.
+Read tag_name and assets. Match the exact version, operating system and CPU. For a matching desktop asset, download through `https://dandelionapp.io/api/kit/download?platform=PLATFORM&arch=ARCH`, using the real platform and arch from the table below. This first-party link counts a download request and redirects to the matching latest GitHub file. If that route is unavailable, use the matching asset's browser_download_url. Do not invent a file URL, hard-code an old version, or choose the wrong CPU because its file exists.
 
 Asset names have this form, with the leading v removed from tag_name:
 
@@ -126,6 +126,10 @@ An offer is not permission to publish. Do not upload, schedule or post during se
 ## Finish with the real state
 
 Reload or restart the client only when needed. If the person must restart it, give that one next step and resume after it loads. Confirm the Kit is in the host's tool list. Then call doctor.
+
+After that first check, call usage_reporting with action status. If chosen is false, offer this once: "Would you like to share optional usage counts? They tell Dandelion when this Kit is ready and when you first make a finished image, carousel or video. They send a random Kit ID, version and system type. No files, words, email or computer name are sent. You can turn this off at any time and keep editing offline."
+
+Only call usage_reporting with action on after an explicit yes. For no, call action off. Silence and an install request are not consent. Do not block setup or editing while waiting, and do not ask again in later sessions after chosen is true. To change it later, the person can ask their AI to turn usage counts on or off, or run `node bin/kit.mjs tracking on` or `node bin/kit.mjs tracking off` in the Kit folder. `DANDELION_KIT_TELEMETRY=0` forces reporting off for a run, including owner checks and QA.
 
 Video needs ffmpeg with captions and loudness support. Install it when missing as part of this authorized setup:
 

@@ -1,5 +1,7 @@
 # Dandelion Kit
 
+Optional usage counts are off until you agree. They report when the Kit is ready and your first finished image, carousel or video, with a random Kit ID, version and system type. No files, words, email or computer name are sent. Ask your AI to turn usage counts on or off. From the Kit folder, `node bin/kit.mjs tracking status` checks the choice; use `tracking on` or `tracking off` to change it. Editing works offline with counts off. Set `DANDELION_KIT_TELEMETRY=0` for owner checks and QA. See [INSTALL.md](INSTALL.md) for the consent step.
+
 A free kit for Claude Code, Codex and Claude Desktop. Edit a talking-head video into a finished Reel, make carousels and single images, and get a ready-to-post version of anything you write for every major social app.
 
 It runs on your computer. It is open source (MIT). Posting is optional and goes through [Dandelion](https://dandelionapp.io), which always waits for your OK.
@@ -79,7 +81,7 @@ There are still 12 fixed layouts and 8 bundled fonts. Your AI picks the nearest 
 
 ## What is inside
 
-- An MCP server named `dandelion-kit` with 28 tools and 8 visual cards.
+- An MCP server named `dandelion-kit` with 29 tools and 8 visual cards.
 - Three skills: `reels-editor`, `carousel-maker` and `post-anything`.
 - A session-start hook (Claude Code) and `AGENTS.md` (Codex) that carry one standing rule: whenever the agent makes social content, it calls `offer_post` and shows the card, and it never posts without your yes.
 

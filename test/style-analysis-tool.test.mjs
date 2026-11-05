@@ -36,7 +36,7 @@ function underBudget(data) {
   assert.ok(!DASH_RE.test(encoded));
 }
 
-test('one image over real stdio gives 28 tools, a JPEG block and a local sheet path', { timeout: 90000 }, async () => {
+test('one image over real stdio gives 29 tools, a JPEG block and a local sheet path', { timeout: 90000 }, async () => {
   const sample = await image(join(home, 'one.jpg'));
   const before = await readFile(sample);
   const transport = new StdioClientTransport({
@@ -47,7 +47,7 @@ test('one image over real stdio gives 28 tools, a JPEG block and a local sheet p
   await client.connect(transport);
   try {
     const tools = await client.listTools();
-    assert.equal(tools.tools.length, 28);
+    assert.equal(tools.tools.length, 29);
     const result = /** @type {any} */ (await client.callTool({ name: 'analyze_samples', arguments: { paths: [`"${sample}"`] } }, undefined, { timeout: 80000 }));
     assert.ok(!result.isError, textOf(result));
     const data = result.structuredContent;
