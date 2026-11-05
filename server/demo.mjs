@@ -103,6 +103,12 @@ export function newDemoServerState() {
  */
 export async function demoOutcome(name, args, state) {
   switch (name) {
+    case 'analyze_samples':
+      return ok({ images: [], videos: [], skipped: [] }, 'This is a sample answer. Real samples stay on this computer.');
+    case 'save_style':
+      return ok({ name: args.name }, 'This is a sample saved style. Nothing was saved.');
+    case 'list_styles':
+      return ok({ styles: [] }, 'No saved styles in this sample.');
     case 'read_asset':
       return demoRead(/** @type {any} */ (args));
     case 'doctor':

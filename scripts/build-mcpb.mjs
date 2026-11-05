@@ -106,4 +106,4 @@ function main() {
   if (!process.argv.includes('--keep')) rmSync(staging, { recursive: true, force: true });
 }
 
-main();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

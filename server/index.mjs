@@ -1,4 +1,4 @@
-// MCP server for the Dandelion Kit: registers the eight cards and the 25 tools, the server instructions, and the stdio transport.
+// MCP server for the Dandelion Kit: registers the eight cards and the 28 tools, the server instructions, and the stdio transport.
 // stdout carries MCP frames only. Everything else goes to stderr and ~/.dandelion-kit/logs/kit.log.
 import { readFileSync } from 'node:fs';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';

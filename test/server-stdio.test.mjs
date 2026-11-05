@@ -81,11 +81,13 @@ test('serve --demo answers with sample data, including pictures through read_ass
   }
 });
 
-test('demo mode answers all 25 tools with text and, for tools with a card, the sample data', async () => {
+test('demo mode answers all 28 tools with text and, for tools with a card, the sample data', async () => {
   const kit = await connectKit({ demo: true });
   try {
     /** @type {Record<string, Record<string, any>>} */
     const args = {
+      analyze_samples: { paths: ['sample.jpg'] },
+      save_style: { name: 'Sample', style: { carousel: { radius: 'sharp' } } },
       open_video: { path: 'x.mp4' },
       get_project: { project_id: 'p_demo' },
       rough_cut: { project_id: 'p_demo' },

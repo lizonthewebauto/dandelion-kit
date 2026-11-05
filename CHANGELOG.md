@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add partial StyleInput and CarouselTokens shapes, a local style store, and analyze_samples, save_style and list_styles tool slots. Only chosen parts are saved.
+
+
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
 ## 1.0.14 (2026-11-05)

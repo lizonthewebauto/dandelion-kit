@@ -119,7 +119,7 @@ test('a missing ffmpeg gives a plain message with the install command', { skip: 
     assert.equal(status.found, false);
     assert.equal(status.install_hint, installHint());
     await assert.rejects(() => requireFfmpeg(), /Install it with: /);
-    assert.match(await captionsProblem(), /Install it with: /);
+    assert.match((await captionsProblem()) ?? '', /Install it with: /);
   } finally {
     process.env.PATH = savedPath;
     if (savedKey !== undefined) process.env.Path = savedKey;

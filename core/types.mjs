@@ -8,6 +8,9 @@
 
 /** Every tool the kit server registers. server/index.mjs registers exactly these; widgets may call only these. */
 export const TOOL_NAMES = Object.freeze([
+  'analyze_samples',
+  'save_style',
+  'list_styles',
   'doctor',
   'open_video',
   'get_project',
@@ -602,3 +605,6 @@ export const ASSET_KINDS = Object.freeze([
  */
 
 export {};
+
+/** @typedef {import('./style/schema.mjs').StyleInput} StyleInput */
+/** @typedef {import('./style/schema.mjs').CarouselTokens} CarouselTokens */

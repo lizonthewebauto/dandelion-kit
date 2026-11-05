@@ -1,3 +1,6 @@
+import { tool as analyze_samples } from '../tools/analyze_samples.mjs';
+import { tool as save_style } from '../tools/save_style.mjs';
+import { tool as list_styles } from '../tools/list_styles.mjs';
 // Every tool, in the order of TOOL_NAMES. server/index.mjs registers exactly these.
 import { TOOL_NAMES } from '../../core/types.mjs';
 import { tool as approve_post } from '../tools/approve_post.mjs';
@@ -27,6 +30,7 @@ import { tool as update_shot_plan } from '../tools/update_shot_plan.mjs';
 import { tool as update_slides } from '../tools/update_slides.mjs';
 
 const BY_NAME = {
+  analyze_samples, save_style, list_styles,
   doctor,
   open_video,
   get_project,
