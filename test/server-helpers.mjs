@@ -38,3 +38,19 @@ export const textOf = (result) => result.content.map((/** @type {any} */ c) => c
 
 /** The characters we never write: em dash and en dash. */
 export const DASH_RE = new RegExp(`[${String.fromCharCode(0x2014)}${String.fromCharCode(0x2013)}]`);
+
+/** Wait through the tool's documented background replies without starting a second build.
+ * @param {{call:(name:string,args?:Record<string,any>)=>Promise<any>}} kit
+ * @param {string} name
+ * @param {Record<string,any>} args
+ * @param {number} [timeoutMs]
+ */
+export async function callFinished(kit, name, args, timeoutMs = 360000) {
+  const end = Date.now() + timeoutMs;
+  for (;;) {
+    const result = await kit.call(name, args);
+    if (result.isError || !result.structuredContent?.pending) return result;
+    if (Date.now() >= end) throw new Error(`Timed out waiting for ${name} to finish.`);
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+}

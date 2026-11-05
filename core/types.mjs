@@ -635,3 +635,25 @@ export {};
  * @property {number} whitespace_ratio
  * @property {number} busyness
  */
+
+/**
+ * Local facts read from one video sample, with speech kept separate from cut confidence.
+ * @typedef {object} SampleVideo
+ * @property {string} path
+ * @property {number} duration_ms
+ * @property {number} width
+ * @property {number} height
+ * @property {number} fps
+ * @property {number[]} cut_times_ms
+ * @property {{p25:number,median:number,p75:number}} shot_ms
+ * @property {number} cuts_per_10s
+ * @property {number|null} words_per_minute
+ * @property {{median:number,p90:number}|null} pause_ms
+ * @property {number|null} loudness_lufs
+ * @property {{saturation:number,contrast:number,warmth:number}} grade
+ * @property {'measured'|'unavailable'} speech
+ * @property {string} [speech_note]
+ * @property {'ok'|'low'} confidence
+ * @property {string} confidence_note
+ * @property {number} [word_count]
+ */

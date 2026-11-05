@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTempDir } from '../core/util/fs.mjs';
 import { detectFfmpeg } from '../core/media/ffmpeg.mjs';
-import { connectKit, textOf, useSharedModels, DASH_RE } from './server-helpers.mjs';
+import { connectKit, textOf, useSharedModels, DASH_RE, callFinished } from './server-helpers.mjs';
 
 useSharedModels();
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,7 +32,7 @@ after(async () => {
   await kit.close();
   if (previousHome === undefined) delete process.env.DANDELION_KIT_HOME;
   else process.env.DANDELION_KIT_HOME = previousHome;
-  rmSync(home, { recursive: true, force: true });
+  rmSync(home, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('open_video returns fast with the project, and the words are read in the background', { skip }, async () => {
@@ -133,7 +133,7 @@ test('plan_shots builds the plan and update_shot_plan edits it', { skip }, async
 });
 
 test('render_reel draft: preview card data, a playable preview file and frames through read_asset', { skip }, async () => {
-  const r = await kit.call('render_reel', { project_id: pid, quality: 'draft' });
+  const r = await callFinished(kit, 'render_reel', { project_id: pid, quality: 'draft' });
   assert.equal(r.isError, undefined, textOf(r));
   const d = r.structuredContent;
   assert.equal(d.active, 'draft');
@@ -153,7 +153,7 @@ test('render_reel draft: preview card data, a playable preview file and frames t
 });
 
 test('render_reel final, check_reel, make_variants, export and offer_post finish the chain', { skip, timeout: 420000 }, async () => {
-  const f = await kit.call('render_reel', { project_id: pid, quality: 'final' });
+  const f = await callFinished(kit, 'render_reel', { project_id: pid, quality: 'final' });
   assert.equal(f.isError, undefined, textOf(f));
   assert.deepEqual(f.structuredContent.renders.map((x) => x.id), ['draft', 'final']);
   const final = f.structuredContent.renders[1];
@@ -167,7 +167,7 @@ test('render_reel final, check_reel, make_variants, export and offer_post finish
   const wrongFile = await kit.call('check_reel', { project_id: pid, file: join(home, 'x.mp4') });
   assert.equal(wrongFile.isError, true);
 
-  const v = await kit.call('make_variants', { project_id: pid, count: 2 });
+  const v = await callFinished(kit, 'make_variants', { project_id: pid, count: 2 });
   assert.equal(v.isError, undefined, textOf(v));
   const variants = v.structuredContent.renders.filter((x) => x.variant_id);
   assert.equal(variants.length, 2);
@@ -201,7 +201,7 @@ test('a new rough cut makes the old plan and renders stale', { skip }, async () 
   assert.equal(p.structuredContent.project.has_shot_plan, false);
   assert.equal(p.structuredContent.project.has_final, false);
   assert.equal(p.structuredContent.next, 'plan_shots', 'the look is kept, the plan is not');
-  const noPlan = await kit.call('render_reel', { project_id: pid, quality: 'draft' });
+  const noPlan = await callFinished(kit, 'render_reel', { project_id: pid, quality: 'draft' });
   assert.equal(noPlan.isError, true);
   assert.match(textOf(noPlan), /plan_shots first/);
 });

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add SampleVideo measurements and confidence. Short or single-shot clips leave cut speed, camera strength and density unset. Speech can be unavailable without blocking the other readings.
+
 - Add SavedStyle, VideoStyle, LookOverrides and SampleImage shapes. Image samples can be measured on this computer for colors, contrast, space and background detail.
 
 - Projects and shot plans can keep look_overrides. Video choices now reach planning, variants, caption samples and the color grade, and take part in the render hash.
