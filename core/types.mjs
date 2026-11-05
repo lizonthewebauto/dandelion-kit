@@ -612,3 +612,26 @@ export {};
 
 /** @typedef {import('./style/schema.mjs').StyleInput} StyleInput */
 /** @typedef {import('./style/schema.mjs').CarouselTokens} CarouselTokens */
+
+/**
+ * A saved style. Each part holds only the fields the person chose.
+ * @typedef {StyleInput & {version:1, name:string, slug:string, created_at:string, updated_at:string}} SavedStyle
+ */
+/** @typedef {import('zod').infer<typeof import('./style/schema.mjs').videoSchema>} VideoStyle */
+/** @typedef {import('./style/schema.mjs').LookOverrides} LookOverrides */
+/**
+ * Local facts read from one sample image.
+ * @typedef {object} SampleImage
+ * @property {string} path
+ * @property {number} width
+ * @property {number} height
+ * @property {{hex:string,share:number}[]} palette
+ * @property {string} bg_hex
+ * @property {string} text_hex
+ * @property {string} accent_hex
+ * @property {'dark'|'mid'|'light'} brightness
+ * @property {'muted'|'normal'|'vivid'} saturation
+ * @property {'flat'|'gradient'|'busy'} background
+ * @property {number} whitespace_ratio
+ * @property {number} busyness
+ */

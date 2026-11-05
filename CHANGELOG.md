@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add SavedStyle, VideoStyle, LookOverrides and SampleImage shapes. Image samples can be measured on this computer for colors, contrast, space and background detail.
+
 - Projects and shot plans can keep look_overrides. Video choices now reach planning, variants, caption samples and the color grade, and take part in the render hash.
 
 - Projects can keep style_name and carousel_tokens, a snapshot of image choices. Saved styles can set corners, heading case, backgrounds, margins and footer rules.
