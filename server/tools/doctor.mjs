@@ -2,7 +2,7 @@ import { statfs } from 'node:fs/promises';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { detectFfmpeg, installHint } from '../../core/media/ffmpeg.mjs';
-import { transformersModelStatus } from '../../core/transcribe/whisper.mjs';
+import { engineStatus, INTEL_MAC_MESSAGE, transformersModelStatus } from '../../core/transcribe/whisper.mjs';
 import { ensureDir, isFile, kitHome, modelsDir } from '../../core/util/fs.mjs';
 import { dandelionState } from '../lib/dandelion.mjs';
 import { defineTool, ok } from '../lib/kit.mjs';
@@ -42,6 +42,7 @@ export async function buildDoctorReport() {
   const free = await freeBytes();
   const major = Number(process.versions.node.split('.')[0]);
   const dandelion = await dandelionState();
+  const speechRuns = (await engineStatus()).some((engine) => engine.available);
   /** @type {import('../../core/types.mjs').DoctorReport} */
   const report = {
     ok: false,
@@ -56,15 +57,23 @@ export async function buildDoctorReport() {
     },
     node: { version: process.versions.node, ok: major >= MIN_NODE_MAJOR },
     disk: { free_bytes: free, ok: free >= MIN_FREE_BYTES },
-    models: { dir: modelsDir(), whisper: models.base || models.tiny, yunet: hasFaceModel() },
+    models: {
+      dir: modelsDir(),
+      whisper: models.base || models.tiny,
+      yunet: hasFaceModel(),
+      ...(speechRuns ? {} : { speech_problem: INTEL_MAC_MESSAGE }),
+    },
     home: kitHome(),
     dandelion,
     next_steps: [],
   };
-  report.ok = report.ffmpeg.found && report.ffmpeg.has_ass && report.ffmpeg.has_loudnorm && report.node.ok && report.disk.ok;
+  report.ok = speechRuns && report.ffmpeg.found && report.ffmpeg.has_ass && report.ffmpeg.has_loudnorm && report.node.ok && report.disk.ok;
 
   const steps = report.next_steps;
-  if (!ff.found) {
+  if (!speechRuns) {
+    // ffmpeg and the speech model would not help, so do not send the person off to install them.
+    steps.push('Tell me what carousel or image to make.');
+  } else if (!ff.found) {
     steps.push(`Install ffmpeg with this command, then ask me to check again: ${ff.install_hint ?? installHint()}`);
     steps.push('Carousels and images work now, even without ffmpeg.');
   } else if (!ff.has_ass || !ff.has_loudnorm) {
@@ -76,7 +85,7 @@ export async function buildDoctorReport() {
     steps.push('Drop a video path and I will open it.');
     steps.push('Or tell me what carousel or image to make.');
   }
-  if (!report.models.whisper) steps.push('The first video downloads a small speech model (about 80 MB). It happens once.');
+  if (speechRuns && !report.models.whisper) steps.push('The first video downloads a small speech model (about 80 MB). It happens once.');
   if (!dandelion.connected) steps.push('Optional: connect Dandelion (free) when you want to post. You can look at the versions first.');
   return report;
 }

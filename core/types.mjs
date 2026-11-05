@@ -240,7 +240,7 @@ export const ASSET_KINDS = Object.freeze([
  * @property {{found:boolean, path?:string, version?:string, has_ass:boolean, has_loudnorm:boolean, has_whisper:boolean, install_hint?:string}} ffmpeg
  * @property {{version:string, ok:boolean}} node   ok when the version satisfies package.json engines.
  * @property {{free_bytes:number, ok:boolean}} disk  ok when at least 3 GB is free.
- * @property {{dir:string, whisper:boolean, yunet:boolean}} models  Which model files are already downloaded.
+ * @property {{dir:string, whisper:boolean, yunet:boolean, speech_problem?:string}} models  Which model files are already downloaded, and why speech cannot run here if it cannot.
  * @property {string} home                 The kit home folder (DANDELION_KIT_HOME or ~/.dandelion-kit).
  * @property {DandelionState} dandelion
  * @property {string[]} next_steps         Plain sentences, in order.

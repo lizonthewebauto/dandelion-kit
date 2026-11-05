@@ -2,6 +2,13 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.11 (2026-11-04)
+
+Found by running the public installers on real Macs.
+
+- Fix: with an ffmpeg that cannot draw captions, `render_reel` and `make_variants` failed with a raw ffmpeg error. They now say so in plain words with the install command (`captionsProblem` in `core/media/ffmpeg.mjs`), and check again each time so a fresh install works with no restart.
+- Fix: on an Intel Mac, `doctor` said the speech model downloads on first use and sent the person off to install ffmpeg. It now says reels cannot be edited there. `DoctorReport.models` gained optional `speech_problem`, and `ok` is false when no speech engine can run.
+
 ## 1.0.10 (2026-11-04)
 
 - Fix: on an Intel Mac, editing a reel failed with a missing file error. The speech engine (`onnxruntime-node`) ships no Intel Mac files since 1.24, so the Kit now says so in plain words (`transformersCanRun` in `core/transcribe/whisper.mjs`). Carousels, images and posting still work there. An Intel Mac with `whisper-cli` and a model file can still edit reels.

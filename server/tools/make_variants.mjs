@@ -1,3 +1,4 @@
+import { captionsProblem } from '../../core/media/ffmpeg.mjs';
 import { requireProject, updateProject } from '../store/project.mjs';
 import { previewData, renderFunction } from '../lib/preview.mjs';
 import { defineTool, fail, ok, z } from '../lib/kit.mjs';
@@ -16,6 +17,8 @@ export const tool = defineTool({
   async run(args, ctx) {
     const project = await requireProject(args.project_id);
     if (!project.shot_plan) return fail('There is no shot plan yet. Run plan_shots first.');
+    const problem = await captionsProblem();
+    if (problem) return fail(problem);
     const makeVariants = await renderFunction('variants', 'makeVariants', 'Variants');
     return runInBackground({
       key: `${project.id}:make_variants:${args.count}:${planKey(project.shot_plan)}`,

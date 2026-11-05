@@ -39,13 +39,13 @@
     rows.appendChild(statusRow(!(dr.node && dr.node.ok === false), "Node", dr.node && dr.node.version ? "Version " + dr.node.version : "Running"));
     var gb = typeof disk.free_bytes === "number" ? (disk.free_bytes / 1073741824).toFixed(1) + " GB free" : "";
     rows.appendChild(statusRow(disk.ok !== false, "Disk space", gb ? gb + (disk.ok === false ? ". Long reels need 3 GB, short clips less." : "") : "Not checked"));
-    rows.appendChild(statusRow(!!(models.whisper && models.yunet), "Speech and face models",
-      (models.whisper ? "Speech model ready. " : "Speech model downloads on first use. ") + (models.yunet ? "Face model ready." : "Face model downloads on first use."), true));
+    rows.appendChild(statusRow(!models.speech_problem && !!(models.whisper && models.yunet), "Speech and face models",
+      models.speech_problem || (models.whisper ? "Speech model ready. " : "Speech model downloads on first use. ") + (models.yunet ? "Face model ready." : "Face model downloads on first use."), !models.speech_problem));
     rows.appendChild(statusRow(!!dl.connected, "Dandelion",
       dl.connected ? "Signed in" + (dl.workspace && dl.workspace.name ? " as " + dl.workspace.name : "") + (dl.plan ? " (" + dl.plan + " plan)" : "") : "Not signed in. Optional: you only need it to post.", true));
     var steps = Array.isArray(dr.next_steps) ? dr.next_steps : [];
     var nodes = [
-      DK.head("Kit check", { pill: DK.pill(dr.ok ? "Ready" : "Needs setup", dr.ok ? "ok" : "warn", dr.ok ? "check" : "alert") }),
+      DK.head("Kit check", { pill: DK.pill(dr.ok ? "Ready" : models.speech_problem ? "No reels here" : "Needs setup", dr.ok ? "ok" : "warn", dr.ok ? "check" : "alert") }),
       h("section", { class: "card" }, rows)
     ];
     if (steps.length) {

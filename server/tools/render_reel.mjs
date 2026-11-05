@@ -1,3 +1,4 @@
+import { captionsProblem } from '../../core/media/ffmpeg.mjs';
 import { requireProject } from '../store/project.mjs';
 import { previewData, renderFunction } from '../lib/preview.mjs';
 import { defineTool, fail, ok, z } from '../lib/kit.mjs';
@@ -17,6 +18,8 @@ export const tool = defineTool({
     const project = await requireProject(args.project_id);
     if (project.type !== 'video') return fail('Only video projects can be built into a reel.');
     if (!project.shot_plan) return fail('There is no shot plan yet. Run plan_shots first.');
+    const problem = await captionsProblem();
+    if (problem) return fail(problem);
     const renderReel = await renderFunction('render', 'renderReel', 'The video builder');
     return runInBackground({
       key: `${project.id}:render_reel:${args.quality}:${planKey(project.shot_plan)}`,

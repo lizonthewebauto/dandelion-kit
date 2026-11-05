@@ -210,7 +210,7 @@ export function transformersModelStatus() {
 export function transformersCanRun(os = process.platform, arch = process.arch) {
   return !(os === 'darwin' && arch === 'x64');
 }
-const INTEL_MAC_MESSAGE =
+export const INTEL_MAC_MESSAGE =
   'Turning speech into text does not work on an Intel Mac yet, so reels cannot be edited on this computer. Carousels, images and posting still work.';
 
 /**

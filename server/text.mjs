@@ -68,7 +68,8 @@ function capped(lines, max) {
 function textDoctor(d) {
   const r = d.doctor ?? {};
   const ff = r.ffmpeg ?? {};
-  const lines = [r.ok ? 'The kit is ready to edit video.' : 'The kit needs a little setup before it can edit video.', ''];
+  const speechProblem = r.models?.speech_problem;
+  const lines = [speechProblem ?? (r.ok ? 'The kit is ready to edit video.' : 'The kit needs a little setup before it can edit video.'), ''];
   lines.push(
     ff.found
       ? `ffmpeg: found, version ${ff.version ?? 'unknown'} at ${ff.path ?? 'unknown path'}. Captions ${ff.has_ass ? 'yes' : 'MISSING'}, loudness ${ff.has_loudnorm ? 'yes' : 'MISSING'}, speech filter ${ff.has_whisper ? 'yes' : 'no (optional)'}.`
@@ -76,7 +77,7 @@ function textDoctor(d) {
   );
   lines.push(`Node: ${r.node?.version ?? 'unknown'} (${r.node?.ok ? 'ok' : 'too old, Node 20 or newer is needed'})`);
   lines.push(`Disk: ${sizeText(r.disk?.free_bytes)} free (${r.disk?.ok ? 'ok' : 'long reels need 3 GB, short clips less'})`);
-  lines.push(`Speech model: ${r.models?.whisper ? 'ready' : 'downloads on first use (about 80 MB)'}. Face model: ${r.models?.yunet ? 'ready' : 'downloads on first use'}.`);
+  if (!speechProblem) lines.push(`Speech model: ${r.models?.whisper ? 'ready' : 'downloads on first use (about 80 MB)'}. Face model: ${r.models?.yunet ? 'ready' : 'downloads on first use'}.`);
   lines.push(`Kit folder: ${r.home ?? 'unknown'}`);
   const dl = r.dandelion ?? {};
   lines.push(

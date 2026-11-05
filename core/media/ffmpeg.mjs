@@ -212,6 +212,18 @@ export async function requireFfmpeg() {
   return { ffmpeg: status.path, ffprobe: status.ffprobe_path, status };
 }
 
+/**
+ * A plain sentence when a reel cannot be built because of ffmpeg, or null when it can.
+ * Checks again each time, since the person may have just installed it.
+ */
+export async function captionsProblem() {
+  const status = await detectFfmpeg({ refresh: true });
+  if (status.found && status.has_ass) return null;
+  const hint = status.install_hint ?? installHint();
+  if (!status.found) return `${status.problem ?? 'ffmpeg was not found.'} Install it with: ${hint}`;
+  return `This ffmpeg cannot draw captions, so the reel cannot be built yet. Install the full build with this command, then ask me to try again: ${hint}`;
+}
+
 function lastLines(text, count = 6) {
   return text
     .split(/\r?\n/)
