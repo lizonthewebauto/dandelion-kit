@@ -16,6 +16,7 @@ const {
   piecesToRawWords,
   escapeFilterValue,
   engineStatus,
+  transformersCanRun,
   transcribe,
   loadAudio16k,
   TRANSFORMERS_MODELS,
@@ -189,13 +190,16 @@ test('model ids use the timestamped exports', () => {
   assert.match(TRANSFORMERS_MODELS.tiny, /^onnx-community\/whisper-tiny_timestamped$/);
 });
 
-test('engineStatus lists the three engines in preference order, and transformers can always run', async () => {
+test('engineStatus lists the three engines in preference order, and transformers runs everywhere but an Intel Mac', async () => {
   const status = await engineStatus();
   assert.deepEqual(
     status.map((e) => e.id),
     [...TRANSCRIBE_ENGINES],
   );
-  assert.equal(status.find((e) => e.id === 'transformers')?.available, true);
+  assert.equal(status.find((e) => e.id === 'transformers')?.available, transformersCanRun());
+  assert.equal(transformersCanRun('darwin', 'x64'), false);
+  assert.equal(transformersCanRun('darwin', 'arm64'), true);
+  assert.equal(transformersCanRun('win32', 'x64'), true);
 });
 
 test('loadAudio16k decodes the fixture to 16 kHz samples', async () => {

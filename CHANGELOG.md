@@ -2,6 +2,10 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.10 (2026-11-04)
+
+- Fix: on an Intel Mac, editing a reel failed with a missing file error. The speech engine (`onnxruntime-node`) ships no Intel Mac files since 1.24, so the Kit now says so in plain words (`transformersCanRun` in `core/transcribe/whisper.mjs`). Carousels, images and posting still work there. An Intel Mac with `whisper-cli` and a model file can still edit reels.
+
 ## 1.0.9 (2026-11-04)
 
 - Fix: on a Mac, reels hit "cannot draw captions". Homebrew's plain `ffmpeg` has no libass, so the install hint is now `brew install ffmpeg-full`. The Kit also finds ffmpeg-full by name, since Homebrew keeps it off PATH, and looks in Homebrew's folders when an app opened from the Dock has a short PATH.

@@ -206,6 +206,13 @@ export function transformersModelStatus() {
   return { dir, base: has(TRANSFORMERS_MODELS.base), tiny: has(TRANSFORMERS_MODELS.tiny) };
 }
 
+/** onnxruntime-node ships no Intel Mac files since 1.24, so transformers.js cannot load there. */
+export function transformersCanRun(os = process.platform, arch = process.arch) {
+  return !(os === 'darwin' && arch === 'x64');
+}
+const INTEL_MAC_MESSAGE =
+  'Turning speech into text does not work on an Intel Mac yet, so reels cannot be edited on this computer. Carousels, images and posting still work.';
+
 /**
  * What each engine can do right now.
  * @returns {Promise<{id: typeof TRANSCRIBE_ENGINES[number], available: boolean, detail: string}[]>}
@@ -227,10 +234,12 @@ export async function engineStatus() {
     },
     {
       id: 'transformers',
-      available: true,
-      detail: models.base
-        ? 'transformers.js, base model ready'
-        : 'transformers.js, downloads the base model (about 80 MB) the first time',
+      available: transformersCanRun(),
+      detail: !transformersCanRun()
+        ? INTEL_MAC_MESSAGE
+        : models.base
+          ? 'transformers.js, base model ready'
+          : 'transformers.js, downloads the base model (about 80 MB) the first time',
     },
     {
       id: 'ffmpeg',
@@ -424,6 +433,8 @@ export async function transcribe(audioPath, options = {}) {
     throw new KitMediaError(
       `"${requested}" is not a speech engine. Use ${TRANSCRIBE_ENGINES.join(', ')} or auto.`,
     );
+
+  if (!order.length && !transformersCanRun()) throw new KitMediaError(INTEL_MAC_MESSAGE);
 
   /** @type {unknown} */
   let lastError = null;
