@@ -71,7 +71,7 @@ export async function buildDoctorReport() {
     steps.push(`This ffmpeg cannot draw captions or set loudness. Install the full build with: ${ff.install_hint ?? installHint()}`);
   }
   if (!report.node.ok) steps.push(`Node ${MIN_NODE_MAJOR} or newer is needed. This is ${process.versions.node}.`);
-  if (!report.disk.ok) steps.push('Free up some disk space. Reels need at least 3 GB free.');
+  if (!report.disk.ok) steps.push('Free up some disk space if you can. Long reels need 3 GB free; a short clip needs less.');
   if (report.ok) {
     steps.push('Drop a video path and I will open it.');
     steps.push('Or tell me what carousel or image to make.');

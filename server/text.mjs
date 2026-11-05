@@ -75,7 +75,7 @@ function textDoctor(d) {
       : `ffmpeg: not found on this computer.${ff.install_hint ? ` Install it with: ${ff.install_hint}` : ''}`,
   );
   lines.push(`Node: ${r.node?.version ?? 'unknown'} (${r.node?.ok ? 'ok' : 'too old, Node 20 or newer is needed'})`);
-  lines.push(`Disk: ${sizeText(r.disk?.free_bytes)} free (${r.disk?.ok ? 'ok' : 'reels need at least 3 GB'})`);
+  lines.push(`Disk: ${sizeText(r.disk?.free_bytes)} free (${r.disk?.ok ? 'ok' : 'long reels need 3 GB, short clips less'})`);
   lines.push(`Speech model: ${r.models?.whisper ? 'ready' : 'downloads on first use (about 80 MB)'}. Face model: ${r.models?.yunet ? 'ready' : 'downloads on first use'}.`);
   lines.push(`Kit folder: ${r.home ?? 'unknown'}`);
   const dl = r.dandelion ?? {};

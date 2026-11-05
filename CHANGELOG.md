@@ -2,6 +2,10 @@
 
 Changes to the shared shapes in `core/types.mjs` must be listed here, because every other module builds against them.
 
+## 1.0.8 (2026-11-04)
+
+- Fix: a render always asked for 3 GB free, even for a 10 second clip. It now asks for 1 GB plus 25 MB a second, up to 3 GB (`renderSpaceBytes` in `core/util/disk.mjs`). Reels of about 80 seconds or more still ask for the full 3 GB, and so does a length the kit cannot read.
+
 ## 1.0.7 (2026-11-04)
 
 - Fix: video editing failed in Codex with "Cannot find package '@huggingface/transformers'". Codex replaces a plugin's whole version folder a few seconds into every session, which wiped a `node_modules` inside it while the Kit was already running. Inside a plugin cache the packages now go in the `plugins` folder (`depsHome` in `bin/deps.mjs`), which Node's lookup still reaches. `depsReady` also compares the Kit version there, so an update installs its own packages. Found by a model-driven run on a Mac, with a folder watch showing 154 packages drop to 0.

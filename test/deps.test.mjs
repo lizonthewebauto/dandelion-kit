@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { depsHome, depsReady, packageReachable } from '../bin/deps.mjs';
+import { MIN_FREE_BYTES, renderSpaceBytes } from '../core/util/disk.mjs';
 
 const DEPS = { '@modelcontextprotocol/sdk': '1.0.0', zod: '4.0.0' };
 
@@ -65,6 +66,15 @@ test('packages in the plugins folder count only for the same Kit version, so an 
   } finally {
     rmSync(base, { recursive: true, force: true });
   }
+});
+
+test('a short clip asks for less disk space, and a long reel or an unknown length asks for the full 3 GB', () => {
+  const gb = (n) => n / 1024 / 1024 / 1024;
+  assert.ok(gb(renderSpaceBytes(10_000)) < 1.3);
+  assert.ok(gb(renderSpaceBytes(10_000)) > 1);
+  assert.equal(renderSpaceBytes(113_000), MIN_FREE_BYTES);
+  assert.equal(renderSpaceBytes(), MIN_FREE_BYTES);
+  assert.equal(renderSpaceBytes(0), MIN_FREE_BYTES);
 });
 
 test('missing packages are not installed, and one missing package is enough', () => {

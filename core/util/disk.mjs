@@ -3,8 +3,20 @@ import { statfs } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { pathExists } from './fs.mjs';
 
-/** The least free space a final render may start with. */
-export const MIN_FREE_BYTES = 3 * 1024 * 1024 * 1024;
+const GB = 1024 * 1024 * 1024;
+
+/** The most free space a render asks for. A two minute reel needs about this much while it builds. */
+export const MIN_FREE_BYTES = 3 * GB;
+
+/**
+ * The free space a render of this length should start with: 1 GB plus 25 MB a second, up to MIN_FREE_BYTES,
+ * so a person with little room can still make a short clip.
+ * @param {number} [durationMs]  Leave out when the length is not known.
+ */
+export function renderSpaceBytes(durationMs) {
+  if (!(Number(durationMs) > 0)) return MIN_FREE_BYTES;
+  return Math.min(MIN_FREE_BYTES, GB + (Number(durationMs) / 1000) * 25 * 1024 * 1024);
+}
 
 /**
  * Free bytes on the disk that holds a path (the nearest folder that exists is used).

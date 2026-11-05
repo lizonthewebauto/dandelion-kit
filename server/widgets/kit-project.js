@@ -38,7 +38,7 @@
     rows.appendChild(ffLi);
     rows.appendChild(statusRow(!(dr.node && dr.node.ok === false), "Node", dr.node && dr.node.version ? "Version " + dr.node.version : "Running"));
     var gb = typeof disk.free_bytes === "number" ? (disk.free_bytes / 1073741824).toFixed(1) + " GB free" : "";
-    rows.appendChild(statusRow(disk.ok !== false, "Disk space", gb ? gb + (disk.ok === false ? ". Reels need at least 3 GB." : "") : "Not checked"));
+    rows.appendChild(statusRow(disk.ok !== false, "Disk space", gb ? gb + (disk.ok === false ? ". Long reels need 3 GB, short clips less." : "") : "Not checked"));
     rows.appendChild(statusRow(!!(models.whisper && models.yunet), "Speech and face models",
       (models.whisper ? "Speech model ready. " : "Speech model downloads on first use. ") + (models.yunet ? "Face model ready." : "Face model downloads on first use."), true));
     rows.appendChild(statusRow(!!dl.connected, "Dandelion",

@@ -8,7 +8,7 @@ import { basename, join } from 'node:path';
 import { getLook } from '../edit/looks.mjs';
 import { hashShotPlan } from '../edit/shotplan.mjs';
 import { probeMedia } from '../media/probe.mjs';
-import { requireFreeSpace } from '../util/disk.mjs';
+import { renderSpaceBytes, requireFreeSpace } from '../util/disk.mjs';
 import { ensureDir, kitHome, readJson, writeJson } from '../util/fs.mjs';
 import { hashJson } from '../util/hash.mjs';
 import { info } from '../util/log.mjs';
@@ -188,7 +188,7 @@ export async function renderPlan({
   }
 
   return withRenderLock(async () => {
-    await requireFreeSpace(folder);
+    await requireFreeSpace(folder, renderSpaceBytes(use.duration_ms));
     const started = Date.now();
     const build = ensureDir(join(folder, `build-${label}`));
     try {
