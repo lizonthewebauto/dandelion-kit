@@ -8,9 +8,9 @@ It runs on your computer. It is open source (MIT). Posting is optional and goes 
 
 Paste this into your agent:
 
-> I want to create images and carousels and edit videos with this: https://dandelionapp.io/freekit
+> Install the free Dandelion video editing kit: https://dandelionapp.io/freekit
 
-The agent reads the install page, sets the Kit up, and checks that it works. The steps it follows are in [INSTALL.md](INSTALL.md).
+The agent reads the install page, sets the full Kit and its Dandelion posting companion up, and checks that they work. Images, carousels and posting are included. Nothing is posted during setup. The steps it follows are in [INSTALL.md](INSTALL.md).
 
 Or install it yourself:
 
