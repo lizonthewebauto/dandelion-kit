@@ -3,6 +3,10 @@
 import { IMAGE_SIZES } from '../types.mjs';
 import { FONTS } from './fonts.mjs';
 import { contrast, mix, readableOn } from './color.mjs';
+import { carouselSchema } from '../style/schema.mjs';
+
+/** @type {Readonly<Required<import('../style/schema.mjs').CarouselTokens>>} */
+export const DEFAULT_CAROUSEL_TOKENS = Object.freeze({ radius: 'soft', heading_case: 'default', background: 'flat', margin: 'standard', rule: 'thin' });
 
 /** @typedef {{type:string, props:Record<string, any>, key?:string}} El */
 /** @typedef {import('../types.mjs').BrandConfig} BrandConfig */
@@ -49,12 +53,15 @@ export function t(s, style, key) {
  * @property {{left:number, top:number, width:number, height:number}} box  The safe area.
  * @property {Colors} c
  * @property {BrandConfig} brand
+ * @property {Required<import('../style/schema.mjs').CarouselTokens>} style
+ * @property {'default'|'accent'|'photo'} theme
  * @property {number} index         0-based slide number.
  * @property {number} total
  * @property {boolean} hasNext
  * @property {string|null} logoUri
  * @property {number} logoRatio     Logo width divided by height.
  * @property {(n:number)=>number} fs   Scale a font size.
+ * @property {(n:number, cap?:number)=>number} r   Scale a corner radius.
  * @property {(n:number)=>number} sp   Scale a gap.
  * @property {(size:number, extra?:Record<string, any>)=>Record<string, any>} head   Heading text style.
  * @property {(size:number, weight?:'regular'|'semi'|'bold', extra?:Record<string, any>)=>Record<string, any>} body  Body text style.
@@ -86,13 +93,16 @@ const r = (n) => Math.round(n);
  * @param {string|null} [o.logoUri]
  * @param {number} [o.logoRatio]
  * @param {boolean} [o.footer]
+ * @param {import('../style/schema.mjs').CarouselTokens} [o.style]
  * @returns {Ctx}
  */
-export function makeContext({ brand, size, theme = 'default', index = 0, total = 1, shrink = 1, logoUri = null, logoRatio = 1, footer = true }) {
+export function makeContext({ brand, size, theme = 'default', index = 0, total = 1, shrink = 1, logoUri = null, logoRatio = 1, footer = true, style: givenStyle = {} }) {
+  const style = { ...DEFAULT_CAROUSEL_TOKENS, ...carouselSchema.parse(givenStyle) };
   const { width: W, height: H, id: sizeId } = IMAGE_SIZES[size];
   const k = BASE_SCALE[size] * shrink;
   const story = size === 'story';
-  const box = { left: r(W * 0.06), top: r(H * 0.1), width: W - 2 * r(W * 0.06), height: H - 2 * r(H * 0.1) };
+  const [mx, my] = style.margin === 'wide' ? [0.09, 0.13] : style.margin === 'tight' ? [0.045, 0.075] : [0.06, 0.1];
+  const box = { left: r(W * mx), top: r(H * my), width: W - 2 * r(W * mx), height: H - 2 * r(H * my) };
 
   const { bg, fg, accent, muted } = brand.colors;
   const onAccent = readableOn(accent, [bg, fg, '#FFFFFF']);
@@ -159,12 +169,15 @@ export function makeContext({ brand, size, theme = 'default', index = 0, total =
     box,
     c,
     brand,
+    style,
+    theme,
     index,
     total,
     hasNext: index < total - 1,
     logoUri,
     logoRatio,
     fs: (n) => r(n * k),
+    r: (n, cap = Math.min(W, H) / 2) => style.radius === 'soft' ? r(n * k) : Math.min(cap, r(r(n * k) * (style.radius === 'sharp' ? 0 : 2.2))),
     sp: (n) => r(n * k * (story ? 1.18 : 1)),
     head: (sz, extra = {}) => ({
       fontFamily: headFamily,
@@ -172,7 +185,7 @@ export function makeContext({ brand, size, theme = 'default', index = 0, total =
       fontSize: r(sz * hf.size * k),
       lineHeight: hf.lineHeight,
       letterSpacing: Math.round(sz * hf.size * k * hf.tracking * 10) / 10,
-      textTransform: hf.upper ? 'uppercase' : 'none',
+      textTransform: style.heading_case === 'upper' ? 'uppercase' : style.heading_case === 'lower' ? 'lowercase' : hf.upper ? 'uppercase' : 'none',
       textWrap: 'balance',
       color: c.fg,
       ...extra,
@@ -246,7 +259,7 @@ function header(ctx) {
   if (!ctx.logoUri && !ctx.brand.name) return h({ height: ctx.fs(44), flexShrink: 0 });
   const mark = ctx.logoUri
     ? { type: 'img', props: { src: ctx.logoUri, width: Math.round(ctx.fs(40) * ctx.logoRatio), height: ctx.fs(40), style: { width: Math.round(ctx.fs(40) * ctx.logoRatio), height: ctx.fs(40), marginRight: ctx.fs(16) } } }
-    : h({ width: ctx.fs(16), height: ctx.fs(16), borderRadius: ctx.fs(5), background: ctx.c.accent, marginRight: ctx.fs(14) });
+    : h({ width: ctx.fs(16), height: ctx.fs(16), borderRadius: ctx.r(5, ctx.fs(8)), background: ctx.c.accent, marginRight: ctx.fs(14) });
   return h({ alignItems: 'center', height: ctx.fs(44), flexShrink: 0 }, [
     mark,
     ctx.brand.name
@@ -279,7 +292,7 @@ function footer(ctx) {
       alignItems: 'center',
       flexShrink: 0,
       height: ctx.fs(64),
-      borderTop: `2px solid ${mixLine(ctx)}`,
+      ...(ctx.style.rule === 'none' ? {} : { borderTop: `${ctx.style.rule === 'bold' ? 5 : 2}px solid ${mixLine(ctx)}` }),
     },
     [
       ctx.brand.handle
@@ -311,6 +324,14 @@ function mixLine(ctx) {
  */
 export function page(ctx, main, bleed = [], opts = {}) {
   const { box } = ctx;
+  const background = ctx.theme === 'default' ? ctx.style.background : 'flat';
+  const dots = background === 'dots' ? [{
+    type: 'img', key: 'bleed-dots', props: {
+      src: `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${ctx.W}" height="${ctx.H}"><defs><pattern id="d" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.8" fill="${mix(ctx.c.bg, ctx.c.accent, 0.18)}"/></pattern></defs><rect width="100%" height="100%" fill="url(#d)"/></svg>`).toString('base64')}`,
+      width: ctx.W, height: ctx.H,
+      style: { position: 'absolute', left: 0, top: 0, width: ctx.W, height: ctx.H },
+    },
+  }] : [];
   return {
     type: 'div',
     key: 'bleed-root',
@@ -320,10 +341,11 @@ export function page(ctx, main, bleed = [], opts = {}) {
         position: 'relative',
         width: ctx.W,
         height: ctx.H,
-        background: ctx.c.bg,
+        background: background === 'soft' ? `linear-gradient(135deg, ${ctx.c.bg}, ${mix(ctx.c.bg, ctx.c.accent, 0.10)})` : ctx.c.bg,
         fontFamily: `${ctx.brand.fonts.body}, Inter`,
       },
       children: [
+        ...dots,
         ...bleed,
         {
           type: 'div',

@@ -14,6 +14,7 @@ ${layoutHelp()}`,
     layout: slideInput.shape.layout,
     fields: slideInput.shape.fields,
     title: z.string().optional().describe('A name for the image. Defaults to the title field.'),
+    style: z.string().optional().describe('A saved style name or slug. Uses your default style when left out.'),
     brand: brandInput,
     size: sizeInput,
     allow_overflow: z.boolean().optional(),
@@ -26,7 +27,7 @@ ${layoutHelp()}`,
       const data = await renderIntoProject(
         project.id,
         { title, slides: [{ layout: /** @type {any} */ (args.layout), fields: args.fields }] },
-        { brand: args.brand, size: args.size, allowOverflow: args.allow_overflow },
+        { style: args.style, brand: args.brand, size: args.size, allowOverflow: args.allow_overflow },
       );
       return { data };
     } catch (error) {

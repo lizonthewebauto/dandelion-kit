@@ -144,6 +144,7 @@ async function prepareLogo(file, who) {
  * @param {number} [opts.total]            Slides in the carousel (the arrow shows on all but the last).
  * @param {boolean} [opts.allowOverflow]   Skip the character limits and shrink the text until it fits.
  * @param {string} [opts.baseDir]          Folder that relative image paths start from.
+ * @param {import('../style/schema.mjs').CarouselTokens} [opts.tokens]
  * @returns {Promise<RenderedSlide>}
  */
 export async function renderSlide(slide, opts = {}) {
@@ -184,6 +185,7 @@ export async function renderSlide(slide, opts = {}) {
       logoUri: logo?.uri ?? null,
       logoRatio: logo?.ratio ?? 1,
       footer: layout.chrome?.footer !== false,
+      style: opts.tokens,
     });
     ctx.photoUri = photoUri;
     const out = layout.render(fields, ctx);
@@ -282,6 +284,7 @@ function slug(s) {
  * @property {string} [cwd]           Where ./brand.json is looked for. Defaults to the working folder.
  * @property {any} [brand]            Overrides spec.brand and brand.json (an object or a path).
  * @property {string} [size]          Overrides spec.size.
+ * @property {import('../style/schema.mjs').CarouselTokens} [tokens]
  */
 
 /**
@@ -315,6 +318,7 @@ export async function renderCarousel(spec, opts) {
       total,
       allowOverflow: opts.allowOverflow,
       baseDir: opts.baseDir ?? cwd,
+      tokens: opts.tokens,
     });
     warnings.push(...r.warnings);
     done.push({ ...r, thumb: await thumbnail(r.buffer) });

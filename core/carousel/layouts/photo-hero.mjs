@@ -44,7 +44,7 @@ export const layout = {
       align: 'end',
       bleed,
       main: [
-        h({ width: fs(72), height: fs(9), borderRadius: fs(5), background: c.accent, marginBottom: sp(34) }),
+        h({ width: fs(72), height: fs(9), borderRadius: ctx.r(5, fs(9) / 2), background: c.accent, marginBottom: sp(34) }),
         t(f.title, ctx.head(size, { color: '#FFFFFF', lineHeight: 1.03 })),
         f.overlay ? t(f.overlay, ctx.body(42, 'regular', { color: '#E9E4D8', marginTop: sp(26), lineHeight: 1.28 })) : null,
       ],

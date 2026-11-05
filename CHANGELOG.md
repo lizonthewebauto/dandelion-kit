@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Projects can keep style_name and carousel_tokens, a snapshot of image choices. Saved styles can set corners, heading case, backgrounds, margins and footer rules.
+
 - Add partial StyleInput and CarouselTokens shapes, a local style store, and analyze_samples, save_style and list_styles tool slots. Only chosen parts are saved.
 
 

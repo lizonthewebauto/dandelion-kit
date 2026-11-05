@@ -53,7 +53,7 @@ export const layout = {
                     width: dot - 2 * fs(5),
                     height: dot - 2 * fs(5),
                     flexShrink: 0,
-                    borderRadius: dot,
+                    borderRadius: ctx.r(dot / ctx.k, (dot - 2 * fs(5)) / 2),
                     background: i === 0 ? c.accent : c.bg,
                     border: `${fs(5)}px solid ${c.accent}`,
                     alignItems: 'center',

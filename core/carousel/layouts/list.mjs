@@ -50,7 +50,7 @@ export const layout = {
                   width: badge,
                   height: badge,
                   flexShrink: 0,
-                  borderRadius: badge,
+                  borderRadius: ctx.r(badge / ctx.k, badge / 2),
                   background: c.accent,
                   alignItems: 'center',
                   justifyContent: 'center',

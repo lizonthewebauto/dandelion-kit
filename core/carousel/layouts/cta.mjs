@@ -31,10 +31,10 @@ export const layout = {
         handle
           ? h(
               { marginTop: sp(64) },
-              h({ alignItems: 'center', background: c.paper, borderRadius: fs(100), paddingLeft: fs(52), paddingRight: fs(24), paddingTop: fs(24), paddingBottom: fs(24) }, [
+              h({ alignItems: 'center', background: c.paper, borderRadius: ctx.r(100), paddingLeft: fs(52), paddingRight: fs(24), paddingTop: fs(24), paddingBottom: fs(24) }, [
                 t(handle, ctx.body(42, 'bold', { color: c.ink, lineHeight: 1, marginRight: fs(30) })),
                 h(
-                  { width: fs(66), height: fs(66), borderRadius: fs(66), background: c.ink, alignItems: 'center', justifyContent: 'center' },
+                  { width: fs(66), height: fs(66), borderRadius: ctx.r(66, fs(33)), background: c.ink, alignItems: 'center', justifyContent: 'center' },
                   t('→', { fontFamily: 'Inter', fontWeight: 800, fontSize: fs(38), lineHeight: 1, color: c.paper, marginTop: -fs(3) }),
                 ),
               ]),

@@ -13,6 +13,7 @@ ${layoutHelp()}`,
   input: {
     title: z.string().min(1).describe('A name for the carousel.'),
     slides: z.array(slideInput).min(1).max(20),
+    style: z.string().optional().describe('A saved style name or slug. Uses your default style when left out.'),
     brand: brandInput,
     size: sizeInput,
     allow_overflow: z.boolean().optional().describe('Shrink text that is over the limit instead of refusing.'),
@@ -25,7 +26,7 @@ ${layoutHelp()}`,
       const data = await renderIntoProject(
         project.id,
         { title: args.title, slides: /** @type {any} */ (args.slides) },
-        { brand: args.brand, size: args.size, allowOverflow: args.allow_overflow },
+        { style: args.style, brand: args.brand, size: args.size, allowOverflow: args.allow_overflow },
       );
       return { data };
     } catch (error) {

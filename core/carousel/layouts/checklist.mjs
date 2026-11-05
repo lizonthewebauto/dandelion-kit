@@ -52,7 +52,7 @@ export const layout = {
                   width: box,
                   height: box,
                   flexShrink: 0,
-                  borderRadius: Math.round(box * 0.28),
+                  borderRadius: ctx.r(Math.round(box * 0.28) / ctx.k, box / 2),
                   background: c.accent,
                   alignItems: 'center',
                   justifyContent: 'center',

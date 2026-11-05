@@ -30,7 +30,7 @@ export const layout = {
           {
             flexDirection: 'column',
             background: c.soft,
-            borderRadius: fs(44),
+            borderRadius: ctx.r(44),
             paddingTop: fs(44),
             paddingBottom: fs(56),
             paddingLeft: panelPad,

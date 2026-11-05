@@ -225,6 +225,8 @@ export const ASSET_KINDS = Object.freeze([
  * @property {ShotPlan} [shot_plan]
  * @property {Record<string, RenderResult>} [renders]  Keyed by "draft", "final" or a variant id.
  * @property {Variant[]} [variants]
+ * @property {string} [style_name] Saved style used for this project.
+ * @property {CarouselTokens} [carousel_tokens] Resolved image choices at render time.
  * @property {CarouselSpec} [carousel]
  * @property {FaceSample[]} [face_samples]  One entry per sampled frame (every 500 ms), in time order.
  */

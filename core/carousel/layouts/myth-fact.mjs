@@ -26,19 +26,19 @@ export const layout = {
     const mythSize = Math.round(factSize * 0.8);
     return {
       main: [
-        h({ flexDirection: 'column', background: c.surface, borderRadius: fs(40), padding: pad, paddingTop: fs(44), paddingBottom: fs(48) }, [
+        h({ flexDirection: 'column', background: c.surface, borderRadius: ctx.r(40), padding: pad, paddingTop: fs(44), paddingBottom: fs(48) }, [
           h({ alignItems: 'center', marginBottom: sp(22) }, [
             h(
-              { width: fs(40), height: fs(40), borderRadius: fs(40), border: `4px solid ${c.muted}`, alignItems: 'center', justifyContent: 'center', marginRight: fs(16) },
+              { width: fs(40), height: fs(40), borderRadius: ctx.r(40, fs(20)), border: `4px solid ${c.muted}`, alignItems: 'center', justifyContent: 'center', marginRight: fs(16) },
               t('×', ctx.body(30, 'bold', { color: c.muted, lineHeight: 1, marginTop: -fs(2) })),
             ),
             label(ctx, 'Myth', { color: c.muted, fontSize: fs(28) }),
           ]),
           t(f.myth, ctx.head(mythSize, { fontWeight: 400, color: c.muted, textDecoration: 'line-through', lineHeight: 1.12 })),
         ]),
-        h({ flexDirection: 'column', background: c.accent, borderRadius: fs(40), padding: pad, paddingTop: fs(44), paddingBottom: fs(48), marginTop: sp(24) }, [
+        h({ flexDirection: 'column', background: c.accent, borderRadius: ctx.r(40), padding: pad, paddingTop: fs(44), paddingBottom: fs(48), marginTop: sp(24) }, [
           h({ alignItems: 'center', marginBottom: sp(22) }, [
-            h({ width: fs(40), height: fs(40), borderRadius: fs(40), background: c.onAccent, marginRight: fs(16) }),
+            h({ width: fs(40), height: fs(40), borderRadius: ctx.r(40, fs(20)), background: c.onAccent, marginRight: fs(16) }),
             label(ctx, 'Fact', { color: c.onAccent, fontSize: fs(28) }),
           ]),
           t(f.fact, ctx.head(factSize, { color: c.onAccent, lineHeight: 1.1 })),

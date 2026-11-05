@@ -26,7 +26,7 @@ export const layout = {
         t(f.quote, ctx.head(size, { fontWeight: 400, lineHeight: 1.14, letterSpacing: -fs(1.5), marginTop: sp(8) })),
         f.who
           ? h({ alignItems: 'center', marginTop: sp(52) }, [
-              h({ width: fs(64), height: fs(6), borderRadius: fs(3), background: c.accent, marginRight: fs(22) }),
+              h({ width: fs(64), height: fs(6), borderRadius: ctx.r(3, fs(3)), background: c.accent, marginRight: fs(22) }),
               label(ctx, f.who, { color: c.fg, fontSize: fs(26), letterSpacing: fs(3.5) }),
             ])
           : null,

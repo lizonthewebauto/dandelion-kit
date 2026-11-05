@@ -48,7 +48,7 @@ export const layout = {
           width: (wide ? W : colW) - 2 * padX,
           flexShrink: 0,
           background: i === 0 ? c.accent : c.surface,
-          borderRadius: fs(34),
+          borderRadius: ctx.r(34),
           paddingTop: fs(32),
           paddingBottom: fs(36),
           paddingLeft: padX,

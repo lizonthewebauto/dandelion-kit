@@ -1,3 +1,4 @@
+import { DEFAULT_CAROUSEL_TOKENS } from '../../core/carousel/ui.mjs';
 import { requireProject } from '../store/project.mjs';
 import { layoutHelp, renderIntoProject, sizeInput, slideInput } from '../lib/carousel.mjs';
 import { defineTool, fail, z } from '../lib/kit.mjs';
@@ -12,6 +13,7 @@ Layouts and their fields:
 ${layoutHelp()}`,
   input: {
     project_id: z.string(),
+    style: z.string().optional().describe('Use a saved style. Leave out to keep this project style.'),
     slides: z.array(slideInput).min(1).max(20),
     size: sizeInput,
     allow_overflow: z.boolean().optional(),
@@ -23,7 +25,7 @@ ${layoutHelp()}`,
     const data = await renderIntoProject(
       project.id,
       { title: project.carousel.title, slides: /** @type {any} */ (args.slides) },
-      { brand: project.carousel.brand, size: args.size ?? project.carousel.size, allowOverflow: args.allow_overflow },
+      { ...(args.style ? { style: args.style } : { brand: project.carousel.brand, tokens: project.carousel_tokens ?? DEFAULT_CAROUSEL_TOKENS, style_name: project.style_name }), size: args.size ?? project.carousel.size, allowOverflow: args.allow_overflow },
     );
     return { data };
   },

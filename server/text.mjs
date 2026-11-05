@@ -284,6 +284,7 @@ function textCarousel(d) {
     '',
     ...slides.map((s, i) => `${i + 1}. ${s.layout}: ${s.file}`),
   ];
+  if (d.style_name) lines.push('', `Style used: ${d.style_name}`);
   if (Array.isArray(d.warnings) && d.warnings.length) lines.push('', 'Notes:', ...d.warnings.map((/** @type {string} */ w) => `- ${w}`));
   lines.push('', 'To change a slide, call update_slides with all the slides. Next: offer_post so the person can post it.');
   return lines.join('\n');

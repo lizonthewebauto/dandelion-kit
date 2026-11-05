@@ -1,3 +1,7 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { brandSearchPaths, normalizeBrand, readBrandFile, loadBrand } from '../../core/carousel/brand.mjs';
+import { defaultStyle, readStyle } from '../../core/style/store.mjs';
+import { DEFAULT_CAROUSEL_TOKENS } from '../../core/carousel/ui.mjs';
 // Shared by make_carousel, make_image and update_slides: render a spec into a project and describe it for the card.
 import { rm, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -59,14 +63,36 @@ export function layoutHelp() {
   return LAYOUT_IDS.map((id) => `${id}: ${describeLayout(id).split('\n').join('; ')}`).join('\n');
 }
 
+/** Resolve each chosen field, keeping the usual fallbacks for gaps. @param {any} [options] */
+export async function resolveCarouselStyle(options = {}) {
+  const named = options.style ? await readStyle(options.style) : null;
+  const fallback = await defaultStyle();
+  const merge = (a, b) => ({ ...a, ...b, colors: { ...a?.colors, ...b?.colors }, fonts: { ...a?.fonts, ...b?.fonts } });
+  let brand = fallback?.brand ?? {};
+  for (const file of options.brand !== undefined ? [] : [...brandSearchPaths()].reverse()) {
+    if (existsSync(file)) {
+      const raw = JSON.parse(readFileSync(file, 'utf8'));
+      const checked = readBrandFile(file);
+      brand = merge(brand, { ...raw, ...(raw.logo ? { logo: checked.logo } : {}) });
+    }
+  }
+  if (named?.brand) brand = merge(brand, named.brand);
+  return {
+    brand: options.brand !== undefined ? loadBrand({ explicit: options.brand }) : normalizeBrand(brand),
+    tokens: { ...DEFAULT_CAROUSEL_TOKENS, ...fallback?.carousel, ...named?.carousel },
+    style_name: named?.name ?? ((fallback?.brand || fallback?.carousel) ? fallback.name : undefined),
+  };
+}
+
 /**
  * Render a spec into a carousel project and return the card data.
  * @param {string} projectId
  * @param {import('../../core/types.mjs').CarouselSpec} spec
- * @param {{brand?: any, size?: string, allowOverflow?: boolean}} [options]
+ * @param {{brand?: any, size?: string, allowOverflow?: boolean, style?: string, tokens?: any, style_name?: string}} [options]
  */
 export async function renderIntoProject(projectId, spec, options = {}) {
   await requireProject(projectId);
+  const resolved = options.tokens ? { brand: options.brand, tokens: options.tokens, style_name: options.style_name } : await resolveCarouselStyle(options);
   const base = ensureDir(join(projectDir(projectId), 'out'));
   const rev = `r${Date.now().toString(36)}`;
   const outDir = ensureDir(join(base, rev));
@@ -74,7 +100,8 @@ export async function renderIntoProject(projectId, spec, options = {}) {
   try {
     result = await renderCarousel(spec, {
       outDir,
-      brand: options.brand,
+      brand: resolved.brand,
+      tokens: resolved.tokens,
       size: options.size,
       allowOverflow: options.allowOverflow,
       cwd: process.cwd(),
@@ -88,6 +115,8 @@ export async function renderIntoProject(projectId, spec, options = {}) {
     // Drop the file list entries from earlier renders; their folders are removed below.
     for (const [id, a] of Object.entries(p.assets)) if (a.kind === 'slide' || a.kind === 'thumb') delete p.assets[id];
     p.carousel = result.spec;
+    p.carousel_tokens = resolved.tokens;
+    p.style_name = resolved.style_name;
     p.title = spec.title || p.title;
     for (let i = 0; i < result.files.length; i += 1) {
       await registerAsset(p, { path: result.files[i].file, kind: 'slide', label: `Slide ${i + 1}` });
@@ -112,6 +141,8 @@ export function carouselData(project, warnings = []) {
   const size = resolveSize(spec.size);
   return {
     project_id: project.id,
+    style_name: project.style_name,
+    carousel_tokens: project.carousel_tokens,
     title: spec.title || project.title,
     size,
     width: rendered[0]?.width ?? IMAGE_SIZES[/** @type {keyof typeof IMAGE_SIZES} */ (size)]?.width,

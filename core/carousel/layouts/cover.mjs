@@ -27,7 +27,7 @@ export const layout = {
       main: [
         f.kicker
           ? h({ alignItems: 'center', marginBottom: sp(40) }, [
-              h({ width: fs(64), height: fs(8), borderRadius: fs(4), background: c.accent, marginRight: fs(22) }),
+              h({ width: fs(64), height: fs(8), borderRadius: ctx.r(4, fs(4)), background: c.accent, marginRight: fs(22) }),
               label(ctx, f.kicker, { fontSize: fs(28), letterSpacing: fs(6) }),
             ])
           : null,
