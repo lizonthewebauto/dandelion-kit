@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-11-05)
+
+- Teach the Kit your style from one sample. analyze_samples, save_style and list_styles bring the tool count to 28. Your AI asks what you like and saves only those parts.
 
 - ToolOutcome and ToolResult can include image blocks after the text. analyze_samples now returns a local JPEG sheet, measurements, shared rubrics and a partial suggestion. Large cut lists stay in a local JSON file so the reply stays small.
 
