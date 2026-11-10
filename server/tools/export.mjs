@@ -65,7 +65,7 @@ export const tool = defineTool({
     /** @type {{file: string, kind: string, from: string, plan_hash?: string, quality?: string}[]} */
     const map = [];
     /** @type {string[]} */
-    const lines = [`# ${project.title}`, '', `Exported by the Dandelion Kit on ${new Date().toISOString().slice(0, 10)}.`, ''];
+    const lines = [`# ${project.title}`, '', `Exported by the Dandelion Studio on ${new Date().toISOString().slice(0, 10)}.`, ''];
     /** @type {string[]} */
     const warnings = [];
 

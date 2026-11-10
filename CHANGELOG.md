@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3 (2026-11-10)
+
+- Public name is Dandelion Studio. Existing install links, plugin IDs and commands stay compatible.
+- Images and carousels support `brand.branding_position`: `top`, `bottom` or `off`. The card picker and `update_slides` can change it on an existing project. Off hides the name, logo and handle; a brand.json preference carries into new work. Existing brands keep top placement.
+- Video titles handle Windows file paths on every supported host. Renderer checks ignore the person's saved branding, and the missing-FFmpeg check respects macOS Homebrew fallback paths.
+
 ## 1.1.2 (2026-11-05)
 
 - Add the usage_reporting tool slot and `kit tracking on|off|status`. Optional ready-install and first-finished-output counts require explicit consent, default off and share only a random Kit ID, version and system type with Dandelion. No files or account details leave the computer. Failed reporting never fails an install, render or export. Demo, test and forced-off runs send nothing.

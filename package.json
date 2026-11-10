@@ -1,7 +1,7 @@
 {
   "name": "dandelion-kit",
-  "version": "1.1.2",
-  "description": "Free kit for Claude and Codex: edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.",
+  "version": "1.1.3",
+  "description": "Dandelion Studio for Claude and Codex: edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.",
   "type": "module",
   "license": "MIT",
   "author": "Dandelion (https://dandelionapp.io)",

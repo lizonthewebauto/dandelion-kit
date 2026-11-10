@@ -21,7 +21,8 @@ import { KitMediaError } from '../../core/media/ffmpeg.mjs';
 
 /** A title from a file name: "my-clip_v2.mp4" becomes "my clip v2". @param {string} path */
 export function titleFromPath(path) {
-  return basename(path, extname(path)).replace(/[_-]+/g, ' ').trim() || 'Untitled video';
+  const portable = path.replace(/\\/g, '/');
+  return basename(portable, extname(portable)).replace(/[_-]+/g, ' ').trim() || 'Untitled video';
 }
 
 /**

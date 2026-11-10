@@ -1,6 +1,6 @@
 {
   "name": "dandelion-kit",
-  "interface": { "displayName": "Dandelion Kit" },
+  "interface": { "displayName": "Dandelion Studio" },
   "plugins": [
     {
       "name": "dandelion-kit",

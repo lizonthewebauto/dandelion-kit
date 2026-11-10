@@ -213,7 +213,8 @@ export function makeContext({ brand, size, theme = 'default', index = 0, total =
   ctx.lines = (kind, str, base, widthPx) => wrapCount(str, px(kind, base), cw(kind), widthPx);
   ctx.est = (kind, str, base, widthPx, lh) =>
     Math.ceil(ctx.lines(kind, str, base, widthPx) * px(kind, base) * (lh ?? (kind === 'head' ? hf.lineHeight : 1.28)));
-  ctx.avail = box.height - ctx.fs(44) - (footer ? ctx.fs(64) : 0) - ctx.sp(14) - ctx.sp(18) - Math.round(box.height * 0.025);
+  const bottomBrand = brand.branding_position === 'bottom';
+  ctx.avail = box.height - ctx.fs(44) - (bottomBrand ? ctx.fs(96) : footer ? ctx.fs(64) : 0) - ctx.sp(14) - ctx.sp(18) - Math.round(box.height * 0.025);
   return ctx;
 }
 
@@ -255,7 +256,7 @@ export function label(ctx, s, extra = {}) {
 }
 
 /** @param {Ctx} ctx */
-function header(ctx) {
+function brandMark(ctx) {
   if (!ctx.logoUri && !ctx.brand.name) return h({ height: ctx.fs(44), flexShrink: 0 });
   const mark = ctx.logoUri
     ? { type: 'img', props: { src: ctx.logoUri, width: Math.round(ctx.fs(40) * ctx.logoRatio), height: ctx.fs(40), style: { width: Math.round(ctx.fs(40) * ctx.logoRatio), height: ctx.fs(40), marginRight: ctx.fs(16) } } }
@@ -276,6 +277,13 @@ function header(ctx) {
 }
 
 /** @param {Ctx} ctx */
+function header(ctx) {
+  return ctx.brand.branding_position === 'bottom' || ctx.brand.branding_position === 'off'
+    ? h({ height: ctx.fs(44), flexShrink: 0 })
+    : brandMark(ctx);
+}
+
+/** @param {Ctx} ctx */
 function footer(ctx) {
   const arrow = ctx.hasNext
     ? t('→', {
@@ -291,11 +299,16 @@ function footer(ctx) {
       justifyContent: 'space-between',
       alignItems: 'center',
       flexShrink: 0,
-      height: ctx.fs(64),
+      height: ctx.fs(ctx.brand.branding_position === 'bottom' ? 96 : 64),
       ...(ctx.style.rule === 'none' ? {} : { borderTop: `${ctx.style.rule === 'bold' ? 5 : 2}px solid ${mixLine(ctx)}` }),
     },
     [
-      ctx.brand.handle
+      ctx.brand.branding_position === 'bottom'
+        ? h({ flexDirection: 'column', justifyContent: 'center' }, [
+            brandMark(ctx),
+            ctx.brand.handle ? t(ctx.brand.handle, ctx.body(22, 'regular', { color: ctx.c.fg })) : null,
+          ])
+        : ctx.brand.branding_position !== 'off' && ctx.brand.handle
         ? t(ctx.brand.handle, {
             fontFamily: `${ctx.brand.fonts.body}, Inter`,
             fontWeight: FONTS[ctx.brand.fonts.body].files.length > 1 ? 600 : 400,
@@ -367,7 +380,7 @@ export function page(ctx, main, bleed = [], opts = {}) {
                 main,
                 'main',
               ),
-              opts.footer === false ? null : footer(ctx),
+              opts.footer === false && ctx.brand.branding_position !== 'bottom' ? null : footer(ctx),
             ],
           },
         },

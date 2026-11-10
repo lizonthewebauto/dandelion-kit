@@ -1,4 +1,4 @@
-// Shared shapes for Dandelion Kit. Every other module builds against these definitions.
+// Shared shapes for Dandelion Studio. Every other module builds against these definitions.
 // Changing a field here needs a note in CHANGELOG.md.
 // Units: time in whole milliseconds (suffix _ms), sizes in pixels, ratios as plain numbers, ids as strings.
 
@@ -467,6 +467,7 @@ export const ASSET_KINDS = Object.freeze([
  * @typedef {object} BrandConfig
  * @property {string} name
  * @property {string} handle               For example "@yourname".
+ * @property {"top"|"bottom"|"off"} [branding_position] Name, logo and handle placement. Defaults to top.
  * @property {{bg:string,fg:string,accent:string,muted:string}} colors  "#RRGGBB" values.
  * @property {{heading:string,body:string}} fonts  Font family names from assets/fonts.
  * @property {string} [logo]               Path to a logo image.

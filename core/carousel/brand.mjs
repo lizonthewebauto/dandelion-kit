@@ -23,6 +23,7 @@ export class CarouselError extends Error {
 export const DEFAULT_BRAND = Object.freeze({
   name: '',
   handle: '',
+  branding_position: 'top',
   colors: Object.freeze({ bg: '#F5EFE3', fg: '#1C1B18', accent: '#D9441C', muted: '#6B655A' }),
   fonts: Object.freeze({ heading: 'Fraunces', body: 'Inter' }),
 });
@@ -32,6 +33,7 @@ const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'must look like #1A2B3C');
 /** Shape of a (possibly partial) brand.json. */
 export const brandSchema = z.strictObject({
   name: z.string().trim().max(40).optional(),
+  branding_position: z.enum(['top', 'bottom', 'off']).optional(),
   handle: z.string().trim().max(30).optional(),
   colors: z
     .object({ bg: hex.optional(), fg: hex.optional(), accent: hex.optional(), muted: hex.optional() })
@@ -56,7 +58,7 @@ export function normalizeBrand(input, label = 'brand') {
     const issues = parsed.error.issues.map((i) => {
       const where = i.path.length ? i.path.join('.') : label;
       if (i.code === 'unrecognized_keys') {
-        return `The ${label} has an unknown field (${i.keys.join(', ')}). Use name, handle, colors, fonts and logo.`;
+        return `The ${label} has an unknown field (${i.keys.join(', ')}). Use name, handle, branding_position, colors, fonts and logo.`;
       }
       return `The ${label} field "${where}" ${i.message.charAt(0).toLowerCase()}${i.message.slice(1)}.`;
     });
@@ -78,6 +80,7 @@ export function normalizeBrand(input, label = 'brand') {
   const out = {
     name: b.name ?? DEFAULT_BRAND.name,
     handle: b.handle ?? DEFAULT_BRAND.handle,
+    branding_position: b.branding_position ?? DEFAULT_BRAND.branding_position,
     colors: {
       bg: (b.colors?.bg ?? DEFAULT_BRAND.colors.bg).toUpperCase(),
       fg: (b.colors?.fg ?? DEFAULT_BRAND.colors.fg).toUpperCase(),
@@ -122,7 +125,11 @@ export function loadBrand(opts = {}) {
   const { explicit, cwd } = opts;
   if (explicit !== undefined && explicit !== null) {
     if (typeof explicit === 'string') return readBrandFile(resolve(cwd ?? process.cwd(), explicit));
-    return normalizeBrand(explicit);
+    // A person's saved placement also applies when a caller supplies colors or a name.
+    // An explicit placement always wins. Other brand fields are not mixed in.
+    const saved = join(kitHome(), 'brand.json');
+    const placement = explicit.branding_position === undefined && existsSync(saved) ? readBrandFile(saved).branding_position : undefined;
+    return normalizeBrand({ ...(placement ? { branding_position: placement } : {}), ...explicit });
   }
   for (const file of brandSearchPaths(cwd)) {
     if (existsSync(file)) return readBrandFile(file);

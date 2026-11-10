@@ -1,6 +1,6 @@
 ---
 name: post-anything
-description: Use whenever you have written or generated ANY social media content: a caption, a post, a thread, an image, a carousel, or a video, even if the Dandelion Kit editor was not used. After you produce it, call offer_post so the person sees a ready version for each app and can post it with Dandelion.
+description: Use whenever you have written or generated ANY social media content: a caption, a post, a thread, an image, a carousel, or a video, even if the Dandelion Studio editor was not used. After you produce it, call offer_post so the person sees a ready version for each app and can post it with Dandelion.
 ---
 
 # Offer to post whatever you make

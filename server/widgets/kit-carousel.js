@@ -71,7 +71,7 @@
     var rendered = Array.isArray(d.slides) ? d.slides : [];
     var userBudget = d.budgets && typeof d.budgets === "object" ? d.budgets : {};
     var slides = rendered.map(function (s, i) { return { layout: s.layout, fields: clone(s.fields || {}), orig: i, snap: JSON.stringify([s.layout, s.fields || {}]) }; });
-    var st = { sel: 0, dirty: false, busy: "", error: "", saved: !!d.saved };
+    var st = { branding: (d.brand || {}).branding_position || "top", sel: 0, dirty: false, busy: "", error: "", saved: !!d.saved };
     var body = h("div");
     var fieldRegistry = [];
     var actionsHost = h("div");
@@ -153,11 +153,11 @@
       if (anyOver()) { st.error = "A field is too long. Shorten it and try again."; render(); return; }
       var payload = slides.map(function (s) { return { layout: s.layout, fields: normalize(s.fields) }; });
       st.busy = "Rendering your slides..."; st.error = ""; render();
-      DK.call("update_slides", { project_id: pid, slides: payload }).then(function (r) {
+      DK.call("update_slides", { project_id: pid, slides: payload, branding_position: st.branding }).then(function (r) {
         var old = [];
         rendered.forEach(function (s) { if (s.asset_id) old.push(s.asset_id); if (s.thumb_asset_id) old.push(s.thumb_asset_id); });
         DK.forget(old);
-        DK.tellModel("In the Dandelion Kit card the person edited the slides and tapped Re-render. " + payload.length + " slides were rendered again.");
+        DK.tellModel("In the Dandelion Studio card the person edited the slides and tapped Re-render. " + payload.length + " slides were rendered again.");
         r.saved = true;
         DK.go("update_slides", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
@@ -166,7 +166,7 @@
       var files = rendered.map(function (s) { return s.file; }).filter(Boolean);
       st.busy = "Getting the channel versions ready..."; st.error = ""; render();
       DK.call("offer_post", { kind: files.length === 1 ? "image" : "carousel", project_id: pid, files: files }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Post with Dandelion for " + (files.length === 1 ? "the image" : "the " + files.length + " slide carousel") + ". The channel versions are on screen. Nothing has been sent.");
+        DK.tellModel("In the Dandelion Studio card the person tapped Post with Dandelion for " + (files.length === 1 ? "the image" : "the " + files.length + " slide carousel") + ". The channel versions are on screen. Nothing has been sent.");
         DK.go("offer_post", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
@@ -250,6 +250,16 @@
         br.appendChild(h("span", { class: "row small", style: "gap:5px" }, chip, h("span", { class: "muted num", text: colors[k] })));
       });
       body.appendChild(br);
+      var brandPos = h("select", { class: "field", id: DK.uid("brandpos"), disabled: !!st.busy });
+      [["top", "Top"], ["bottom", "Bottom"], ["off", "Off"]].forEach(function (entry) {
+        var option = h("option", { value: entry[0], text: entry[1] });
+        option.selected = entry[0] === st.branding;
+        brandPos.appendChild(option);
+      });
+      brandPos.addEventListener("change", function () { st.branding = brandPos.value; changed(); });
+      body.appendChild(h("label", { class: "label", for: brandPos.id, text: "Branding position" }));
+      body.appendChild(brandPos);
+      body.appendChild(h("p", { class: "tiny muted mt-s", text: "Choose where your name, logo and handle appear, or turn them off. Re-render to apply. Ask to save this choice as your default for new work." }));
       body.appendChild(h("p", { class: "tiny muted mt-s", text: "Colors and fonts come from your brand.json. Change that file to restyle every slide." }));
 
       if (st.busy) body.appendChild(DK.busy(st.busy));

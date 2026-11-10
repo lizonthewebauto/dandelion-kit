@@ -13,6 +13,7 @@ Layouts and their fields:
 ${layoutHelp()}`,
   input: {
     project_id: z.string(),
+    branding_position: z.enum(['top', 'bottom', 'off']).optional().describe('Move the name, logo and handle, or hide all branding.'),
     style: z.string().optional().describe('Use a saved style. Leave out to keep this project style.'),
     slides: z.array(slideInput).min(1).max(20),
     size: sizeInput,
@@ -25,7 +26,7 @@ ${layoutHelp()}`,
     const data = await renderIntoProject(
       project.id,
       { title: project.carousel.title, slides: /** @type {any} */ (args.slides) },
-      { ...(args.style ? { style: args.style } : { brand: project.carousel.brand, tokens: project.carousel_tokens ?? DEFAULT_CAROUSEL_TOKENS, style_name: project.style_name }), size: args.size ?? project.carousel.size, allowOverflow: args.allow_overflow },
+      { ...(args.style ? { style: args.style, ...(args.branding_position ? { brand: { ...project.carousel.brand, branding_position: args.branding_position } } : {}) } : { brand: { ...project.carousel.brand, ...(args.branding_position ? { branding_position: args.branding_position } : {}) }, tokens: project.carousel_tokens ?? DEFAULT_CAROUSEL_TOKENS, style_name: project.style_name }), size: args.size ?? project.carousel.size, allowOverflow: args.allow_overflow },
     );
     return { data };
   },

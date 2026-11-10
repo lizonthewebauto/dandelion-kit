@@ -34,7 +34,7 @@
       st.busy = "Applying your changes..."; st.error = ""; render();
       DK.call("update_cut", { project_id: pid, keep_ids: keep, drop_ids: drop }).then(function (r) {
         var c = counts();
-        DK.tellModel("In the Dandelion Kit card the person changed the rough cut and tapped Apply. " + c.cut + " of " + c.total + " pieces are cut. The reel is now about " + DK.clock(estimate()) + " long.");
+        DK.tellModel("In the Dandelion Studio card the person changed the rough cut and tapped Apply. " + c.cut + " of " + c.total + " pieces are cut. The reel is now about " + DK.clock(estimate()) + " long.");
         r.saved = true;
         DK.go("update_cut", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
@@ -42,14 +42,14 @@
     function setPreset(id) {
       st.preset = id; st.busy = "Finding the cuts for " + id + "..."; st.error = ""; render();
       DK.call("rough_cut", { project_id: pid, preset: id }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person chose the " + id + " rough cut preset. The list of cuts was rebuilt.");
+        DK.tellModel("In the Dandelion Studio card the person chose the " + id + " rough cut preset. The list of cuts was rebuilt.");
         DK.go("rough_cut", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
     function next() {
       st.busy = "Getting the looks..."; st.error = ""; render();
       DK.call("pick_look", { project_id: pid }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person moved on from the rough cut to Pick a look. The look picker is on screen.");
+        DK.tellModel("In the Dandelion Studio card the person moved on from the rough cut to Pick a look. The look picker is on screen.");
         DK.go("pick_look", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }

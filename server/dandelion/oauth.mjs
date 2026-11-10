@@ -237,7 +237,7 @@ export function startSignIn(options = {}) {
         const code = url.searchParams.get('code');
         if (denied) {
           res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(PAGE('Dandelion was not connected', 'You chose not to allow it. Nothing was changed. You can close this tab.'));
-          gotError(new DandelionError('You chose not to allow the Dandelion Kit. Nothing was changed.', 'access_denied'));
+          gotError(new DandelionError('You chose not to allow the Dandelion Studio. Nothing was changed.', 'access_denied'));
           return;
         }
         if (!code) {

@@ -165,7 +165,7 @@ export async function renderSlide(slide, opts = {}) {
   }
   /** @type {{uri: string, ratio: number}|null} */
   let logo = null;
-  if (brand.logo) {
+  if (brand.logo && brand.branding_position !== 'off') {
     const file = isAbsolute(brand.logo) ? brand.logo : resolve(baseDir, brand.logo);
     logo = await prepareLogo(file, who);
   }

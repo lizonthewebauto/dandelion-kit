@@ -17,7 +17,7 @@ async function until(cond, ms = 5000) {
   }
 }
 
-test('sign-in: registers as "Dandelion Kit", uses PKCE on a loopback address, and ends up connected', async () => {
+test('sign-in: keeps the legacy OAuth client name "Dandelion Kit", uses PKCE on a loopback address, and ends up connected', async () => {
   const t = await useFakeDandelion();
   try {
     const r = await t.client.connect({ waitMs: 15000 });

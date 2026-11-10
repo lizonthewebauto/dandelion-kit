@@ -85,11 +85,11 @@
     if (nextId === "plan" && !doneMap.look) nextId = "look";
 
     var ACTIONS = {
-      cut: { label: "Rough cut", icon: "scissors", run: function () { return DK.call("rough_cut", { project_id: pid }).then(function (r) { return { tool: "rough_cut", data: r }; }); }, busy: "Finding the cuts...", tell: "In the Dandelion Kit card the person tapped Rough cut. The cut review is on screen." },
-      look: { label: "Pick a look", icon: "palette", run: function () { return DK.call("pick_look", { project_id: pid }).then(function (r) { return { tool: "pick_look", data: r }; }); }, busy: "Getting the looks...", tell: "In the Dandelion Kit card the person tapped Pick a look. The look picker is on screen." },
-      plan: { label: "Plan shots", icon: "film", run: function () { return DK.call("plan_shots", { project_id: pid }).then(function (r) { return { tool: "plan_shots", data: r }; }); }, busy: "Planning the shots...", tell: "In the Dandelion Kit card the person tapped Plan shots. The shot plan is on screen." },
-      draft: { label: "Build draft", icon: "play", run: function () { return DK.call("render_reel", { project_id: pid, quality: "draft" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Building the draft. This can take a minute...", tell: "In the Dandelion Kit card the person tapped Build draft. The draft preview is on screen.", tellPending: "In the Dandelion Kit card the person tapped Build draft. It is still being built, and a progress bar is on screen." },
-      final: { label: "Render final", icon: "film", run: function () { return DK.call("render_reel", { project_id: pid, quality: "final" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Rendering the final reel. This can take a few minutes...", tell: "In the Dandelion Kit card the person tapped Render final. The finished reel and its checks are on screen.", tellPending: "In the Dandelion Kit card the person tapped Render final. It is still being built, and a progress bar is on screen." }
+      cut: { label: "Rough cut", icon: "scissors", run: function () { return DK.call("rough_cut", { project_id: pid }).then(function (r) { return { tool: "rough_cut", data: r }; }); }, busy: "Finding the cuts...", tell: "In the Dandelion Studio card the person tapped Rough cut. The cut review is on screen." },
+      look: { label: "Pick a look", icon: "palette", run: function () { return DK.call("pick_look", { project_id: pid }).then(function (r) { return { tool: "pick_look", data: r }; }); }, busy: "Getting the looks...", tell: "In the Dandelion Studio card the person tapped Pick a look. The look picker is on screen." },
+      plan: { label: "Plan shots", icon: "film", run: function () { return DK.call("plan_shots", { project_id: pid }).then(function (r) { return { tool: "plan_shots", data: r }; }); }, busy: "Planning the shots...", tell: "In the Dandelion Studio card the person tapped Plan shots. The shot plan is on screen." },
+      draft: { label: "Build draft", icon: "play", run: function () { return DK.call("render_reel", { project_id: pid, quality: "draft" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Building the draft. This can take a minute...", tell: "In the Dandelion Studio card the person tapped Build draft. The draft preview is on screen.", tellPending: "In the Dandelion Studio card the person tapped Build draft. It is still being built, and a progress bar is on screen." },
+      final: { label: "Render final", icon: "film", run: function () { return DK.call("render_reel", { project_id: pid, quality: "final" }).then(function (r) { return { tool: "render_reel", data: r }; }); }, busy: "Rendering the final reel. This can take a few minutes...", tell: "In the Dandelion Studio card the person tapped Render final. The finished reel and its checks are on screen.", tellPending: "In the Dandelion Studio card the person tapped Render final. It is still being built, and a progress bar is on screen." }
     };
 
     function go(id) {
@@ -134,7 +134,7 @@
           h("div", { class: "actions" }, DK.btn("Check again", { small: true, kind: "gold", icon: "film", disabled: !!st.busy, onclick: function () {
             st.busy = "Checking..."; st.error = ""; render();
             DK.call("get_project", { project_id: pid }).then(function (r) {
-              DK.tellModel("In the Dandelion Kit card the person tapped Check again while " + what + " was being built.");
+              DK.tellModel("In the Dandelion Studio card the person tapped Check again while " + what + " was being built.");
               DK.go("get_project", r);
             }, function (e) { st.busy = ""; st.error = e.message; render(); });
           } }))));
@@ -146,7 +146,7 @@
           DK.btn("Export", { kind: "gold", icon: "folder", disabled: !!st.busy, onclick: function () {
             st.busy = "Copying the files..."; render();
             DK.call("export", { project_id: pid }).then(function (r) {
-              DK.tellModel("In the Dandelion Kit card the person tapped Export. The files are listed on screen.");
+              DK.tellModel("In the Dandelion Studio card the person tapped Export. The files are listed on screen.");
               DK.go("export", r);
             }, function (e) { st.busy = ""; st.error = e.message; render(); });
           } })));

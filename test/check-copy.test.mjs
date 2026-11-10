@@ -18,7 +18,7 @@ function temp(files) {
 }
 
 test('clean text passes', () => {
-  const dir = temp({ 'a.md': 'Plain words, nothing odd.\n', 'b.mjs': 'export const x = 1;\n' });
+  const dir = temp({ 'a.md': 'Plain words, Dandelion Studio.\n', 'b.mjs': 'export const x = 1;\n' });
   try {
     const r = scanCopy(dir);
     assert.equal(r.scanned, 2);

@@ -1,5 +1,5 @@
 /*
- * The in-card runtime for the Dandelion Kit widgets, inlined into every card page as a plain script.
+ * The in-card runtime for the Dandelion Studio widgets, inlined into every card page as a plain script.
  *
  * 1. A small MCP Apps bridge (spec 2026-01-26, the same wire messages as the ext-apps App class):
  *    JSON-RPC 2.0 over postMessage with the host (window.parent). ui/initialize, then ui/notifications/initialized,
@@ -431,7 +431,7 @@
   /** The card header: a small kit label, the title, and a Back button when we moved here from another step. */
   DK.head = function (title, o) {
     o = o || {};
-    var top = h("div", { class: "eyebrow" }, h("span", { class: "dot" }), "Dandelion Kit");
+    var top = h("div", { class: "eyebrow" }, h("span", { class: "dot" }), "Dandelion Studio");
     var row = h("div", { class: "hl-row" });
     if (DK.canGoBack()) {
       row.appendChild(DK.btn("Back", { kind: "quiet", tiny: true, icon: "back", aria: "Back to the last step", onclick: function () { DK.back(); } }));
@@ -446,7 +446,7 @@
   /** Placeholder while we wait for the first tool result. */
   DK.skeleton = function () {
     return [
-      h("header", { class: "head" }, h("div", { class: "eyebrow" }, h("span", { class: "dot" }), "Dandelion Kit")),
+      h("header", { class: "head" }, h("div", { class: "eyebrow" }, h("span", { class: "dot" }), "Dandelion Studio")),
       h("div", { class: "card", "aria-busy": "true" },
         h("div", { class: "sk", style: "height:18px;width:55%;border-radius:8px" }),
         h("div", { class: "sk", style: "height:12px;width:90%;border-radius:8px;margin-top:12px" }),
@@ -779,12 +779,12 @@
     mountNodes(DK.skeleton());
     DK.on("result", function (r) {
       var res = DK.read(r);
-      if (!res.ok) { mountNodes([DK.head("Dandelion Kit"), DK.problem(res.message)]); return; }
+      if (!res.ok) { mountNodes([DK.head("Dandelion Studio"), DK.problem(res.message)]); return; }
       DK.show(primary, res.data, { reset: true });
     });
     DK.on("cancelled", function () {
-      mountNodes([DK.head("Dandelion Kit"), DK.problem("This was stopped before it finished.")]);
+      mountNodes([DK.head("Dandelion Studio"), DK.problem("This was stopped before it finished.")]);
     });
-    startBridge(appName || "Dandelion Kit");
+    startBridge(appName || "Dandelion Studio");
   };
 })();

@@ -221,7 +221,7 @@
         }
         delete st.edits[p];
         st.savedTab = p;
-        DK.tellModel("In the Dandelion Kit card the person edited the " + DK.plat(p).n + " version and saved it. New words: " + DK.short(mainText(copy), 400));
+        DK.tellModel("In the Dandelion Studio card the person edited the " + DK.plat(p).n + " version and saved it. New words: " + DK.short(mainText(copy), 400));
         paintTabs(); paintPanel(); paintAction();
       }, function (e) { st.busy = ""; st.error = e.message; paintSave(); paintAction(); });
     }
@@ -238,7 +238,7 @@
           absorb(r);
           if (dl.connected) {
             st.polling = false; st.busy = "";
-            DK.tellModel("In the Dandelion Kit card the person finished signing in to Dandelion" + (dl.workspace && dl.workspace.name ? " (" + dl.workspace.name + ")" : "") + ". Nothing has been sent yet.");
+            DK.tellModel("In the Dandelion Studio card the person finished signing in to Dandelion" + (dl.workspace && dl.workspace.name ? " (" + dl.workspace.name + ")" : "") + ". Nothing has been sent yet.");
             paintTabs(); paintAction();
           } else setTimeout(tick, 3000);
         }, function () { setTimeout(tick, 3000); });
@@ -251,7 +251,7 @@
         absorb(r);
         if (dl.connected) {
           st.busy = "";
-          DK.tellModel("In the Dandelion Kit card the person signed in to Dandelion" + (dl.workspace && dl.workspace.name ? " (" + dl.workspace.name + ")" : "") + ". Nothing has been sent yet.");
+          DK.tellModel("In the Dandelion Studio card the person signed in to Dandelion" + (dl.workspace && dl.workspace.name ? " (" + dl.workspace.name + ")" : "") + ". Nothing has been sent yet.");
           paintTabs(); paintAction();
         } else startPolling();
       }, function (e) { st.busy = ""; st.error = e.message; paintAction(); });
@@ -277,7 +277,7 @@
           absorb(r);
           if (!bundle.sent) bundle.sent = { brand_id: curBrand(), content_id: "", mode: mode, jobs: [], sent_at: Date.now() };
           var jobs = (bundle.sent.jobs || []).length;
-          DK.tellModel("In the Dandelion Kit card the person tapped Send to Dandelion (" + (mode === "review" ? "send for review" : "save to library") + "). " + (jobs ? jobs + " posts are waiting for their OK in the card. Nothing has gone out." : "The files are in their Dandelion library. Nothing has gone out."));
+          DK.tellModel("In the Dandelion Studio card the person tapped Send to Dandelion (" + (mode === "review" ? "send for review" : "save to library") + "). " + (jobs ? jobs + " posts are waiting for their OK in the card. Nothing has gone out." : "The files are in their Dandelion library. Nothing has gone out."));
           paintAll();
         }, function (e) { st.busy = ""; st.error = e.message; repaint(); });
       }
@@ -385,7 +385,7 @@
           setStatus(r, "posting");
           local.stopped = "";
           local.msg = "On its way. It goes out in a minute or two.";
-          DK.tellModel("In the Dandelion Kit card the person tapped " + (force ? "Post it anyway" : "Approve now") + " on the " + label + " (job " + job.id + "). It is approved and goes out now. Do not approve it again.");
+          DK.tellModel("In the Dandelion Studio card the person tapped " + (force ? "Post it anyway" : "Approve now") + " on the " + label + " (job " + job.id + "). It is approved and goes out now. Do not approve it again.");
           paint();
         }, function (e) {
           // Dandelion stopped it: say why in plain words and let the person decide. Anything else stays an error in the confirm box.
@@ -402,7 +402,7 @@
           job.post_at = (r && r.job && r.job.post_at) || iso;
           local.msg = "Scheduled for " + DK.when(ms) + ".";
           local.open = false;
-          DK.tellModel("In the Dandelion Kit card the person scheduled the " + label + " (job " + job.id + ") for " + iso + ". It is approved. Do not approve it again.");
+          DK.tellModel("In the Dandelion Studio card the person scheduled the " + label + " (job " + job.id + ") for " + iso + ". It is approved. Do not approve it again.");
           paint();
         });
       }
@@ -411,7 +411,7 @@
         DK.call("skip_post", { job_id: job.id }).then(function (r) {
           setStatus(r, "skipped");
           local.msg = "Skipped. It will not post.";
-          DK.tellModel("In the Dandelion Kit card the person skipped the " + label + " (job " + job.id + "). It will not post.");
+          DK.tellModel("In the Dandelion Studio card the person skipped the " + label + " (job " + job.id + "). It will not post.");
           paint();
         }, function (e) { local.err = e.message; paint(); });
       }
@@ -470,7 +470,7 @@
               return DK.call("skip_post", { job_id: job.id }).then(function (r) {
                 setStatus(r, "skipped");
                 local.msg = "Cancelled. It will not post.";
-                DK.tellModel("In the Dandelion Kit card the person cancelled the scheduled " + label + " (job " + job.id + "). It will not post.");
+                DK.tellModel("In the Dandelion Studio card the person cancelled the scheduled " + label + " (job " + job.id + "). It will not post.");
                 paint();
               });
             }

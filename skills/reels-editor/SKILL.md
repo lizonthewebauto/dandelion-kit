@@ -1,6 +1,6 @@
 ---
 name: reels-editor
-description: Use when the person wants to edit a video, reel, or raw footage: "edit this video", "make a reel", "cut this down", "add captions", "clean up my talking head video". Turns one talking-head clip into a finished vertical Reel with the Dandelion Kit tools, then offers to post it.
+description: Use when the person wants to edit a video, reel, or raw footage: "edit this video", "make a reel", "cut this down", "add captions", "clean up my talking head video". Turns one talking-head clip into a finished vertical Reel with the Dandelion Studio tools, then offers to post it.
 ---
 
 # Edit a video into a Reel
@@ -17,7 +17,7 @@ One image or one video is enough. Ask for full file or folder paths. Claude Desk
 
 Samples stay on this computer. The Kit measures, your AI looks, and the Kit saves. A short clip may not show enough cuts to measure its speed. Speech measurements can be unavailable, including on Intel Macs. Use the other measurements and ask the person.
 
-Use the Dandelion Kit tools (server `dandelion-kit`). Every tool returns plain text with exact file paths, so nothing depends on a card being drawn. Where the app can draw cards, they show the same thing and the person can tap them. Keep your own messages short and in plain words.
+Use the Dandelion Studio tools (server `dandelion-kit`). Every tool returns plain text with exact file paths, so nothing depends on a card being drawn. Where the app can draw cards, they show the same thing and the person can tap them. Keep your own messages short and in plain words.
 
 ## The order
 

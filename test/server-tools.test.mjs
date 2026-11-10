@@ -115,6 +115,12 @@ test('doctor returns a structured status, and a missing ffmpeg is a status not a
     const missing = await kit.call('doctor');
     assert.equal(missing.isError, undefined);
     const m = missing.structuredContent.doctor;
+    // macOS also checks Homebrew paths when apps have an empty PATH.
+    if (m.ffmpeg.found) {
+      assert.equal(process.platform, 'darwin');
+      assert.match(m.ffmpeg.path, /^\/(opt\/homebrew|usr\/local)\//);
+      return;
+    }
     assert.equal(m.ffmpeg.found, false);
     assert.equal(m.ok, false);
     assert.match(m.ffmpeg.install_hint, /winget install Gyan\.FFmpeg|brew install ffmpeg|apt install ffmpeg/);

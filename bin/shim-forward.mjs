@@ -4,7 +4,7 @@
 // node_modules exists.
 
 export const READY_TEXT =
-  'Setup is done and all the Dandelion Kit tools are ready. If you only see setup_status, start a new session so the tools load, then call doctor.';
+  'Setup is done and all the Dandelion Studio tools are ready. If you only see setup_status, start a new session so the tools load, then call doctor.';
 
 /**
  * Line-buffered forwarder. Every complete line goes to `write` unchanged and newline-terminated, except a setup_status

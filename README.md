@@ -1,4 +1,4 @@
-# Dandelion Kit
+# Dandelion Studio
 
 Optional usage counts are off until you agree. They report when the Kit is ready and your first finished image, carousel or video, with a random Kit ID, version and system type. No files, words, email or computer name are sent. Ask your AI to turn usage counts on or off. From the Kit folder, `node bin/kit.mjs tracking status` checks the choice; use `tracking on` or `tracking off` to change it. Editing works offline with counts off. Set `DANDELION_KIT_TELEMETRY=0` for owner checks and QA. See [INSTALL.md](INSTALL.md) for the consent step.
 
@@ -105,3 +105,7 @@ The `.mcpb` bundle for Claude Desktop is built with `node scripts/build-mcpb.mjs
 ## License
 
 MIT. See LICENSE, NOTICE and THIRD_PARTY_NOTICES.md.
+
+### Put your branding where you want it
+
+Choose Top, Bottom or Off in the image and carousel card, then re-render. Your name, logo and handle move together. Set `"branding_position": "bottom"` in your `brand.json` to keep that choice for new work, or use `"off"` to remove branding. Existing brands default to `"top"`. Agents can pass `brand.branding_position` to `make_carousel` or `make_image`, and `branding_position` to `update_slides`.

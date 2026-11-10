@@ -1,6 +1,6 @@
 # Third party notices
 
-Dandelion Kit is MIT licensed (see LICENSE). It uses the components below. Each one keeps its own license.
+Dandelion Studio is MIT licensed (see LICENSE). It uses the components below. Each one keeps its own license.
 
 ## Bundled in this repository
 

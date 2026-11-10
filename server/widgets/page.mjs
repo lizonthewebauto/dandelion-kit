@@ -75,7 +75,7 @@ export function widgetPage(input) {
 <script type="application/json" id="dk-data">${scriptJson(data)}</script>
 <script>${runtimeSource()}</script>
 ${views}
-<script>window.DK.boot(${scriptJson(input.widgetId)}, ${scriptJson(`Dandelion Kit: ${input.title}`)});</script>${input.extraBody ?? ''}
+<script>window.DK.boot(${scriptJson(input.widgetId)}, ${scriptJson(`Dandelion Studio: ${input.title}`)});</script>${input.extraBody ?? ''}
 </body>
 </html>`;
 }

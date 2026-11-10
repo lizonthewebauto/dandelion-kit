@@ -16,7 +16,7 @@
     function open(path, label) {
       st.error = "";
       DK.call("open_path", { path: path }).then(function () {
-        DK.tellModel("In the Dandelion Kit card the person tapped " + label + " for " + path + ".");
+        DK.tellModel("In the Dandelion Studio card the person tapped " + label + " for " + path + ".");
       }, function (e) { st.error = e.message; render(); });
     }
     function post() {
@@ -27,7 +27,7 @@
       var args = { kind: kind, files: picked.map(function (f) { return f.path; }) };
       if (d.project_id) args.project_id = d.project_id;
       DK.call("offer_post", args).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Post with Dandelion for the exported files. The channel versions are on screen. Nothing has been sent.");
+        DK.tellModel("In the Dandelion Studio card the person tapped Post with Dandelion for the exported files. The channel versions are on screen. Nothing has been sent.");
         DK.go("offer_post", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }

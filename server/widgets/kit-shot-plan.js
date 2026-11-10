@@ -65,14 +65,14 @@
       var work = dirty() ? DK.call("update_shot_plan", payload()) : Promise.resolve(null);
       st.busy = thenBuild ? "Saving your edits..." : "Saving your edits..."; st.error = ""; render();
       work.then(function (r) {
-        if (r) DK.tellModel("In the Dandelion Kit card the person edited the shot plan and saved it" + (st.hook !== st.hookOrig ? ". The hook is now: " + st.hook : "") + ".");
+        if (r) DK.tellModel("In the Dandelion Studio card the person edited the shot plan and saved it" + (st.hook !== st.hookOrig ? ". The hook is now: " + st.hook : "") + ".");
         if (!thenBuild) {
           if (r) { r.saved = true; DK.go("update_shot_plan", r); } else { st.busy = ""; render(); }
           return null;
         }
         st.busy = "Building the draft. This can take a minute..."; render();
         return DK.call("render_reel", { project_id: pid, quality: "draft" }).then(function (rr) {
-          DK.tellModel("In the Dandelion Kit card the person tapped Build draft. The draft preview is on screen.");
+          DK.tellModel("In the Dandelion Studio card the person tapped Build draft. The draft preview is on screen.");
           DK.go("render_reel", rr);
         });
       }).catch(function (e) { st.busy = ""; st.error = e.message; render(); });

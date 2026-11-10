@@ -29,6 +29,8 @@ const DASH = new RegExp(`[${String.fromCharCode(0x2013)}${String.fromCharCode(0x
 
 /** One scratch folder for the whole file. */
 const TMP = mkdtempSync(join(tmpdir(), 'kit-carousel-'));
+// Never inherit the person's saved colors or branding preference in render gates.
+process.env.DANDELION_KIT_HOME = TMP;
 process.on('exit', () => {
   try {
     rmSync(TMP, { recursive: true, force: true });

@@ -1,6 +1,6 @@
-# Dandelion Kit: instructions for coding agents
+# Dandelion Studio: instructions for coding agents
 
-This repo is the free Dandelion Kit: an MCP server (`node bin/kit.mjs serve`, server name `dandelion-kit`) plus three skills. To install it for a person, follow `INSTALL.md`. For source setup in Claude Desktop, Claude Code, Codex, Cursor, VS Code or another local MCP app, also read `CLIENTS.md`.
+This repo is the free Dandelion Studio: an MCP server (`node bin/kit.mjs serve`, server name `dandelion-kit`) plus three skills. To install it for a person, follow `INSTALL.md`. For source setup in Claude Desktop, Claude Code, Codex, Cursor, VS Code or another local MCP app, also read `CLIENTS.md`.
 
 ## Local app setup
 

@@ -28,6 +28,7 @@ export const brandInput = z
     z.string(),
     z.object({
       name: z.string().optional(),
+      branding_position: z.enum(['top', 'bottom', 'off']).optional().describe('Show your name, logo and handle at the top or bottom, or hide them with off.'),
       handle: z.string().optional().describe('For example @yourname.'),
       colors: z
         .object({ bg: z.string().optional(), fg: z.string().optional(), accent: z.string().optional(), muted: z.string().optional() })

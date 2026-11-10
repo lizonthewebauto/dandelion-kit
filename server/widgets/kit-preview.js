@@ -24,7 +24,7 @@
         ? DK.call("make_variants", { project_id: pid, count: d.count || 2 })
         : DK.call("render_reel", { project_id: pid, quality: d.quality === "draft" ? "draft" : "final" });
       asked.then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Check again for the " + what + ". " + (r && r.pending ? "It is still being built, and a progress bar is on screen." : "It is finished and on screen."));
+        DK.tellModel("In the Dandelion Studio card the person tapped Check again for the " + what + ". " + (r && r.pending ? "It is still being built, and a progress bar is on screen." : "It is finished and on screen."));
         DK.go(tool, r);
       }, function (e) { st.busy = false; st.error = e.message; render(); });
     }
@@ -65,21 +65,21 @@
     function doFinal() {
       st.busy = "Rendering the final reel. This can take a few minutes..."; st.error = ""; render();
       DK.call("render_reel", { project_id: pid, quality: "final" }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Render final. " + (r && r.pending ? "It is still being built, and a progress bar is on screen." : "The finished reel and its checks are on screen."));
+        DK.tellModel("In the Dandelion Studio card the person tapped Render final. " + (r && r.pending ? "It is still being built, and a progress bar is on screen." : "The finished reel and its checks are on screen."));
         DK.go("render_reel", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
     function doVariants() {
       st.busy = "Making 2 variants. The speech stays the same..."; st.error = ""; render();
       DK.call("make_variants", { project_id: pid, count: 2 }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Make variants. " + (r && r.pending ? "They are still being built, and a progress bar is on screen." : "Two versions with the same speech are on screen as tabs."));
+        DK.tellModel("In the Dandelion Studio card the person tapped Make variants. " + (r && r.pending ? "They are still being built, and a progress bar is on screen." : "Two versions with the same speech are on screen as tabs."));
         DK.go("make_variants", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }
     function doCheck(rr) {
       st.busy = "Checking the file..."; st.error = ""; render();
       DK.call("check_reel", { project_id: pid, file: rr.file }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person ran the checks again on " + DK.base(rr.file) + ".");
+        DK.tellModel("In the Dandelion Studio card the person ran the checks again on " + DK.base(rr.file) + ".");
         checkedNote = "Checks ran again just now.";
         DK.go("check_reel", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
@@ -87,7 +87,7 @@
     function doPost(rr) {
       st.busy = "Getting the channel versions ready..."; st.error = ""; render();
       DK.call("offer_post", { kind: "video", project_id: pid, files: [rr.file] }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person tapped Post with Dandelion for " + DK.base(rr.file) + ". The channel versions are on screen. Nothing has been sent.");
+        DK.tellModel("In the Dandelion Studio card the person tapped Post with Dandelion for " + DK.base(rr.file) + ". The channel versions are on screen. Nothing has been sent.");
         DK.go("offer_post", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }

@@ -1,14 +1,14 @@
-# Install the full free Dandelion Kit and Dandelion posting
+# Install the full free Dandelion Studio and Dandelion posting
 
 This page is an install contract for the person's AI. The person chose the full Kit with Dandelion posting. Do the setup for them. Keep your updates short.
 
 The install prompt is:
 
-> Install the free Dandelion video editing kit: https://dandelionapp.io/freekit
+> Install free Dandelion Studio: https://dandelionapp.io/freekit
 
 This short prompt means the full Kit with images, carousels, video editing and the Dandelion posting companion for all their social content, including work made outside the Kit. Do not narrow it to video editing alone.
 
-Earlier install prompts still mean this same full install. This includes "I want to create images and carousels and edit videos with this: https://dandelionapp.io/freekit" and "Install the full free Dandelion Kit on my computer for images, carousels and video editing, plus Dandelion posting for all my social content, even when I make it outside the Kit: https://dandelionapp.io/freekit/install.md". Older links using `/kit` instead of `/freekit` also remain valid. Do not ask them to choose the product again.
+Earlier install prompts still mean this same full install. This includes "I want to create images and carousels and edit videos with this: https://dandelionapp.io/freekit" and "Install the full free Dandelion Studio on my computer for images, carousels and video editing, plus Dandelion posting for all my social content, even when I make it outside the Kit: https://dandelionapp.io/freekit/install.md". Older links using `/kit` instead of `/freekit` also remain valid. Do not ask them to choose the product again.
 
 People who came through the Dandelion install page already gave their email and created their free Dandelion account before choosing full Kit or posting-only. Do not ask for their email again or create a second account. Reuse that account and any existing Dandelion connection. A browser sign-in may still be needed to grant this AI app access.
 
@@ -144,3 +144,9 @@ Intel Macs support images, carousels and posting. Speech and Reel editing do not
 Speech and face models download locally when the first video edit needs them. Tell the person before that download. Do not borrow another person's models, settings or sign-in files.
 
 Finish with a short report: whether the Kit loaded or the exact step left, whether the Dandelion companion was reused or added and its real sign-in state, any video limit, and what they can ask you to make next. Do not invent a success rate or confidence score.
+
+## Choose branding placement
+
+Dandelion Studio lets each person choose where their name, logo and handle go on images and carousels: top, bottom or off. Use the card's Branding position picker, or pass `branding_position` to `update_slides`. A brand object or `brand.json` can set `"branding_position": "top"`, `"bottom"` or `"off"`. Save it in `~/.dandelion-kit/brand.json` to use it for new work. Top stays the default for people who have not chosen. Off removes the brand name, logo and handle, including the brand's default CTA handle.
+
+The public name is Dandelion Studio. Existing `/freekit`, `/kit`, repository, plugin and command names keep working. The older install prompt, "Install the free Dandelion video editing kit: https://dandelionapp.io/freekit", still selects this same full install.

@@ -1,6 +1,6 @@
 ---
 name: carousel-maker
-description: Use when the person wants a carousel, a slide post, an infographic, or a single social image. Makes clean JPEG slides from twelve layouts and a tiny brand file with the Dandelion Kit tools, then offers to post them.
+description: Use when the person wants a carousel, a slide post, an infographic, or a single social image. Makes clean JPEG slides from twelve layouts and a tiny brand file with the Dandelion Studio tools, then offers to post them.
 ---
 
 # Make a carousel or an image
@@ -31,6 +31,7 @@ Call `list_styles` first. A saved default style is used unless you pass a brand 
 {
   "name": "Your Brand",
   "handle": "@yourhandle",
+  "branding_position": "top",
   "colors": { "bg": "#F5EFE3", "fg": "#1C1B18", "accent": "#D9441C", "muted": "#6B655A" },
   "fonts": { "heading": "Fraunces", "body": "Inter" }
 }
@@ -73,3 +74,7 @@ Slide 1 is a cover that makes someone want slide 2. The middle slides each carry
 1. Tell the person the slide count and the folder. If they want edits, change the fields and call `update_slides` with the full slide list.
 2. End with `offer_post` (`kind: carousel` or `image`, the `project_id`, and your own words per app in `copies`). The person sees a version for each app before they sign up for anything. See the `post-anything` skill.
 3. Never post anything yourself. Posting waits for a clear yes.
+
+## Branding placement
+
+Honor the person's choice: `brand.branding_position` can be `top`, `bottom` or `off`. The card has the same picker. `update_slides` accepts `branding_position` to move or hide branding on an existing project. Save the chosen value in the person's brand.json when they ask for a default. Never force a brand name or handle on their work.

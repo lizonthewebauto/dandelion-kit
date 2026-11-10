@@ -64,7 +64,7 @@
       var accent = st.accent || l.accent;
       st.busy = "Saving the look..."; st.error = ""; render();
       DK.call("pick_look", { project_id: pid, look: st.look, caption_theme: theme, accent: accent }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person picked the " + (l.name || st.look) + " look with " + nice(theme) + " captions and the accent " + accent + ".");
+        DK.tellModel("In the Dandelion Studio card the person picked the " + (l.name || st.look) + " look with " + nice(theme) + " captions and the accent " + accent + ".");
         r.saved = true;
         if (!r.current) r.current = { look_id: st.look, caption_theme: theme, accent: accent };
         DK.go("pick_look", r);
@@ -73,7 +73,7 @@
     function plan() {
       st.busy = "Planning the shots..."; st.error = ""; render();
       DK.call("plan_shots", { project_id: pid }).then(function (r) {
-        DK.tellModel("In the Dandelion Kit card the person moved on to Plan shots. The shot plan is on screen.");
+        DK.tellModel("In the Dandelion Studio card the person moved on to Plan shots. The shot plan is on screen.");
         DK.go("plan_shots", r);
       }, function (e) { st.busy = ""; st.error = e.message; render(); });
     }

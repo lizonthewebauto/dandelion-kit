@@ -11,7 +11,7 @@ export function nodeVersionSupported(version = process.versions.node) {
 
 /** @param {string} [version] @returns {string|null} */
 export function nodeVersionProblem(version = process.versions.node) {
-  return nodeVersionSupported(version) ? null : `Dandelion Kit needs Node.js ${MIN_NODE_VERSION} or newer. This is ${version}. Install a current Node.js version from https://nodejs.org, then try again.`;
+  return nodeVersionSupported(version) ? null : `Dandelion Studio needs Node.js ${MIN_NODE_VERSION} or newer. This is ${version}. Install a current Node.js version from https://nodejs.org, then try again.`;
 }
 
 /** CPU use needs no extra GPU downloads. Keep a person's explicit install choice.

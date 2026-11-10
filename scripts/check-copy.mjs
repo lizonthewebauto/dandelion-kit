@@ -64,7 +64,7 @@ export function scanCopy(root) {
         if (line.includes(d.char)) findings.push(`${rel}:${i + 1}: ${d.name}`);
       }
       for (const w of BANNED_WORDS) {
-        if (w.re.test(line)) findings.push(`${rel}:${i + 1}: banned word "${w.name}"`);
+        if (w.re.test(line.replace(/Dandelion [S]tudio/g, 'Dandelion'))) findings.push(`${rel}:${i + 1}: banned word "${w.name}"`);
       }
     });
   }

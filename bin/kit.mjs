@@ -23,7 +23,7 @@ const IS_WIN = process.platform === 'win32';
 /** Two tries at the package install, and the age when a waiting start treats the install lock as stale. */
 const INSTALL_LIMIT_MS = 5 * 60 * 1000;
 
-const USAGE = `Dandelion Kit: edit videos into Reels, make carousels and images, post with Dandelion.
+const USAGE = `Dandelion Studio: edit videos into Reels, make carousels and images, post with Dandelion.
 
 Usage:
   kit serve [--demo]                    Start the MCP server (hosts run this).
@@ -63,7 +63,7 @@ function ensureDependencies() {
   const npm = IS_WIN ? 'npm.cmd' : 'npm';
   const check = spawnSync(npm, ['--version'], { shell: IS_WIN, stdio: 'ignore' });
   if (check.status !== 0) {
-    err('Dandelion Kit needs npm to finish setup. Install Node.js from https://nodejs.org, then run: npm install --omit=dev');
+    err('Dandelion Studio needs npm to finish setup. Install Node.js from https://nodejs.org, then run: npm install --omit=dev');
     err(`(in the folder ${ROOT})`);
     return false;
   }
@@ -80,7 +80,7 @@ function ensureDependencies() {
       break;
     } catch (error) {
       if (/** @type {any} */ (error)?.code !== 'EEXIST') {
-        err(`Dandelion Kit cannot write its setup folder: ${home}. Choose a folder you can write to, then try again.`);
+        err(`Dandelion Studio cannot write its setup folder: ${home}. Choose a folder you can write to, then try again.`);
         return false;
       }
       // Another start is installing. Wait for it; a lock older than 5 minutes is stale.
@@ -92,7 +92,7 @@ function ensureDependencies() {
           sleep(50);
           continue;
         }
-        err(`Dandelion Kit cannot read its setup folder: ${home}. Choose a folder you can write to, then try again.`);
+        err(`Dandelion Studio cannot read its setup folder: ${home}. Choose a folder you can write to, then try again.`);
         return false;
       }
       if (age > INSTALL_LIMIT_MS) {
@@ -109,7 +109,7 @@ function ensureDependencies() {
   }
   try {
     if (depsReady()) return true;
-    err('Dandelion Kit: installing its packages (once, about a minute)...');
+    err('Dandelion Studio: installing its packages (once, about a minute)...');
     if (home !== ROOT) {
       for (const file of ['package.json', 'package-lock.json']) copyFileSync(join(ROOT, file), join(home, file));
     }
@@ -130,7 +130,7 @@ function ensureDependencies() {
       run = install();
       if (run.error) {
         // npm can stall for good reading its own cache: seen on a Mac when Claude Code started the Kit. A fresh cache gets past it.
-        err('Dandelion Kit: the install stalled, so it is trying once more with a fresh download.');
+        err('Dandelion Studio: the install stalled, so it is trying once more with a fresh download.');
         const cache = mkdtempSync(join(tmpdir(), 'dandelion-kit-npm-'));
         run = install('--cache', cache);
         rmSync(cache, { recursive: true, force: true });
@@ -139,10 +139,10 @@ function ensureDependencies() {
       closeSync(log);
     }
     if (run.status !== 0 || !depsReady()) {
-      err(`Dandelion Kit: the install did not finish. Run "npm install --omit=dev" in ${home}. The log is at ${logPath}.`);
+      err(`Dandelion Studio: the install did not finish. Run "npm install --omit=dev" in ${home}. The log is at ${logPath}.`);
       return false;
     }
-    err('Dandelion Kit: packages installed.');
+    err('Dandelion Studio: packages installed.');
     return true;
   } finally {
     rmSync(lock, { recursive: true, force: true });
@@ -169,7 +169,7 @@ async function serveWithSetup(demo) {
     }
   })();
   const send = (/** @type {any} */ obj) => process.stdout.write(`${JSON.stringify({ jsonrpc: '2.0', ...obj })}\n`);
-  let status = 'Dandelion Kit is setting up for the first time. This takes about a minute. Ask again shortly.';
+  let status = 'Dandelion Studio is setting up for the first time. This takes about a minute. Ask again shortly.';
   let failed = false;
   let handedOff = false;
   /** @type {string | null} */
@@ -187,7 +187,7 @@ async function serveWithSetup(demo) {
             protocolVersion: msg.params?.protocolVersion ?? '2025-06-18',
             capabilities: { tools: { listChanged: true } },
             serverInfo: { name: 'dandelion-kit', version },
-            instructions: 'Dandelion Kit is finishing its first-time setup (about a minute). The real tools appear when it is done.',
+            instructions: 'Dandelion Studio is finishing its first-time setup (about a minute). The real tools appear when it is done.',
           },
         });
         break;
@@ -198,7 +198,7 @@ async function serveWithSetup(demo) {
             tools: [
               {
                 name: 'setup_status',
-                description: 'Dandelion Kit is finishing its first-time setup. Call this to see how it is going. The editing tools appear when it is done.',
+                description: 'Dandelion Studio is finishing its first-time setup. Call this to see how it is going. The editing tools appear when it is done.',
                 inputSchema: { type: 'object', properties: {} },
               },
             ],
@@ -221,7 +221,7 @@ async function serveWithSetup(demo) {
         send({ id: msg.id, result: {} });
         break;
       default:
-        if (msg.id !== undefined) send({ id: msg.id, error: { code: -32601, message: 'Dandelion Kit is still setting up.' } });
+        if (msg.id !== undefined) send({ id: msg.id, error: { code: -32601, message: 'Dandelion Studio is still setting up.' } });
     }
   };
 
@@ -258,12 +258,12 @@ async function serveWithSetup(demo) {
   });
 
   // Install in a child so the handshake keeps being answered. It reuses the lock logic in ensureDependencies.
-  err('Dandelion Kit: first run, installing packages in the background...');
+  err('Dandelion Studio: first run, installing packages in the background...');
   const child = spawn(process.execPath, [fileURLToPath(import.meta.url), 'install-deps'], { stdio: ['ignore', 2, 2] });
   child.on('exit', async (code) => {
     if (code !== 0 || !depsReady()) {
       failed = true;
-      status = `Dandelion Kit could not finish its setup. Run "npm install --omit=dev" in ${depsHome(ROOT)} and look at the message, then start a new session.`;
+      status = `Dandelion Studio could not finish its setup. Run "npm install --omit=dev" in ${depsHome(ROOT)} and look at the message, then start a new session.`;
       return;
     }
     try {
@@ -310,10 +310,10 @@ async function serveWithSetup(demo) {
         inp.end();
       });
       send({ method: 'notifications/tools/list_changed' });
-      err('Dandelion Kit: setup finished, tools are ready.');
+      err('Dandelion Studio: setup finished, tools are ready.');
     } catch (error) {
       failed = true;
-      status = `Dandelion Kit installed but could not start: ${/** @type {any} */ (error)?.message ?? error}`;
+      status = `Dandelion Studio installed but could not start: ${/** @type {any} */ (error)?.message ?? error}`;
       err(status);
     }
   });
@@ -507,7 +507,7 @@ async function main() {
     case 'connect': {
       // From the command line there is no card to poll, so wait the full 3 minutes for the browser.
       process.env.DANDELION_KIT_CONNECT_WAIT_MS ??= String(3 * 60 * 1000);
-      err('Opening Dandelion in your browser. Sign in there and allow the Dandelion Kit. This waits up to 3 minutes.');
+      err('Opening Dandelion in your browser. Sign in there and allow the Dandelion Studio. This waits up to 3 minutes.');
       const connected = await runTool('connect_dandelion', {});
       try {
         const { closeSession } = await import('../server/dandelion/client.mjs');

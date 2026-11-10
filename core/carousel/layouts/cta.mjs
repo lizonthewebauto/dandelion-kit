@@ -20,7 +20,7 @@ export const layout = {
   render(f, ctx) {
     const { c, fs, sp } = ctx;
     const W = ctx.box.width;
-    const handle = f.handle || ctx.brand.handle;
+    const handle = ctx.brand.branding_position === 'off' ? '' : f.handle || (ctx.brand.branding_position === 'bottom' ? '' : ctx.brand.handle);
     const lineH = f.line ? ctx.est('body', f.line, 46, fs(840)) + sp(40) : 0;
     const pillH = fs(110) + sp(64);
     const size = ctx.pick([190, 168, 148, 130, 116, 104, 92], (s) => ctx.est('head', f.title, s, W) + lineH + pillH <= ctx.avail * 0.95 && ctx.lines('head', f.title, s, W) <= 4);

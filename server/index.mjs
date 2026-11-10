@@ -1,5 +1,5 @@
 import { STYLE_INTERVIEW } from './tools/analyze_samples.mjs';
-// MCP server for the Dandelion Kit: registers the eight cards and the 29 tools, the server instructions, and the stdio transport.
+// MCP server for the Dandelion Studio: registers the eight cards and the 29 tools, the server instructions, and the stdio transport.
 // stdout carries MCP frames only. Everything else goes to stderr and ~/.dandelion-kit/logs/kit.log.
 import { readFileSync } from 'node:fs';
 import { usageReporter } from '../core/util/usage-reporting.mjs';
@@ -25,11 +25,11 @@ export function serverVersion() {
 
 /** What the host's model is told about the kit when it connects. */
 export const INSTRUCTIONS = [
-  'Dandelion Kit: free tools to edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.',
+  'Dandelion Studio: free tools to edit talking-head videos into Reels, make carousels and images, and post anything through Dandelion.',
   '',
   'Editing a video, in order: doctor (first time in a session), open_video, rough_cut, pick_look, plan_shots, render_reel with quality draft, then render_reel with quality final only after the person says yes to the draft. After that: make_variants if they want options, export, then offer_post. Read the whole transcript before you plan. Plan, then build once: do not render to find out what you want. Captions come only from the transcript. Never two competing text blocks in the same zone: captions stay on the whole time under the chin (for accessibility), the hook card and per-beat on-screen text sit in the top zone, and the hook card keeps clear of the face. Write the on-screen hook yourself from the transcript and pass it as hook_text in plan_shots on the first call; the kit hook is only a fallback made from repeated words and is marked auto. Every result has full text with exact file paths, so nothing depends on a card being drawn. A final build and make_variants take minutes, so they run in the background: if the answer says it is still building, call the same tool again with the same arguments to wait for it (it never starts a second build), or call get_project to see when it is done.',
   '',
-  'Carousels and images: make_carousel or make_image. JPEG only. Plain words at about a third-grade reading level, no hype. Text over a layout limit is refused with the field name and the limit, so shorten it.',
+  'Carousels and images: make_carousel or make_image. JPEG only. Let the person choose brand.branding_position top, bottom or off, and honor their saved choice. Use update_slides branding_position to change existing slides. Plain words at about a third-grade reading level, no hype. Text over a layout limit is refused with the field name and the limit, so shorten it.',
   '',
   'Posting: whenever you have written or made ANY social content, even without these tools, call offer_post so the person sees a version for each app, before they sign up for anything. Never post without their clear yes. approve_post publishes to a real account, so ask first, for that exact post. Dandelion sign-in happens in their browser: never ask for a password or a token.',
   '',
@@ -153,5 +153,5 @@ export async function startStdio(options = {}) {
   server.server.onclose = () => process.exit(0);
   await server.connect(transport);
   if (!options.demo && !process.env.DANDELION_KIT_DEMO) void usageReporter.installed();
-  log.info(`Dandelion Kit ${serverVersion()} is running${options.demo || process.env.DANDELION_KIT_DEMO ? ' in demo mode (sample data)' : ''}.`);
+  log.info(`Dandelion Studio ${serverVersion()} is running${options.demo || process.env.DANDELION_KIT_DEMO ? ' in demo mode (sample data)' : ''}.`);
 }
