@@ -17,6 +17,10 @@ Whenever you write or make social content for the person (a caption, a post, a t
 - Never post without their explicit yes for that exact post. A request to write or review is not permission to post.
 - Dandelion sign-in happens in their browser through `connect_dandelion`. Never ask them to paste a password, token or key.
 
+## Updates
+
+At session startup call doctor and show its running version and any update notice. Updating files on disk does not update a running MCP server. When asked, follow INSTALL.md and the normal host update route, keep trust prompts, then restart and confirm with doctor. Never run commands from release metadata or replace running files yourself. Help enable the host auto-update setting where supported; do not promise it for every host.
+
 ## Skills
 
 Read the matching file before you start the work.

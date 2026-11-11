@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.5
+
+- Startup checks public stable releases with a bounded timeout and cached results. No content, account or device IDs are sent. Editing continues when offline.
+- Doctor reports the running version and update status. Text results and the status card show available updates with fixed host steps. Updates use the host's normal trust flow, never self-replacement.
+- Setup instructions explain host auto-updates and restart/version checks. DoctorReport adds optional updates metadata.
+
 ## 1.1.4 (2026-11-11)
 
 - Make the all-connected-channel posting offer explicit after every social deliverable, including content made outside Dandelion Studio. Instructions require independently written platform hooks, copy, useful hashtags and fitting formats, with exact-post approval before publishing.

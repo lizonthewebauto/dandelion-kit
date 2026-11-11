@@ -1,0 +1,28 @@
+{
+  "version": "1.1.5",
+  "nativeBase": "v1.1.4",
+  "dependenciesUnchanged": true,
+  "assets": [
+    {
+      "name": "dandelion-kit-1.1.5-darwin-arm64.mcpb",
+      "sha256": "8dd621c2c47531290899bb6f9f90361bb24a1da7b961c453932596dc6dbbd381",
+      "bytes": 82707241,
+      "protectedFilesVerified": 4286,
+      "sourceFilesVerified": 156
+    },
+    {
+      "name": "dandelion-kit-1.1.5-darwin-x64.mcpb",
+      "sha256": "cec5ee941cc39b7a275072da08d8c98c3c818a1399c64491c9a2ca4a3371c469",
+      "bytes": 58006934,
+      "protectedFilesVerified": 4283,
+      "sourceFilesVerified": 156
+    },
+    {
+      "name": "dandelion-kit-1.1.5-win32-x64.mcpb",
+      "sha256": "b790fb905955f24c2587b10d05208c2c4f892fec347c47821a80757a285fd2a5",
+      "bytes": 82195467,
+      "protectedFilesVerified": 4252,
+      "sourceFilesVerified": 156
+    }
+  ]
+}

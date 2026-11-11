@@ -1,3 +1,4 @@
+import { studioUpdateStatus } from '../../core/util/updates.mjs';
 import { statfs } from 'node:fs/promises';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -46,6 +47,7 @@ export async function buildDoctorReport() {
   /** @type {import('../../core/types.mjs').DoctorReport} */
   const report = {
     ok: false,
+    updates: await studioUpdateStatus(),
     ffmpeg: {
       found: ff.found,
       ...(ff.path ? { path: ff.path } : {}),
@@ -96,7 +98,7 @@ export const tool = defineTool({
   description:
     'Check this computer for what the kit needs: ffmpeg, Node, disk space, the speech and face models, and whether Dandelion is signed in. Call it first in a new session. A missing ffmpeg is a status with the install command, not an error.',
   input: {},
-  annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   async run() {
     return ok({ mode: 'status', doctor: await buildDoctorReport() });
   },

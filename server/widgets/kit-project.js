@@ -35,6 +35,14 @@
       ffLi.lastChild.appendChild(h("p", { class: "small mt-s", text: "Install it with this command, then ask me to check again:" }));
       ffLi.lastChild.appendChild(h("div", { class: "code", text: ff.install_hint }));
     }
+    if (dr.updates) {
+      var up = dr.updates;
+      rows.appendChild(statusRow(!up.available, "Dandelion Studio", "Running version " + up.installed + (up.latest ? ". Latest stable release: " + up.latest + "." : ". Update check unavailable. Editing can continue."), true));
+      if (up.available) rows.appendChild(h("li", {}, h("div", {},
+        h("p", { text: "Update available. Editing can continue." }),
+        h("p", { class: "small", text: up.action }),
+        h("a", { href: "https://dandelionapp.io/freekit/update", target: "_blank", rel: "noopener noreferrer", text: "Update guide" }))));
+    }
     rows.appendChild(ffLi);
     rows.appendChild(statusRow(!(dr.node && dr.node.ok === false), "Node", dr.node && dr.node.version ? "Version " + dr.node.version : "Running"));
     var gb = typeof disk.free_bytes === "number" ? (disk.free_bytes / 1073741824).toFixed(1) + " GB free" : "";

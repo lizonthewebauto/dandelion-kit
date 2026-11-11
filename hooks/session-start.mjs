@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // SessionStart hook for Claude Code. Prints one JSON object on stdout: the post-anything rule as added context.
-// No dependencies, no network. Written as plain statements, which the host treats as facts about this setup.
+// No package dependencies. A bounded public release check uses a local cache. Written as plain statements, which the host treats as facts about this setup.
+import { studioUpdateStatus, updateText } from '../core/util/updates.mjs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { depsReady as packagesReachable } from '../bin/deps.mjs';
@@ -20,6 +21,9 @@ if (!depsReady) {
     'The Kit is doing its one-time setup (installing its own packages, about a minute). Until that finishes its tools are not listed. If they are missing, wait a minute, then reconnect the server with /mcp or start a new session.',
   );
 }
+
+lines.push(updateText(await studioUpdateStatus()));
+lines.push('If an update is requested, use the normal host steps from the guide. Keep trust prompts. Restart the app, then call doctor to confirm the running version.');
 
 const out = {
   hookSpecificOutput: {

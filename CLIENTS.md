@@ -147,3 +147,9 @@ With WSL, SSH, a container, or another remote runtime, run the Kit where the MCP
 4. If ffmpeg is missing, use the command `doctor` gives for your computer. Then check again.
 
 Do not sign in, connect accounts, upload files, or send a test post as part of setup. Making a real post is a later choice and needs your yes for that exact post.
+
+## Updates
+
+Follow the existing host route in INSTALL.md and https://dandelionapp.io/freekit/update. Claude Code offers marketplace auto-updates in `/plugin`, **Marketplaces**, **dandelion-kit**, **Enable auto-update**. Enable that setting during setup where available. Do not claim every host supports automatic installation.
+
+From 1.1.5, startup checks public stable release metadata with a bounded timeout and a local cache. Update notices include fixed host steps; they never install code themselves. Restart the app after a host update, then call doctor to confirm the running version. Keep the existing account and all saved work.

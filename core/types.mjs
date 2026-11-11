@@ -243,6 +243,7 @@ export const ASSET_KINDS = Object.freeze([
 /**
  * What doctor reports. It is a status, never an error, so isError stays false.
  * @typedef {object} DoctorReport
+ * @property {{installed:string, latest:string|null, available:boolean, checked:boolean, action:string, guide:string}} [updates] Running version and public release check.
  * @property {boolean} ok                  True when a reel can be edited on this machine right now.
  * @property {{found:boolean, path?:string, version?:string, has_ass:boolean, has_loudnorm:boolean, has_whisper:boolean, install_hint?:string}} ffmpeg
  * @property {{version:string, ok:boolean}} node   ok when the version satisfies package.json engines.

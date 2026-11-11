@@ -2,6 +2,7 @@ import { STYLE_INTERVIEW } from './tools/analyze_samples.mjs';
 // MCP server for the Dandelion Studio: registers the eight cards and the 29 tools, the server instructions, and the stdio transport.
 // stdout carries MCP frames only. Everything else goes to stderr and ~/.dandelion-kit/logs/kit.log.
 import { readFileSync } from 'node:fs';
+import { studioUpdateStatus, currentUpdateNotice } from '../core/util/updates.mjs';
 import { usageReporter } from '../core/util/usage-reporting.mjs';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -36,6 +37,8 @@ export const INSTRUCTIONS = [
   'Learn a style: ask for file paths or a folder. Claude Desktop chat attachments cannot be passed to tools. Call analyze_samples. ' + STYLE_INTERVIEW,
   '',
   'Style: no em dashes or en dashes in anything you write for the person. If you ever need a voice, use a female voice unless the person names another. Images are JPEG.',
+  '',
+  'Updates: startup checks public stable releases in the background. Show any update notice in tool results. Call doctor at the start of a session to show the running version and update status. Never claim an update is active until the app restarts and doctor confirms the running version. Use only the supported host update steps when asked; keep trust prompts and saved settings.',
   '',
   'Optional usage counts: after the first doctor check, call usage_reporting with action status. If chosen is false, read its notice and ask once whether the person wants to help count ready Kits and first finished outputs. Only call action on after their explicit yes; call off for no. A Kit install request is not consent. Never block setup or editing for this choice and never ask again after chosen is true. The person may turn it off at any time.',
 ].join('\n');
@@ -86,6 +89,8 @@ export function toMcpResult(name, outcome) {
       text = 'Done.';
     }
   }
+  const updateNotice = currentUpdateNotice();
+  if (updateNotice && name !== 'doctor') text += `\n\n${updateNotice}`;
   /** @type {Record<string, any>} */
   const result = { content: [{ type: 'text', text }, ...(outcome.images ?? []).map(i => ({ type: 'image', data: i.data, mimeType: i.mimeType }))] };
   if (outcome.data) {
@@ -104,6 +109,7 @@ export function toMcpResult(name, outcome) {
  * @param {{demo?: boolean}} [options]  demo answers every tool with sample data.
  */
 export function createKitServer(options = {}) {
+  void studioUpdateStatus();
   const demo = Boolean(options.demo ?? process.env.DANDELION_KIT_DEMO);
   const server = new McpServer({ name: SERVER_NAME, version: serverVersion() }, { instructions: INSTRUCTIONS });
   registerWidgets(server);

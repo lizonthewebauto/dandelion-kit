@@ -158,3 +158,18 @@ Finish with a short report: whether the Kit loaded or the exact step left, wheth
 Dandelion Studio lets each person choose where their name, logo and handle go on images and carousels: top, bottom or off. Use the card's Branding position picker, or pass `branding_position` to `update_slides`. A brand object or `brand.json` can set `"branding_position": "top"`, `"bottom"` or `"off"`. Save it in `~/.dandelion-kit/brand.json` to use it for new work. Top stays the default for people who have not chosen. Off removes the brand name, logo and handle, including the brand's default CTA handle.
 
 The public name is Dandelion Studio. Existing `/freekit`, `/kit`, repository, plugin and command names keep working. The older install prompt, "Install the free Dandelion video editing kit: https://dandelionapp.io/freekit", still selects this same full install.
+
+## Keep the installed app current
+
+After setup, help the person turn on host auto-updates where the host supports them. In Claude Code, open `/plugin`, select **Marketplaces**, select **dandelion-kit**, then **Enable auto-update**. Keep normal trust prompts. Codex and other hosts may refresh plugins differently; do not promise automatic installation without a verified setting in that app.
+
+Dandelion Studio 1.1.5 and newer check the public stable release at startup. The check has a short timeout and a local cache. It sends no email, content, account ID or device ID. A failed check never blocks editing. An update notice shows the running and latest versions with the right host steps. It never replaces running files. Older installs need one normal host update to get this check.
+
+When the person asks to update, reuse their existing install, account and settings. Use the normal host steps at https://dandelionapp.io/freekit/update or the matching route below. Do not ask them to sign up again, delete saved work, run commands from release text, or bypass the app's trust prompts.
+
+- Codex: run `codex plugin marketplace upgrade dandelion-kit`, then `codex plugin add dandelion-kit@dandelion-kit`.
+- Claude Code: run `claude plugin marketplace update dandelion-kit`, then `claude plugin update dandelion-kit@dandelion-kit`.
+- Claude Desktop extension: use the matching latest desktop download above, open it and accept the normal update prompt. Do not add a second copy of the server.
+- Source setup: confirm the existing folder uses `https://github.com/lizonthewebauto/dandelion-kit`, preserve local changes and update that checkout through Git. Use the package manager with its lockfile if dependencies changed. Keep the same MCP path.
+
+Restart the app or MCP session after updating, then call `doctor`. Its running version is the proof that this session loaded the update. An updated file on disk alone does not prove that. Confirm editing access without creating, uploading or posting a test file. Preserve saved styles, brand defaults, projects, sign-in and the person's usage-count choice.
