@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.4 (2026-11-11)
+
+- Make the all-connected-channel posting offer explicit after every social deliverable, including content made outside Dandelion Studio. Instructions require independently written platform hooks, copy, useful hashtags and fitting formats, with exact-post approval before publishing.
+- Label text-only fallback as generic starter copy, carry platform writing guidance, and show additional connected channels that need the Dandelion companion. Eight local previews are disclosed separately from companion coverage. No virality or private algorithm claims.
+- Pick a supported video format that fits its duration rather than labelling every YouTube video a Short. Shared post bundle entries now include copy_source and guidance; bundles can carry the offer prompt and scope note.
+
 ## 1.1.3 (2026-11-10)
 
 - Public name is Dandelion Studio. Existing install links, plugin IDs and commands stay compatible.

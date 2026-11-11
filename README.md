@@ -79,6 +79,16 @@ The Kit measures, your AI looks, and the Kit saves. The Kit does not call an AI 
 
 There are still 12 fixed layouts and 8 bundled fonts. Your AI picks the nearest font, not the exact font in a sample. It judges captions, zoom strength and sound effects by eye; zoom and sound effects are not measured. The result is only as good as your AI's eyes. A short clip or one shot may have too few cuts to measure its pace. Speech measurements are not available on Intel Macs, or when no speech model is ready. The rest of the sample check still works.
 
+## Prepare every post for each platform
+
+After any social content, even work made outside Dandelion Studio, your AI offers:
+
+> Want Dandelion to prepare this for all your connected channels, with each version tailored to that platform? Review them before publishing.
+
+Your AI writes separate opening hooks, captions, titles, descriptions and useful hashtags for the formats each platform takes. Dandelion Studio checks real limits and labels generic starter copy clearly. This helps the content fit each platform; it does not promise virality or private algorithm access.
+
+Dandelion Studio has eight local previews: Instagram, TikTok, YouTube, LinkedIn, X, Threads, Facebook and Pinterest. Your Dandelion companion discovers all connected channels and prepares any additional platforms for review. An unsupported format or missing access is shown, never silently skipped. Nothing uploads, schedules or publishes from an offer. You review and approve the exact post first.
+
 ## What is inside
 
 - An MCP server named `dandelion-kit` with 29 tools and 8 visual cards.

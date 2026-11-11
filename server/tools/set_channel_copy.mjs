@@ -27,8 +27,8 @@ export const tool = defineTool({
     const rule = rules.platforms?.[args.channel];
     const media = { kind: bundle.kind, duration_ms: bundle.media?.duration_ms, image_count: bundle.media?.image_count, platform: args.channel };
     const warnings = rule ? checkCopy(rule, args.copy, media) : [];
-    bundle.channels[args.channel] = { ...entry, copy: args.copy, warnings };
+    bundle.channels[args.channel] = { ...entry, copy: args.copy, copy_source: 'authored', warnings };
     await saveBundle(bundle);
-    return ok({ channel: args.channel, copy: args.copy, warnings });
+    return ok({ channel: args.channel, copy: args.copy, copy_source: 'authored', warnings });
   },
 });

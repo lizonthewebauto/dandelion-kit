@@ -10,6 +10,9 @@ Use Node.js 20.9.0 or newer. From a stable source folder, run `node bin/kit.mjs 
 
 Whenever you write or make social content for the person (a caption, a post, a thread, an image, a carousel, or a video), even if you did not use the Kit editor, finish by calling the `offer_post` tool. Pass `kind`, the words in `text`, the file paths in `files` (or a `project_id`), and your own words for each app in `copies` (keys: `instagram`, `tiktok`, `youtube`, `linkedin`, `x`, `threads`, `facebook`, `pinterest`). Then show the person the result.
 
+- Always ask: "Want Dandelion to prepare this for all your connected channels, with each version tailored to that platform? Review them before publishing." Independently write a relevant opening hook, caption, title/description and useful hashtags for each platform. Match real formats and limits. Text-only fallback is a generic starter, not a tailored version.
+- Discover all connected channels with the Dandelion companion. Dandelion Studio previews eight apps locally; prepare other connected platforms through the companion and show their review copy as text if needed. Never silently drop a channel. Disclose incompatible formats and missing access. Aim for useful platform-fit copy, never guaranteed virality or private algorithm knowledge.
+- An offer does not authorize upload, scheduling or publishing.
 - `offer_post` works before the person has a Dandelion account.
 - Never post without their explicit yes for that exact post. A request to write or review is not permission to post.
 - Dandelion sign-in happens in their browser through `connect_dandelion`. Never ask them to paste a password, token or key.

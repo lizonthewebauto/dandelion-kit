@@ -12,6 +12,9 @@ import { assetByLabel, renderIsFresh } from './data.mjs';
 import { ToolFailure } from './kit.mjs';
 import { countedLength } from './counted.mjs';
 
+export const POSTING_OFFER = 'Want Dandelion to prepare this for all your connected channels, with each version tailored to that platform? Review them before publishing.';
+export const LOCAL_PREVIEW_SCOPE = 'Dandelion Studio previews Instagram, TikTok, YouTube, LinkedIn, X, Threads, Facebook and Pinterest here. Use the connected Dandelion companion to discover and prepare any other connected channels for review. Nothing is uploaded or posted by this offer.';
+
 export { countedLength, INLINE_HASHTAG_PLATFORMS, X_LINK_LENGTH } from './counted.mjs';
 
 /** @typedef {import('../../core/types.mjs').PostBundle} PostBundle */
@@ -98,7 +101,7 @@ export function checkCopy(rule, copy, media = {}) {
     } else {
       if (want === 'video' && media.duration_ms) {
         const longest = Math.max(...formats.map((f) => f.maxSeconds ?? 0));
-        if (longest && media.duration_ms / 1000 > longest) {
+        if (formats.every((f) => f.maxSeconds) && longest && media.duration_ms / 1000 > longest) {
           warnings.push(`This video is ${Math.round(media.duration_ms / 1000)} seconds. ${name} takes up to ${longest} seconds.`);
         }
       }
@@ -116,13 +119,18 @@ export function checkCopy(rule, copy, media = {}) {
  * @param {PlatformRule} rule
  * @param {string} kind
  * @param {number} [imageCount]
+ * @param {number} [durationMs]
  */
-export function pickFormat(rule, kind, imageCount = 0) {
+export function pickFormat(rule, kind, imageCount = 0, durationMs = 0) {
   const want = acceptsFor(kind);
   const formats = (rule.formats ?? []).filter((f) => f.accepts.includes(/** @type {any} */ (want)));
   if (!formats.length) return undefined;
+  if (want === 'video' && durationMs > 0) {
+    const fitting = formats.find((f) => !f.maxSeconds || durationMs <= f.maxSeconds * 1000);
+    if (fitting) return fitting;
+  }
   if (want === 'image' && imageCount > 1) {
-    const multi = formats.find((f) => (f.maxImages ?? 1) > 1);
+    const multi = formats.find((f) => (f.maxImages ?? 1) >= imageCount) ?? formats.find((f) => (f.maxImages ?? 1) > 1);
     if (multi) return multi;
   }
   return formats[0];
@@ -172,8 +180,8 @@ export function buildChannels({ rules, kind, text, copies, channels, duration_ms
     const copy = copies?.[id] ?? (text ? draftCopy(rule, text) : {});
     const warnings = checkCopy(rule, copy, { kind, duration_ms, image_count, platform: id });
     if (!text && !copies?.[id]) warnings.push(`Write the words for ${rule.name}, or tell me what the post is about.`);
-    const format = pickFormat(rule, kind, image_count);
-    out[id] = { copy, limits: rule.limits ?? {}, warnings, ...(format ? { format: format.label } : {}) };
+    const format = pickFormat(rule, kind, image_count, duration_ms);
+    out[id] = { copy, copy_source: copies?.[id] ? 'authored' : text ? 'starter' : 'missing', guidance: rule.style || '', limits: rule.limits ?? {}, warnings, ...(format ? { format: format.label } : {}) };
   }
   return out;
 }

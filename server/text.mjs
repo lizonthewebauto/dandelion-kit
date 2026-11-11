@@ -3,6 +3,7 @@
 // so it always matches the card. It lists exact file paths and says what to do next.
 // No stack traces, no dashes used as punctuation, no hype.
 
+import { POSTING_OFFER, LOCAL_PREVIEW_SCOPE } from './lib/offer.mjs';
 import { countedLength } from './lib/counted.mjs';
 
 /** @typedef {Record<string, any>} Data */
@@ -16,6 +17,7 @@ const CHANNEL_NAMES = /** @type {Record<string, string>} */ ({
   threads: 'Threads',
   facebook: 'Facebook',
   pinterest: 'Pinterest',
+  bluesky: 'Bluesky', reddit: 'Reddit', mastodon: 'Mastodon', google_business: 'Google Business Profile', discord: 'Discord', slack: 'Slack', snapchat: 'Snapchat',
 });
 
 /** @param {string} id */
@@ -382,11 +384,15 @@ function textPost(d) {
     const kinds = /** @type {Record<string, string>} */ ({ text: 'text post', image: 'image post', carousel: 'carousel post', video: 'video post', thread: 'thread' });
     const lines = [`Post ${b.id}: ${kinds[b.kind] ?? b.kind}${b.files?.length ? `, ${plural(b.files.length, 'file')}` : ''}.`];
     for (const f of b.files ?? []) lines.push(`  File: ${f}`);
+    if (!b.sent) lines.push('', b.offer_prompt || POSTING_OFFER, b.scope_note || LOCAL_PREVIEW_SCOPE);
+    if ((d.additional_connected_channels ?? []).length) lines.push('Also connected for companion review: ' + [...new Set(d.additional_connected_channels.map((c) => channelName(c.platform)))].join(', ') + '. These are not included in the local preview below.');
     if (b.rules_source === 'snapshot') lines.push('Limits come from the saved copy of Dandelion\'s rules.');
     lines.push('');
     for (const [id, entry] of Object.entries(b.channels ?? {})) {
       const e = /** @type {Data} */ (entry);
       lines.push(`${channelName(id)}${e.format ? ` (${e.format})` : ''}: ${meter(e, id)}`);
+      if (e.copy_source === 'starter') lines.push('  Starter copy only. Write a separate platform version before calling it tailored.');
+      if (e.copy_source === 'missing') lines.push('  This platform still needs its own words.');
       for (const l of copyLines(e.copy ?? {})) lines.push(`  ${l.replace(/\n/g, '\n  ')}`);
       for (const w of e.warnings ?? []) lines.push(`  ! ${w}`);
     }

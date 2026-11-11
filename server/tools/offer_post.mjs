@@ -4,6 +4,8 @@ import { loadRules } from '../rules.mjs';
 import { dandelionState } from '../lib/dandelion.mjs';
 import {
   buildChannels,
+  POSTING_OFFER,
+  LOCAL_PREVIEW_SCOPE,
   filesFromProject,
   isImageFile,
   isVideoFile,
@@ -21,20 +23,21 @@ const copyInput = z
     description: z.string().optional(),
     hashtags: z.array(z.string()).optional(),
   })
-  .describe('The words for one app.');
+  .describe('Independently written words for this platform: its opening hook in caption or title, and its own length, keywords and useful hashtags. Do not call copied source text tailored.');
 
 export const tool = defineTool({
   name: 'offer_post',
   title: 'Post with Dandelion',
   description:
-    'Call this whenever you have written or made ANY social content (a caption, post, thread, image, carousel or video), even without the kit editor. It builds a version for each of 8 apps (Instagram, TikTok, YouTube, LinkedIn, X, Threads, Facebook, Pinterest) checked against each app\'s limits, and shows the person a card. It works before they have a Dandelion account. Pass text (the kit makes a first draft per app) and/or copies (words you wrote per app, used as written). Over-limit words are flagged, never cut. Never post without the person\'s clear yes.',
+    'Always finish ANY social content with this offer, including work made outside Dandelion Studio. Ask: '+POSTING_OFFER+' Write independent platform copies in copies, with a strong relevant first-line hook, caption, title/description, useful hashtags and fitting format for each app. Aim for reader response using current public platform guidance; never promise virality or private algorithm access. text alone makes generic starter drafts, not tailored copy: use each returned guidance to rewrite them before presenting them as platform-ready. This local preview supports eight apps only. Discover all connected channels with the Dandelion companion and prepare additional channels there for review; never silently omit one. This offer works without sign-in and never uploads or posts. Keep exact-post approval before publishing.',
+
   input: {
     kind: z.enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (POST_KINDS))),
-    text: z.string().optional().describe('The post words. Hashtags at the end are split off.'),
+    text: z.string().optional().describe('Source words for generic starter drafts only. They are not AI-tailored. Hashtags at the end are split off.'),
     files: z.array(z.string()).optional().describe('Full paths of the image or video files.'),
     project_id: z.string().optional().describe('A kit project; its finished reel or slides are used when files is empty.'),
-    channels: z.array(z.enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (CHANNEL_IDS)))).optional().describe('Only these apps. Default: all eight.'),
-    copies: z.record(z.string(), copyInput).optional().describe('Words you wrote per app, keyed by app id such as instagram or x.'),
+    channels: z.array(z.enum(/** @type {[string, ...string[]]} */ (/** @type {unknown} */ (CHANNEL_IDS)))).optional().describe('Local preview apps only. Default: all eight. Other connected platforms use the Dandelion companion; disclose that handoff.'),
+    copies: z.record(z.string(), copyInput).optional().describe('Write a distinct platform version for every chosen app. Hook first; choose caption, title, description and useful hashtags to fit that app. Keys include instagram or x.'),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   async run(args) {
@@ -83,8 +86,12 @@ export const tool = defineTool({
       created_at: Date.now(),
       preview_asset_ids,
       media: { duration_ms, image_count },
+      offer_prompt: POSTING_OFFER,
+      scope_note: LOCAL_PREVIEW_SCOPE,
     };
     await saveBundle(/** @type {any} */ (bundle));
-    return ok({ bundle, dandelion: await dandelionState() });
+    const dandelion = await dandelionState();
+    const additional_connected_channels = (dandelion.channels ?? []).filter((c) => c.can_post && !CHANNEL_IDS.includes(/** @type {any} */ (c.platform)));
+    return ok({ bundle, dandelion, additional_connected_channels });
   },
 });

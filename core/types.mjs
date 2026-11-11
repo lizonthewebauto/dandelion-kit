@@ -571,7 +571,9 @@ export const ASSET_KINDS = Object.freeze([
  * @property {string[]} files              Absolute paths of images or videos (empty for text only).
  * @property {string} [text]               The original text the agent wrote.
  * @property {string} [project_id]
- * @property {Record<string, {copy: ChannelCopy, limits: ChannelLimits, warnings: string[]}>} channels  Keyed by CHANNEL_IDS.
+ * @property {Record<string, {copy: ChannelCopy, copy_source?: 'authored'|'starter'|'missing', guidance?: string, format?: string, limits: ChannelLimits, warnings: string[]}>} channels  Keyed by CHANNEL_IDS.
+ * @property {string} [offer_prompt] Default all-connected-channel review offer.
+ * @property {string} [scope_note] Local preview coverage and companion handoff.
  * @property {'live'|'snapshot'} rules_source  Where the limits came from.
  * @property {SentBundle} [sent]           Set after send_to_dandelion.
  * @property {number} created_at           Unix ms.

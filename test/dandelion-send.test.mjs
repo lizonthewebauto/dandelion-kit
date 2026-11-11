@@ -2,7 +2,7 @@
 // against the fake Dandelion. Nothing here approves or posts anything real.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
@@ -600,6 +600,28 @@ test('tools: a plan that cannot use the API says so in plain words', async () =>
     const r = await kit.call('connect_dandelion');
     assert.equal(r.isError, true);
     assert.match(textOf(r), /cannot use the API yet/);
+  } finally {
+    await kit.close();
+    await t.stop();
+  }
+});
+
+test('offer exposes extra connected companion channels but never uploads or posts', async () => {
+  const t = await useFakeDandelion({ withChannels: true });
+  const extra = { id: randomUUID(), brand_id: t.fake.brandId, platform: 'bluesky', handle: 'qa_sky', connected: true, status: 'active', can_post: true };
+  t.fake.state.channels.push(extra);
+  await t.client.connect({ waitMs: 15000 });
+  const kit = await connectKit();
+  try {
+    const r = await kit.call('offer_post', { kind: 'text', text: 'A clear source idea.' });
+    assert.equal(r.isError, undefined, textOf(r));
+    assert.equal(r.structuredContent.additional_connected_channels[0].id, extra.id);
+    assert.equal(r.structuredContent.bundle.channels.bluesky, undefined);
+    assert.equal(r.structuredContent.bundle.channels.x.copy_source, 'starter');
+    assert.match(textOf(r), /Bluesky/);
+    assert.match(textOf(r), /companion review/);
+    assert.equal(t.fake.state.putCount, 0);
+    assert.equal(t.fake.state.calls.filter((c) => ['create_upload', 'add_content', 'share_content', 'approve_job'].includes(c.tool)).length, 0);
   } finally {
     await kit.close();
     await t.stop();

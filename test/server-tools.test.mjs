@@ -285,6 +285,9 @@ test('offer_post: a plain caption gets eight drafts with limits before any sign-
   assert.deepEqual(bundle.files, []);
   assert.equal(bundle.channels.instagram.copy.caption, 'I stopped checking my phone in the first hour. Thirty days later my focus was up.');
   assert.deepEqual(bundle.channels.instagram.copy.hashtags, ['#morningroutine', '#focus']);
+  assert.equal(bundle.channels.x.copy_source, 'starter');
+  assert.ok(bundle.channels.x.guidance);
+  assert.match(bundle.offer_prompt, /all your connected channels/);
   assert.equal(bundle.channels.x.limits.caption_max, 280);
   assert.equal(bundle.channels.youtube.copy.title, 'I stopped checking my phone in the first hour.');
   assert.ok(bundle.channels.youtube.warnings.some((w) => /does not take a text post/.test(w)), 'YouTube needs a video');
@@ -309,6 +312,7 @@ test('offer_post flags over-limit words and never cuts them, honors copies and c
   const b = own.structuredContent.bundle;
   assert.deepEqual(Object.keys(b.channels), ['instagram', 'x']);
   assert.equal(b.channels.x.copy.caption, 'Short and sweet');
+  assert.equal(b.channels.x.copy_source, 'authored');
   assert.deepEqual(b.channels.x.warnings, []);
   const tags = await kit.call('offer_post', { kind: 'text', text: 'Hello. #a #b #c #d #e #f' });
   assert.ok(tags.structuredContent.bundle.channels.threads.warnings.some((w) => /at most 1 hashtags/.test(w)));
@@ -358,6 +362,7 @@ test('set_channel_copy saves the words and re-checks the limits', async () => {
   const id = offer.structuredContent.bundle.id;
   const ok1 = await kit.call('set_channel_copy', { bundle_id: id, channel: 'x', copy: { caption: 'A new X version.', hashtags: ['#one'] } });
   assert.equal(ok1.isError, undefined, textOf(ok1));
+  assert.equal(ok1.structuredContent.copy_source, 'authored');
   assert.deepEqual(ok1.structuredContent.warnings, []);
   const over = await kit.call('set_channel_copy', { bundle_id: id, channel: 'x', copy: { caption: 'y'.repeat(300) } });
   assert.equal(over.isError, undefined);

@@ -7,6 +7,7 @@
 (function () {
   var DK = window.DK, h = DK.h;
   var ORDER = ["instagram", "tiktok", "youtube", "linkedin", "x", "threads", "facebook", "pinterest"];
+  var EXTRA_NAMES = { bluesky: "Bluesky", reddit: "Reddit", mastodon: "Mastodon", google_business: "Google Business Profile", discord: "Discord", slack: "Slack", snapchat: "Snapchat" };
   var KIND = { text: "Text post", image: "Image post", carousel: "Carousel", video: "Video", thread: "Thread" };
   var STATUS = {
     preparing: ["Getting ready", "off", "clock"], review: ["Needs your OK", "gold", "alert"], scheduled: ["Scheduled", "gold", "clock"], posting: ["Posting now", "gold", "clock"],
@@ -97,6 +98,14 @@
       }
       if (bundle.text) box.appendChild(h("p", { class: "excerpt mt-s", text: bundle.text }));
       if (!bundle.sent) box.appendChild(h("p", { class: "small muted mt-s", text: "Nothing has been posted. Check the words for each app, then decide." }));
+      if (!bundle.sent) {
+        box.appendChild(h("p", { class: "small mt", text: bundle.offer_prompt || "Want Dandelion to prepare this for all your connected channels, with each version tailored to that platform? Review them before publishing." }));
+        box.appendChild(h("p", { class: "small muted mt-s", text: bundle.scope_note || "Dandelion Studio previews eight apps here. Use your connected Dandelion companion for other connected channels. This offer uploads and posts nothing." }));
+        var extra = (dl.channels || []).filter(function (c) { return c.can_post && ORDER.indexOf(c.platform) < 0 && (!curBrand() || c.brand_id === curBrand()); });
+        var extraNames = [];
+        extra.forEach(function (c) { var name = EXTRA_NAMES[c.platform] || nice(c.platform); if (extraNames.indexOf(name) < 0) extraNames.push(name); });
+        if (extraNames.length) box.appendChild(DK.note("Also connected: " + extraNames.join(", ") + ". Ask your AI to prepare these with the Dandelion companion. They are not in this local preview.", "warn"));
+      }
       previewHost.appendChild(box);
     }
 
@@ -137,6 +146,8 @@
       var name = DK.plat(p).n;
       box.appendChild(h("div", { class: "row between wrap" },
         h("div", { class: "row" }, DK.platDot(p), h("span", { class: "strong", text: name }), ch.format ? h("span", { class: "small muted", text: ch.format }) : null)));
+      if (ch.copy_source === "starter") box.appendChild(DK.note("Starter copy only. Ask your AI to write this version for " + name + " before you share it.", "warn"));
+      if (ch.guidance) box.appendChild(h("details", { class: "small muted mt-s" }, h("summary", { text: "Writing guide for " + name }), h("p", { text: ch.guidance })));
       (ch.warnings || []).forEach(function (w) { box.appendChild(h("div", { class: "mt-s" }, DK.note(w, "warn"))); });
       var local = st.edits[p] || null;
       function ensure() { if (!local) { local = clone(copyOf(p)); st.edits[p] = local; paintTabs(); } return local; }
@@ -217,6 +228,7 @@
         else {
           if (!bundle.channels[p]) bundle.channels[p] = { copy: {}, limits: {}, warnings: [] };
           bundle.channels[p].copy = copy;
+          bundle.channels[p].copy_source = (r && r.copy_source) || "authored";
           if (r && Array.isArray(r.warnings)) bundle.channels[p].warnings = r.warnings;
         }
         delete st.edits[p];
@@ -564,9 +576,9 @@
     var wordsCard = h("section", { class: "card" }, h("p", { class: "sec-title", text: "Words for each app" }), tabsHost, panelHost);
     paintAll();
     if (!dl.connected && d0.pending) startPolling();
-    var sub = bundle.sent ? "Check each post, then approve it." : plats.length ? "A version for each app, ready to check." : "Words for each app.";
+    var sub = bundle.sent ? "Check each post, then approve it." : plats.length ? "Review each platform version. Nothing posts without your OK." : "Words for each app.";
     return [
-      DK.head("Post it with Dandelion", { sub: sub }),
+      DK.head("Prepare posts with Dandelion", { sub: sub }),
       noticeHost, previewHost,
       wordsCard,
       actionHost, jobsHost
